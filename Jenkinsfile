@@ -1,6 +1,6 @@
 pipeline {
      environment {
-        registry = "levernfulcrum/lnfapp"
+        registry = "levernfulcrum/lnf-client-service"
         registryCredential = 'dockerhub'
         dockerImage = ''
       }

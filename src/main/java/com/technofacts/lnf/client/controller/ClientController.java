@@ -61,7 +61,7 @@ public class ClientController {
     }
 
     // delete
-    @DeleteMapping(value = "/client/{clientId}")
+    @DeleteMapping(value = "/clients/{clientId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("clientId") final String clientId) {
         service.delete(clientId);
