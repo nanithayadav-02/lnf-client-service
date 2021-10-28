@@ -2,6 +2,7 @@ package com.technofacts.lnf.client.service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -67,20 +68,20 @@ public class ClientService {
         return entities.stream().map(ClientConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public ClientDto findByClientId(String clientId) {
+    public ClientDto findByClientId(UUID clientId) {
         Client entity = search(clientId);
         return ClientConverter.toTransportModel(entity);
     }
 
-    public void create(String clientId, ClientDto resource) {
+    public void create(ClientDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create Client with null payload"));
         Client entity = ClientConverter.toEntityModel(resource);
         saveEntity(entity);
-        log.info(() -> String.format("Client[%s] successfully created", entity.getClientId()));
+        log.info(() -> String.format("Client[%s] successfully created", entity.getCode()));
     }
 
     @Transactional
-    public void update(String clientId, ClientDto resource) {
+    public void update(UUID clientId, ClientDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to update Client with null payload"));
         Client entity = search(clientId);
         Client updatedEntity = ClientConverter.toEntityModel(resource);
@@ -89,13 +90,13 @@ public class ClientService {
         log.info(() -> String.format("Client[%s] successfully updated", clientId));
     }
 
-    public void delete(String clientId) {
+    public void delete(UUID clientId) {
         Client entity = search(clientId);
         try {
             repository.delete(entity);
-            log.info(() -> String.format("Client[%s] successfully deleted", entity.getClientId()));
+            log.info(() -> String.format("Client[%s] successfully deleted", entity.getCode()));
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete Client [%s]", entity.getClientId());
+            String errorMessage = String.format("Failed to delete Client [%s]", entity.getCode());
             throw new LnFException(errorMessage, e);
         }
     }
@@ -112,13 +113,13 @@ public class ClientService {
         try {
             return repository.save(entity);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save client [%s]", entity.getClientId());
+            String errorMessage = String.format("Failed to save client [%s]", entity.getCode());
             throw new LnFException(errorMessage, e);
         }
     }
 
-    private Client search(String clientId) {
-        return repository.findByClientId(clientId).
+    private Client search(UUID clientId) {
+        return repository.findById(clientId).
                 orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
     }
 }
