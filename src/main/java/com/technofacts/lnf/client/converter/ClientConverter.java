@@ -1,7 +1,12 @@
 package com.technofacts.lnf.client.converter;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import com.technofacts.lnf.client.dto.ClientDto;
-import com.technofacts.lnf.client.model.Client;
+import com.technofacts.lnf.client.model.*;
 
 public class ClientConverter {
 
@@ -12,7 +17,18 @@ public class ClientConverter {
         }
         ClientDto dto = new ClientDto();
         dto.setId(entity.getId());
-        dto.setClientId(entity.getClientId());
+        dto.setId(entity.getId());
+        dto.setCode(entity.getCode());
+        dto.setName(entity.getName());
+        dto.setPan(entity.getPan());
+        dto.setWorkingFrom(entity.getWorkingFrom());
+        dto.setAgreementExpiryDate(entity.getAgreementExpiryDate());
+        dto.setClientDetails(entity.getClientDetails());
+        dto.getContacts().addAll(entity.getClientContacts().stream().map(ContactConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
+        dto.setEscalation(entity.getEscalation() != null ? EscalationConverter.toTransportModel(entity.getEscalation()) : null);
+        dto.setAddress(entity.getClientAddress() != null ? AddressConverter.toTransportModel(entity.getClientAddress()) : null);
+        dto.getGst().addAll(entity.getGst().stream().map(GstConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
+
         return dto;
     }
 
@@ -22,8 +38,57 @@ public class ClientConverter {
         }
         Client entity = new Client();
         entity.setId(transport.getId());
-        entity.setClientId(transport.getClientId());
+        entity.setCode(transport.getCode());
+        entity.setName(transport.getName());
+        entity.setPan(transport.getPan());
+        entity.setWorkingFrom(transport.getWorkingFrom());
+        entity.setAgreementExpiryDate(transport.getAgreementExpiryDate());
+        entity.setClientDetails(transport.getClientDetails());
+
+        addContactsToEntityModel(transport, entity);
+        addEsacalationToEntityModel(transport, entity);
+        addAdressToEntityModel(transport, entity);
+        addGstToEntityModel(transport, entity);
+
         return entity;
     }
+
+    private static void addContactsToEntityModel(ClientDto transport, Client client) {
+        List<ClientContact> contactList = new ArrayList<>();
+        transport.getContacts().stream().filter(Objects::nonNull).forEach(dto -> {
+            ClientContact entity = ContactConverter.toEntityModel(dto);
+            entity.setClient(client);
+            contactList.add(entity);
+        });
+        client.getClientContacts().addAll(contactList);
+    }
+
+    private static void addEsacalationToEntityModel(ClientDto transport, Client client) {
+        if (transport.getEscalation() != null) {
+            Escalation escalation = EscalationConverter.toEntityModel(transport.getEscalation());
+            escalation.setClient(client);
+            client.setEscalation(escalation);
+        }
+    }
+
+    private static void addAdressToEntityModel(ClientDto transport, Client client) {
+        if (transport.getAddress() != null) {
+            ClientAddress address = AddressConverter.toEntityModel(transport.getAddress());
+            address.setClient(client);
+            client.setClientAddress(address);
+        }
+    }
+
+    private static void addGstToEntityModel(ClientDto transport, Client client) {
+        List<Gst> gstList = new ArrayList<>();
+        transport.getGst().stream().filter(Objects::nonNull).forEach(dto -> {
+            Gst entity = GstConverter.toEntityModel(dto);
+            entity.setClient(client);
+            gstList.add(entity);
+        });
+        client.getGst().addAll(gstList);
+    }
+
+
 
 }

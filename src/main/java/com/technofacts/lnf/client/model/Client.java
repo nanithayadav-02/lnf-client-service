@@ -1,8 +1,9 @@
 package com.technofacts.lnf.client.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.*;
 
@@ -16,6 +17,42 @@ import lombok.*;
 @Table(name = "client")
 public class Client extends AuditableEntity {
 
-    @Column(name = "client_id", nullable = false, unique = true)
-    private String clientId;
+    @Column(name = "code", nullable = false, unique = true)
+    private String code;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "pan", nullable = false)
+    private String pan;
+
+    @Column(name = "working_from", nullable = false)
+    private LocalDate workingFrom;
+
+    @Column(name = "agreement_expiry_date")
+    private LocalDate agreementExpiryDate;
+
+    @Column(name = "client_details", nullable = false)
+    private String clientDetails;
+
+    @ToString.Exclude
+    @OneToOne(mappedBy = "client", cascade = CascadeType.ALL)
+    private ClientAddress clientAddress;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private Set<ClientContact> clientContacts = new HashSet<>();
+
+    @ToString.Exclude
+    @OneToOne(mappedBy = "client", cascade = CascadeType.ALL)
+    private Escalation escalation;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private Set<Gst> gst = new HashSet<>();
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private Set<ClientDocument> files = new HashSet<>();
+
 }

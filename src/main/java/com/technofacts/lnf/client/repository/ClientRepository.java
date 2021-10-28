@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecificationExecutor<Client> {
 
-    @Query("select e from Client e where e.clientId = :client_id")
-    Optional<Client> findByClientId(@Param("client_id") String client_id);
+    @Query("select e from Client e where e.id = :id")
+    Optional<Client> findByClientId(@Param("id") String id);
 
 }

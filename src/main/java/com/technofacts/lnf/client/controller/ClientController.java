@@ -1,6 +1,7 @@
 package com.technofacts.lnf.client.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.technofacts.lnf.client.dto.ClientDto;
 import com.technofacts.lnf.client.service.ClientService;
@@ -44,26 +45,26 @@ public class ClientController {
     }
 
     @GetMapping(value = "/clients/{clientId}")
-    public ClientDto findOne(@PathVariable("clientId") final String clientId) {
+    public ClientDto findOne(@PathVariable("clientId") final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
-    @PostMapping(value = "/clients/{clientId}")
+    @PostMapping(value = "/clients")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable("clientId") final String clientId, @RequestBody final ClientDto resource) {
-        service.create(clientId, resource);
+    public void create(@RequestBody final ClientDto resource) {
+        service.create(resource);
     }
 
     @PutMapping(value = "/clients/{clientId}")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("clientId") final String clientId, @RequestBody final ClientDto resource) {
+    public void update(@PathVariable("clientId") final UUID clientId, @RequestBody final ClientDto resource) {
         service.update(clientId, resource);
     }
 
     // delete
     @DeleteMapping(value = "/clients/{clientId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final String clientId) {
+    public void delete(@PathVariable("clientId") final UUID clientId) {
         service.delete(clientId);
     }
 }
