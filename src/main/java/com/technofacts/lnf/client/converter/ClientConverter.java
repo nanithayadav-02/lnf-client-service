@@ -1,12 +1,14 @@
 package com.technofacts.lnf.client.converter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import javax.print.Doc;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.technofacts.lnf.client.dto.ClientDto;
+import com.technofacts.lnf.client.dto.DocumentDto;
+import com.technofacts.lnf.client.exception.LnFException;
 import com.technofacts.lnf.client.model.*;
+import com.technofacts.lnf.client.model.enums.DocumentType;
 
 public class ClientConverter {
 
@@ -16,7 +18,6 @@ public class ClientConverter {
             return null;
         }
         ClientDto dto = new ClientDto();
-        dto.setId(entity.getId());
         dto.setId(entity.getId());
         dto.setCode(entity.getCode());
         dto.setName(entity.getName());
@@ -28,6 +29,20 @@ public class ClientConverter {
         dto.setEscalation(entity.getEscalation() != null ? EscalationConverter.toTransportModel(entity.getEscalation()) : null);
         dto.setAddress(entity.getClientAddress() != null ? AddressConverter.toTransportModel(entity.getClientAddress()) : null);
         dto.getGst().addAll(entity.getGst().stream().map(GstConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
+        Optional<ClientDocument> agreementOpt = entity.getFiles().stream().filter(file -> file.getType() == DocumentType.agreement).findFirst();
+
+        if (agreementOpt.isPresent()) {
+            DocumentDto documentDto = DocumentConverter.toTransportModel(agreementOpt.get());
+            documentDto.setUrl(DocumentConverter.getDocumentUrl(entity.getId(), documentDto.getId(), DocumentType.agreement));
+            dto.setAgreement(documentDto);
+        }
+
+        Optional<ClientDocument> imageOpt = entity.getFiles().stream().filter(file -> file.getType() == DocumentType.image).findFirst();
+        if (imageOpt.isPresent()) {
+            DocumentDto documentDto = DocumentConverter.toTransportModel(imageOpt.get());
+            documentDto.setUrl(DocumentConverter.getDocumentUrl(entity.getId(), documentDto.getId(), DocumentType.image));
+            dto.setClientLogo(documentDto);
+        }
 
         return dto;
     }
@@ -88,7 +103,5 @@ public class ClientConverter {
         });
         client.getGst().addAll(gstList);
     }
-
-
 
 }

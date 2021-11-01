@@ -45,12 +45,7 @@ public class DocumentService {
         searchForClient(clientId);
         ClientDocument entity = searchForDocument(clientId, type);
         DocumentDto documentDto = DocumentConverter.toTransportModel(entity);
-        String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path(constructUrlFromType(clientId, type))
-                .path(documentDto.getId().toString())
-                .toUriString();
-        documentDto.setUrl(downloadURL);
-
+        documentDto.setUrl(DocumentConverter.getDocumentUrl(clientId, documentDto.getId(), type));
         return documentDto;
     }
 
