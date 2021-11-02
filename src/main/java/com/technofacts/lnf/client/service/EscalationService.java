@@ -56,10 +56,9 @@ public class EscalationService {
 
     public void update(UUID clientId, UUID escalationId, EscalationDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to update Escalation for client[%s] with null payload", clientId));
-        Client clientEntity = searchForClient(clientId);
-        searchForEscalation(escalationId);
-        Escalation updatedEntity = EscalationConverter.toEntityModel(resource);
-        updatedEntity.setClient(clientEntity);
+        searchForClient(clientId);
+        Escalation entity = searchForEscalation(escalationId);
+        Escalation updatedEntity = EscalationConverter.toEntityModel(resource, entity);
         save(updatedEntity);
         log.info(() -> String.format("Escalation for Client[%s] successfully created", clientId));
     }

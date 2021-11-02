@@ -23,11 +23,15 @@ public class EscalationConverter {
     }
 
     public static Escalation toEntityModel(EscalationDto transport) {
+        return toEntityModel(transport, new Escalation());
+    }
 
-        if (transport == null) {
+    public static Escalation toEntityModel(EscalationDto transport, Escalation entity) {
+
+        if (transport == null || entity == null) {
             return null;
         }
-        Escalation entity = new Escalation();
+
         entity.setId(transport.getId());
         entity.setName(transport.getName());
         entity.setMobileNumber(transport.getMobileNumber());

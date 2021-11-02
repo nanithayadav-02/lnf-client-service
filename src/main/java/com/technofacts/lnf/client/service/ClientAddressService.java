@@ -56,10 +56,9 @@ public class ClientAddressService {
 
     public void update(UUID clientId, UUID addressId, AddressDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to update Address for client[%s] with null payload", clientId));
-        Client clientEntity = searchForClient(clientId);
-        searchForAddress(addressId);
-        ClientAddress updatedEntity = AddressConverter.toEntityModel(resource);
-        updatedEntity.setClient(clientEntity);
+        searchForClient(clientId);
+        ClientAddress entity = searchForAddress(addressId);
+        ClientAddress updatedEntity = AddressConverter.toEntityModel(resource, entity);
         save(updatedEntity);
         log.info(() -> String.format("Address for Client[%s] successfully created", clientId));
     }

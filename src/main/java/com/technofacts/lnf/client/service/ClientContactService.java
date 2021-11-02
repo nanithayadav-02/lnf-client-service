@@ -69,10 +69,9 @@ public class ClientContactService {
 
     public void update(UUID clientId, UUID contactId, ContactDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to contact client[%s] with null payload", clientId));
-        Client clientEntity = searchForClient(clientId);
+        searchForClient(clientId);
         ClientContact entity = searchForContact(contactId);
-        ClientContact updatedEntity = ContactConverter.toEntityModel(resource);
-        updatedEntity.setClient(clientEntity);
+        ClientContact updatedEntity = ContactConverter.toEntityModel(resource, entity);
         save(updatedEntity);
         log.info(() -> String.format("Contact for client[%s] successfully updated", clientId));
     }
