@@ -1,12 +1,13 @@
 package com.technofacts.lnf.client.converter;
 
-import javax.print.Doc;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.technofacts.lnf.client.dto.ClientDto;
 import com.technofacts.lnf.client.dto.DocumentDto;
-import com.technofacts.lnf.client.exception.LnFException;
 import com.technofacts.lnf.client.model.*;
 import com.technofacts.lnf.client.model.enums.DocumentType;
 
@@ -48,7 +49,12 @@ public class ClientConverter {
     }
 
     public static Client toEntityModel(ClientDto transport) {
-        return toEntityModel(transport, new Client());
+        Client entity = toEntityModel(transport, new Client());
+        addContactsToEntityModel(transport, entity);
+        addEsacalationToEntityModel(transport, entity);
+        addAdressToEntityModel(transport, entity);
+        addGstToEntityModel(transport, entity);
+        return entity;
     }
 
     public static Client toEntityModel(ClientDto transport, Client entity) {
@@ -66,5 +72,42 @@ public class ClientConverter {
         entity.setClientDetails(transport.getClientDetails());
 
         return entity;
+    }
+
+    private static void addContactsToEntityModel(ClientDto transport, Client client) {
+        List<ClientContact> contactList = new ArrayList<>();
+        transport.getContacts().stream().filter(Objects::nonNull).forEach(dto -> {
+            ClientContact entity = ContactConverter.toEntityModel(dto);
+            entity.setClient(client);
+            contactList.add(entity);
+        });
+        client.getClientContacts().addAll(contactList);
+    }
+
+
+    private static void addEsacalationToEntityModel(ClientDto transport, Client client) {
+        if (transport.getEscalation() != null) {
+            Escalation escalation = EscalationConverter.toEntityModel(transport.getEscalation());
+            escalation.setClient(client);
+            client.setEscalation(escalation);
+        }
+    }
+
+    private static void addAdressToEntityModel(ClientDto transport, Client client) {
+        if (transport.getAddress() != null) {
+            ClientAddress address = AddressConverter.toEntityModel(transport.getAddress());
+            address.setClient(client);
+            client.setClientAddress(address);
+        }
+    }
+
+    private static void addGstToEntityModel(ClientDto transport, Client client) {
+        List<Gst> gstList = new ArrayList<>();
+        transport.getGst().stream().filter(Objects::nonNull).forEach(dto -> {
+            Gst entity = GstConverter.toEntityModel(dto);
+            entity.setClient(client);
+            gstList.add(entity);
+        });
+        client.getGst().addAll(gstList);
     }
 }
