@@ -69,10 +69,9 @@ public class GstService {
 
     public void update(UUID clientId, UUID gstId, GstDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to gst client[%s] with null payload", clientId));
-        Client clientEntity = searchForClient(clientId);
+        searchForClient(clientId);
         Gst entity = searchForGst(gstId);
-        Gst updatedEntity = GstConverter.toEntityModel(resource);
-        updatedEntity.setClient(clientEntity);
+        Gst updatedEntity = GstConverter.toEntityModel(resource, entity);
         save(updatedEntity);
         log.info(() -> String.format("Gst for client[%s] successfully updated", clientId));
     }

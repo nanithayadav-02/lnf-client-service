@@ -23,11 +23,15 @@ public class ContactConverter {
     }
 
     public static ClientContact toEntityModel(ContactDto transport) {
+        return toEntityModel(transport, new ClientContact());
+    }
 
-        if (transport == null) {
+    public static ClientContact toEntityModel(ContactDto transport, ClientContact entity) {
+
+        if (transport == null || entity == null) {
             return null;
         }
-        ClientContact entity = new ClientContact();
+
         entity.setId(transport.getId());
         entity.setName(transport.getName());
         entity.setDepartment(transport.getDepartment());

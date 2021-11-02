@@ -20,11 +20,14 @@ public class GstConverter {
     }
 
     public static Gst toEntityModel(GstDto transport) {
+        return toEntityModel(transport, new Gst());
+    }
 
-        if (transport == null) {
+    public static Gst toEntityModel(GstDto transport, Gst entity) {
+
+        if (transport == null || entity == null) {
             return null;
         }
-        Gst entity = new Gst();
         entity.setId(transport.getId());
         entity.setLocation(transport.getLocation());
         entity.setNumber(transport.getNumber());

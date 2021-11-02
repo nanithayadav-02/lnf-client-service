@@ -25,11 +25,14 @@ public class AddressConverter {
     }
 
     public static ClientAddress toEntityModel(AddressDto transport) {
+        return toEntityModel(transport, new ClientAddress());
+    }
 
-        if (transport == null) {
+    public static ClientAddress toEntityModel(AddressDto transport, ClientAddress entity) {
+
+        if (transport == null || entity == null) {
             return null;
         }
-        ClientAddress entity = new ClientAddress();
         entity.setId(transport.getId());
         entity.setAddressText(transport.getAddressText());
         entity.setTown(transport.getTown());

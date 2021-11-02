@@ -74,7 +74,7 @@ public class ClientService {
     }
 
     public void create(ClientDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create Client with null payload"));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create Client with null payload");
         Client entity = ClientConverter.toEntityModel(resource);
         saveEntity(entity);
         log.info(() -> String.format("Client[%s] successfully created", entity.getCode()));
@@ -82,10 +82,9 @@ public class ClientService {
 
     @Transactional
     public void update(UUID clientId, ClientDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to update Client with null payload"));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to update Client with null payload");
         Client entity = search(clientId);
-        Client updatedEntity = ClientConverter.toEntityModel(resource);
-        updatedEntity.setId(entity.getId());
+        Client updatedEntity = ClientConverter.toEntityModel(resource, entity);
         saveEntity(updatedEntity);
         log.info(() -> String.format("Client[%s] successfully updated", clientId));
     }
