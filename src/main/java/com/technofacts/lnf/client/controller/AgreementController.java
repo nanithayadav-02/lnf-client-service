@@ -22,7 +22,7 @@ public class AgreementController {
 
     @GetMapping(value = "/clients/{clientId}/agreement")
     @ResponseStatus(HttpStatus.CREATED)
-    public DocumentDto findByEmployeeId(@PathVariable("clientId") final UUID clientId) throws IOException {
+    public DocumentDto findByClientId(@PathVariable("clientId") final UUID clientId) throws IOException {
         return service.findByClientId(clientId, DocumentType.agreement);
     }
 

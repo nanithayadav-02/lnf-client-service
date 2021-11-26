@@ -16,7 +16,7 @@ public class ClientAddressController {
     private final ClientAddressService service;
 
     @GetMapping(value = "/clients/{clientId}/address")
-    public AddressDto findByEmployeeId(@PathVariable("clientId") final UUID clientId) {
+    public AddressDto findByClientId(@PathVariable("clientId") final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
