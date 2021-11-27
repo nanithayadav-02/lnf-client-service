@@ -41,47 +41,47 @@ public class TaskService {
 
     public TaskDto findById(UUID projectId, UUID taskId) {
         searchForProject(projectId);
-        return TaskConverter.toTransportModel(searchForTask(projectId));
+        return TaskConverter.toTransportModel(searchForTask(taskId));
     }
 
     public void create(UUID projectId, TaskDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create Task for project[%s] with null payload", projectId));
-        Project clientEntity = searchForProject(projectId);
+        Project projectEntity = searchForProject(projectId);
         Task entity = TaskConverter.toEntityModel(resource);
-        entity.setProject(clientEntity);
+        entity.setProject(projectEntity);
         save(entity);
         log.info(() -> String.format("Task for Project[%s] successfully created", projectId));
     }
 
-    public void update(UUID clientId, UUID projectId, TaskDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to update Task for client[%s] with null payload", clientId));
-        searchForProject(clientId);
-        Task entity = searchForTask(projectId);
+    public void update(UUID projectId, UUID taskId, TaskDto resource) {
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to update Task for project[%s] with null payload", projectId));
+        searchForProject(projectId);
+        Task entity = searchForTask(taskId);
         Task updatedEntity = TaskConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.info(() -> String.format("Task for Project[%s] successfully created", clientId));
+        log.info(() -> String.format("Task for Project[%s] successfully created", taskId));
     }
 
-    public void deleteById(UUID clientId, UUID projectId) {
-        searchForProject(clientId);
-        Task entity = searchForTask(projectId);
+    public void deleteById(UUID projectId, UUID taskId) {
+        searchForProject(projectId);
+        Task entity = searchForTask(taskId);
         try {
             repository.delete(entity);
-            log.info(() -> String.format("Task[%s] for client [%s] successfully deleted", projectId, clientId));
+            log.info(() -> String.format("Task[%s] for project [%s] successfully deleted", taskId, projectId));
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete Task[[%s] for client [%s]", projectId, clientId);
+            String errorMessage = String.format("Failed to delete Task[[%s] for project [%s]", taskId, projectId);
             throw new LnFException(errorMessage);
         }
     }
 
-    public void deleteByProjectId(UUID clientId) {
-        searchForProject(clientId);
-        List<Task> entities = repository.findByProjectId(clientId);
+    public void deleteByProjectId(UUID projectId) {
+        searchForProject(projectId);
+        List<Task> entities = repository.findByProjectId(projectId);
         try {
             repository.deleteAll(entities);
-            log.info(() -> String.format("Tasks for client[%s] successfully deleted", clientId));
+            log.info(() -> String.format("Tasks for project[%s] successfully deleted", projectId));
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete project(s) for client [%s]", clientId);
+            String errorMessage = String.format("Failed to delete tasks(s) for project [%s]", projectId);
             throw new LnFException(errorMessage);
         }
     }
@@ -90,7 +90,7 @@ public class TaskService {
         try {
             repository.save(entity);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save Task for client [%s]", entity.getProject().getId());
+            String errorMessage = String.format("Failed to save Task for project [%s]", entity.getProject().getId());
             throw new LnFException(errorMessage);
         }
     }
