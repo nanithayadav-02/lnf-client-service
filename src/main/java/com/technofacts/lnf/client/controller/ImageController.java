@@ -22,7 +22,7 @@ public class ImageController {
 
     @GetMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.CREATED)
-    public DocumentDto findByEmployeeId(@PathVariable("clientId") final UUID clientId) throws IOException {
+    public DocumentDto findByClientId(@PathVariable("clientId") final UUID clientId) throws IOException {
         return service.findByClientId(clientId, DocumentType.image);
     }
 

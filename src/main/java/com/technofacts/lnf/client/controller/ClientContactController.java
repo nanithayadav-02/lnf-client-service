@@ -17,7 +17,7 @@ public class ClientContactController {
     private final ClientContactService service;
 
     @GetMapping(value = "/clients/{clientId}/contact")
-    public List<ContactDto> findByEmployeeId(@PathVariable("clientId") final UUID clientId) {
+    public List<ContactDto> findByClientId(@PathVariable("clientId") final UUID clientId) {
         return service.findByClientId(clientId);
     }
 

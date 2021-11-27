@@ -16,7 +16,7 @@ public class EscalationController {
     private final EscalationService service;
 
     @GetMapping(value = "/clients/{clientId}/escalation")
-    public EscalationDto findByEmployeeId(@PathVariable("clientId") final UUID clientId) {
+    public EscalationDto findByClientId(@PathVariable("clientId") final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
