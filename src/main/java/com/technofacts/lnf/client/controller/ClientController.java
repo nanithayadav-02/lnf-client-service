@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.technofacts.lnf.client.dto.ClientDto;
+import com.technofacts.lnf.client.dto.ClientDashboardDto;
 import com.technofacts.lnf.client.service.ClientService;
 import com.technofacts.lnf.client.util.QueryConstants;
 import lombok.RequiredArgsConstructor;
@@ -19,24 +20,28 @@ public class ClientController {
     private final ClientService service;
 
     @GetMapping(value = "/clients", params = {QueryConstants.PAGE, QueryConstants.SIZE, QueryConstants.SORT_BY})
-    public List<ClientDto> findAllPaginatedAndSorted(@RequestParam(value = QueryConstants.PAGE) final int page, @RequestParam(value = QueryConstants.SIZE) final int size, @RequestParam(value = QueryConstants.SORT_BY) final String sortBy,
+    public List<ClientDto> findAllPaginatedAndSorted(@RequestParam(value = QueryConstants.PAGE) final int page,
+                                                     @RequestParam(value = QueryConstants.SIZE) final int size,
+                                                     @RequestParam(value = QueryConstants.SORT_BY) final String sortBy,
                                                      @RequestParam(value = QueryConstants.SORT_ORDER) final String sortOrder) {
         return service.findPaginatedAndSorted(page, size, sortBy, sortOrder);
     }
 
     @GetMapping(value = "/clients", params = {QueryConstants.PAGE, QueryConstants.SIZE})
-    public List<ClientDto> findAllPaginated(@RequestParam(value = QueryConstants.PAGE) final int page, @RequestParam(value = QueryConstants.SIZE) final int size) {
+    public List<ClientDto> findAllPaginated(@RequestParam(value = QueryConstants.PAGE) final int page,
+                                            @RequestParam(value = QueryConstants.SIZE) final int size) {
         return service.findPaginated(page, size);
     }
 
     @GetMapping(value = "/clients", params = {QueryConstants.SORT_BY})
-    public List<ClientDto> findAllSorted(@RequestParam(value = QueryConstants.SORT_BY) final String sortBy, @RequestParam(value = QueryConstants.SORT_ORDER) final String sortOrder) {
+    public List<ClientDto> findAllSorted(@RequestParam(value = QueryConstants.SORT_BY) final String sortBy,
+                                         @RequestParam(value = QueryConstants.SORT_ORDER) final String sortOrder) {
         return service.findAllSorted(sortBy, sortOrder);
     }
 
-    @GetMapping(value = "/clients")
-    public List<ClientDto> findAll() {
-        return service.findAll();
+    @GetMapping(value = "/clients/dashboard")
+    public ClientDashboardDto dashboard() {
+        return service.dashboard();
     }
 
     @GetMapping(value = "/clients", params = {"search"})
@@ -47,6 +52,11 @@ public class ClientController {
     @GetMapping(value = "/clients/{clientId}")
     public ClientDto findOne(@PathVariable("clientId") final UUID clientId) {
         return service.findByClientId(clientId);
+    }
+
+    @GetMapping(value = "/clients")
+    public List<ClientDto> findAll() {
+        return service.findAll();
     }
 
     @PostMapping(value = "/clients")
