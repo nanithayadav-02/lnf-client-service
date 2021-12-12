@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.technofacts.lnf.client.dto.ClientDto;
-import com.technofacts.lnf.client.dto.ClientDashboardDto;
+import com.technofacts.lnf.client.dto.DashboardDto;
 import com.technofacts.lnf.client.service.ClientService;
 import com.technofacts.lnf.client.util.QueryConstants;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class ClientController {
     }
 
     @GetMapping(value = "/clients/dashboard")
-    public ClientDashboardDto dashboard() {
+    public DashboardDto dashboard() {
         return service.dashboard();
     }
 

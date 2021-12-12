@@ -18,7 +18,7 @@ public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecif
 
     @Query(value = "select extract(year from c.created_time) as year, " +
             " to_char(c.created_time, 'MON') as month, count(c.id) as count "
-            + " from client as c group by  year, month order by year desc", nativeQuery = true)
-    List<ClientStatistics> clientsByYearAndMonth();
+            + " from client as c group by year, month order by year desc", nativeQuery = true)
+    List<StatisticsSummary> clientsByYearAndMonth();
 
 }

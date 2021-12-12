@@ -1,9 +1,12 @@
 package com.technofacts.lnf.client.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @ToString
 @Getter
@@ -11,9 +14,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientDashboardDto {
+@JsonInclude(NON_NULL)
+public class DashboardDto {
 
-    private long totalClients = 0;
+    private long total = 0;
 
     private List<StatisticsDto> statistics = new ArrayList<>();
 
