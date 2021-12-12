@@ -6,7 +6,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.technofacts.lnf.client.converter.ProjectConverter;
+import com.technofacts.lnf.client.dto.DashboardDto;
 import com.technofacts.lnf.client.dto.ProjectDto;
+import com.technofacts.lnf.client.dto.StatisticsDto;
 import com.technofacts.lnf.client.exception.LnFBadRequestException;
 import com.technofacts.lnf.client.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.client.exception.LnFException;
@@ -14,6 +16,7 @@ import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
+import com.technofacts.lnf.client.repository.StatisticsSummary;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
@@ -83,6 +86,21 @@ public class ProjectService {
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete project(s) for client [%s]", clientId);
             throw new LnFException(errorMessage);
+        }
+    }
+
+    public DashboardDto dashboard() {
+        DashboardDto dashboardDto = new DashboardDto();
+        dashboardDto.setTotal(repository.count());
+        mapStatistics(dashboardDto, repository.projectsByYearAndMonth());
+        return  dashboardDto;
+    }
+
+    private void mapStatistics(DashboardDto projectDashboardDto, List<StatisticsSummary> statisticsSummaries) {
+        if (!statisticsSummaries.isEmpty()) {
+            projectDashboardDto.setStatistics(statisticsSummaries.stream()
+                    .map(cs -> new StatisticsDto(cs.getYear(), cs.getMonth(), cs.getStatus(), cs.getCount()))
+                    .collect(Collectors.toList()));
         }
     }
 

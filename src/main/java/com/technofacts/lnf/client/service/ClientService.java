@@ -11,13 +11,13 @@ import com.google.common.collect.Lists;
 import com.technofacts.lnf.client.converter.ClientConverter;
 import com.technofacts.lnf.client.dto.StatisticsDto;
 import com.technofacts.lnf.client.dto.ClientDto;
-import com.technofacts.lnf.client.dto.ClientDashboardDto;
+import com.technofacts.lnf.client.dto.DashboardDto;
 import com.technofacts.lnf.client.exception.LnFBadRequestException;
 import com.technofacts.lnf.client.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.client.exception.LnFException;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.repository.ClientRepository;
-import com.technofacts.lnf.client.repository.ClientStatistics;
+import com.technofacts.lnf.client.repository.StatisticsSummary;
 import com.technofacts.lnf.client.repository.specification.client.ClientSpecificationBuilder;
 import com.technofacts.lnf.client.util.RestUtil;
 import lombok.RequiredArgsConstructor;
@@ -103,16 +103,19 @@ public class ClientService {
         }
     }
 
-    public ClientDashboardDto dashboard() {
-        ClientDashboardDto clientDashboardDto = new ClientDashboardDto();
-        clientDashboardDto.setTotalClients(repository.count());
-        List<ClientStatistics> clientStatistics = repository.clientsByYearAndMonth();
-        if (!clientStatistics.isEmpty()) {
-            clientDashboardDto.setStatistics(clientStatistics.stream()
-                    .map(cc -> new StatisticsDto(cc.getYear(), cc.getMonth(), cc.getCount()))
+    public DashboardDto dashboard() {
+        DashboardDto dashboardDto = new DashboardDto();
+        dashboardDto.setTotal(repository.count());
+        mapStatistics(dashboardDto,  repository.clientsByYearAndMonth());
+        return  dashboardDto;
+    }
+
+    private void mapStatistics(DashboardDto projectDashboardDto, List<StatisticsSummary> statisticsSummaries) {
+        if (!statisticsSummaries.isEmpty()) {
+            projectDashboardDto.setStatistics(statisticsSummaries.stream()
+                    .map(cs -> new StatisticsDto(cs.getYear(), cs.getMonth(), cs.getStatus(), cs.getCount()))
                     .collect(Collectors.toList()));
         }
-        return  clientDashboardDto;
     }
 
     private List<ClientDto> validateAndGetPages(int page, Page<Client> resultPage) {

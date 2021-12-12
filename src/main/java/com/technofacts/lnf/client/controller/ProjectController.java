@@ -3,6 +3,7 @@ package com.technofacts.lnf.client.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.technofacts.lnf.client.dto.DashboardDto;
 import com.technofacts.lnf.client.dto.ProjectDto;
 import com.technofacts.lnf.client.service.ProjectService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,11 @@ public class ProjectController {
     @GetMapping(value = "/clients/{clientId}/project/{projectId}")
     public ProjectDto findById(@PathVariable("clientId") final UUID clientId, @PathVariable("projectId") final UUID projectId) {
         return service.findById(clientId, projectId);
+    }
+
+    @GetMapping(value = "/projects/dashboard")
+    public DashboardDto dashboard() {
+        return service.dashboard();
     }
 
     @PostMapping(value = "/clients/{clientId}/project")

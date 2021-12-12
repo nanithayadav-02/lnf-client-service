@@ -6,6 +6,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.technofacts.lnf.client.converter.TaskConverter;
+import com.technofacts.lnf.client.dto.DashboardDto;
+import com.technofacts.lnf.client.dto.StatisticsDto;
 import com.technofacts.lnf.client.dto.TaskDto;
 import com.technofacts.lnf.client.exception.LnFBadRequestException;
 import com.technofacts.lnf.client.exception.LnFEntityNotFoundException;
@@ -13,6 +15,7 @@ import com.technofacts.lnf.client.exception.LnFException;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.model.Task;
 import com.technofacts.lnf.client.repository.ProjectRepository;
+import com.technofacts.lnf.client.repository.StatisticsSummary;
 import com.technofacts.lnf.client.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -83,6 +86,21 @@ public class TaskService {
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete tasks(s) for project [%s]", projectId);
             throw new LnFException(errorMessage);
+        }
+    }
+
+    public DashboardDto dashboard() {
+        DashboardDto dashboardDto = new DashboardDto();
+        dashboardDto.setTotal(repository.count());
+        mapStatistics(dashboardDto, repository.tasksByYearAndStatus());
+        return  dashboardDto;
+    }
+
+    private void mapStatistics(DashboardDto projectDashboardDto, List<StatisticsSummary> statisticsSummaries) {
+        if (!statisticsSummaries.isEmpty()) {
+            projectDashboardDto.setStatistics(statisticsSummaries.stream()
+                    .map(cs -> new StatisticsDto(cs.getYear(), cs.getMonth(), cs.getStatus(), cs.getCount()))
+                    .collect(Collectors.toList()));
         }
     }
 
