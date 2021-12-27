@@ -74,7 +74,6 @@ pipeline {
                 script {
                     echo '=== Delete the local docker images ==='
                     docker.withTool('docker-latest') {
-                        sh("docker rmi -f ${IMAGE_REPO_NAME}:latest")
                         sh("docker rmi -f ${IMAGE_REPO_NAME}:${BUILD_NUMBER}")
                         sh("docker rmi -f ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${BUILD_NUMBER}")
                         sh("docker rmi -f ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:latest")
