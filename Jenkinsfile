@@ -60,6 +60,8 @@ pipeline {
                      }
 
                     echo '=== Pushing Container Image to ECR ==='
+                    echo "${IMAGE_REPO_NAME}"
+                    echo "${REPO_NAME}"
                     sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
                     sh "docker tag ${REPO_NAME} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${BUILD_NUMBER}"
                     sh "docker tag ${REPO_NAME} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:latest"
@@ -73,8 +75,7 @@ pipeline {
                 echo '=== Remove local images ==='
                 script {
                     echo '=== Delete the local docker images ==='
-                    echo "${IMAGE_REPO_NAME}"
-                    echo "${REPO_NAME}"
+
                     docker.withTool('docker-latest') {
                         sh("docker rmi -f ${IMAGE_REPO_NAME}:${BUILD_NUMBER}")
                         sh("docker rmi -f ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${BUILD_NUMBER}")
