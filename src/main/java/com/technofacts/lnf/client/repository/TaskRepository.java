@@ -16,8 +16,9 @@ public interface TaskRepository extends JpaRepository<Task, UUID>, JpaSpecificat
     @Query("SELECT t FROM Task t WHERE t.project.id = :project_id")
     List<Task> findByProjectId(@Param("project_id") UUID project_id);
 
-    @Query(value = "select extract(year from t.start_date) as year, status, count(t.id) as count "
-            + " from task as t group by year, status order by year, status desc", nativeQuery = true)
+    @Query(value = "select extract(year from t.start_date) as year, " +
+            " to_char(t.start_date, 'MON') as month, status, count(t.id) as count " +
+            " from task as t group by year, status order by year, status desc", nativeQuery = true)
     List<StatisticsSummary> tasksByYearAndStatus();
 
 }
