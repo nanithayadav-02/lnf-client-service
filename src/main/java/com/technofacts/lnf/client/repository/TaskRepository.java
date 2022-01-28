@@ -18,7 +18,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID>, JpaSpecificat
 
     @Query(value = "select extract(year from t.start_date) as year, " +
             " to_char(t.start_date, 'MON') as month, status, count(t.id) as count " +
-            " from task as t group by year, status order by year, status desc", nativeQuery = true)
+            " from task as t group by year, month, status order by year, status desc", nativeQuery = true)
     List<StatisticsSummary> tasksByYearAndStatus();
 
 }
