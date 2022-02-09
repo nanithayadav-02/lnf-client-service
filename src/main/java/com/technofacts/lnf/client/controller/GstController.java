@@ -3,7 +3,7 @@ package com.technofacts.lnf.client.controller;
 import java.util.List;
 import java.util.UUID;
 
-import com.technofacts.lnf.client.dto.GstDto;
+import com.technofacts.lnf.dto.client.GstDto;
 import com.technofacts.lnf.client.service.GstService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

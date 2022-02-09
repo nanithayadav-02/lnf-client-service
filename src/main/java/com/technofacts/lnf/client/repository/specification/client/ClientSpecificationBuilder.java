@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.technofacts.lnf.client.model.Client;
-import com.technofacts.lnf.client.util.SearchOperation;
-import com.technofacts.lnf.client.util.SpecSearchCriteria;
+import com.technofacts.lnf.util.SearchOperation;
+import com.technofacts.lnf.util.SpecSearchCriteria;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ClientSpecificationBuilder {

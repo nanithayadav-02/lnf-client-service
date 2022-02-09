@@ -3,10 +3,10 @@ package com.technofacts.lnf.client.controller;
 import java.util.List;
 import java.util.UUID;
 
-import com.technofacts.lnf.client.dto.ClientDto;
-import com.technofacts.lnf.client.dto.DashboardDto;
+import com.technofacts.lnf.dto.client.ClientDto;
+import com.technofacts.lnf.dto.client.DashboardDto;
 import com.technofacts.lnf.client.service.ClientService;
-import com.technofacts.lnf.client.util.QueryConstants;
+import com.technofacts.lnf.util.QueryConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

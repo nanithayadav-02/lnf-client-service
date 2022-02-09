@@ -6,10 +6,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.technofacts.lnf.client.converter.EscalationConverter;
-import com.technofacts.lnf.client.dto.EscalationDto;
-import com.technofacts.lnf.client.exception.LnFBadRequestException;
-import com.technofacts.lnf.client.exception.LnFEntityNotFoundException;
-import com.technofacts.lnf.client.exception.LnFException;
+import com.technofacts.lnf.dto.client.EscalationDto;
+import com.technofacts.lnf.exception.LnFBadRequestException;
+import com.technofacts.lnf.exception.LnFEntityNotFoundException;
+import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.Escalation;
 import com.technofacts.lnf.client.repository.ClientRepository;

@@ -2,7 +2,7 @@ package com.technofacts.lnf.client.controller;
 
 import java.util.UUID;
 
-import com.technofacts.lnf.client.dto.EscalationDto;
+import com.technofacts.lnf.dto.client.EscalationDto;
 import com.technofacts.lnf.client.service.EscalationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.technofacts.lnf.client.dto.ClientDto;
-import com.technofacts.lnf.client.dto.DocumentDto;
+import com.technofacts.lnf.dto.client.ClientDto;
+import com.technofacts.lnf.dto.client.DocumentDto;
 import com.technofacts.lnf.client.model.*;
 import com.technofacts.lnf.client.model.enums.DocumentType;
 

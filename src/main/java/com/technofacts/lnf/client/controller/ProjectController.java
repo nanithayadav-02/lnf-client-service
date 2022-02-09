@@ -3,8 +3,8 @@ package com.technofacts.lnf.client.controller;
 import java.util.List;
 import java.util.UUID;
 
-import com.technofacts.lnf.client.dto.DashboardDto;
-import com.technofacts.lnf.client.dto.ProjectDto;
+import com.technofacts.lnf.dto.client.DashboardDto;
+import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.client.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

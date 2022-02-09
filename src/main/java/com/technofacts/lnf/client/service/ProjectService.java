@@ -6,12 +6,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.technofacts.lnf.client.converter.ProjectConverter;
-import com.technofacts.lnf.client.dto.DashboardDto;
-import com.technofacts.lnf.client.dto.ProjectDto;
-import com.technofacts.lnf.client.dto.StatisticsDto;
-import com.technofacts.lnf.client.exception.LnFBadRequestException;
-import com.technofacts.lnf.client.exception.LnFEntityNotFoundException;
-import com.technofacts.lnf.client.exception.LnFException;
+import com.technofacts.lnf.dto.client.DashboardDto;
+import com.technofacts.lnf.dto.client.ProjectDto;
+import com.technofacts.lnf.dto.client.StatisticsDto;
+import com.technofacts.lnf.exception.LnFBadRequestException;
+import com.technofacts.lnf.exception.LnFEntityNotFoundException;
+import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.repository.ClientRepository;

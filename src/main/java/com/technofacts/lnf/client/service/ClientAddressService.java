@@ -6,10 +6,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.technofacts.lnf.client.converter.AddressConverter;
-import com.technofacts.lnf.client.dto.AddressDto;
-import com.technofacts.lnf.client.exception.LnFBadRequestException;
-import com.technofacts.lnf.client.exception.LnFEntityNotFoundException;
-import com.technofacts.lnf.client.exception.LnFException;
+import com.technofacts.lnf.dto.client.AddressDto;
+import com.technofacts.lnf.exception.LnFBadRequestException;
+import com.technofacts.lnf.exception.LnFEntityNotFoundException;
+import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.ClientAddress;
 import com.technofacts.lnf.client.repository.ClientAddressRepository;

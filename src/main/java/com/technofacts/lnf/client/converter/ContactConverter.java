@@ -1,6 +1,6 @@
 package com.technofacts.lnf.client.converter;
 
-import com.technofacts.lnf.client.dto.ContactDto;
+import com.technofacts.lnf.dto.client.ContactDto;
 import com.technofacts.lnf.client.model.ClientContact;
 
 public class ContactConverter {

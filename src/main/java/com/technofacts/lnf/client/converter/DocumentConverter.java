@@ -3,8 +3,8 @@ package com.technofacts.lnf.client.converter;
 import java.io.IOException;
 import java.util.UUID;
 
-import com.technofacts.lnf.client.dto.DocumentDto;
-import com.technofacts.lnf.client.exception.LnFException;
+import com.technofacts.lnf.dto.client.DocumentDto;
+import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.client.model.ClientDocument;
 import com.technofacts.lnf.client.model.enums.DocumentType;
 import org.springframework.web.multipart.MultipartFile;

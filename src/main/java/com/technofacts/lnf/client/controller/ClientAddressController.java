@@ -2,7 +2,7 @@ package com.technofacts.lnf.client.controller;
 
 import java.util.UUID;
 
-import com.technofacts.lnf.client.dto.AddressDto;
+import com.technofacts.lnf.dto.client.AddressDto;
 import com.technofacts.lnf.client.service.ClientAddressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

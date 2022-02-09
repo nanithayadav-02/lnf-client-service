@@ -1,4 +1,4 @@
-package com.technofacts.lnf.client.util;
+package com.technofacts.lnf.util;
 
 public enum SearchOperation {
 

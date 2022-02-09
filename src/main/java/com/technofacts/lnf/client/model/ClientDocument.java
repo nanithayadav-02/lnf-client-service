@@ -3,6 +3,8 @@ package com.technofacts.lnf.client.model;
 import javax.persistence.*;
 
 import com.technofacts.lnf.client.model.enums.DocumentType;
+import com.technofacts.lnf.model.AuditableEntity;
+
 import lombok.*;
 import org.hibernate.annotations.Type;
 

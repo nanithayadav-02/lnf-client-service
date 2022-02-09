@@ -1,6 +1,6 @@
 package com.technofacts.lnf.client.converter;
 
-import com.technofacts.lnf.client.dto.TaskDto;
+import com.technofacts.lnf.dto.client.TaskDto;
 import com.technofacts.lnf.client.model.Task;
 
 public class TaskConverter {

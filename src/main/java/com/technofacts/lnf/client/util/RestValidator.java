@@ -1,7 +1,7 @@
-package com.technofacts.lnf.client.util;
+package com.technofacts.lnf.util;
 
-import com.technofacts.lnf.client.exception.LnFBadRequestException;
-import com.technofacts.lnf.client.exception.LnFEntityNotFoundException;
+import com.technofacts.lnf.exception.LnFBadRequestException;
+import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import org.springframework.http.HttpStatus;
 
 /**

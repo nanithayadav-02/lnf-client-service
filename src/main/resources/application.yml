@@ -86,9 +86,9 @@ spring:
 
   datasource:
 #    url: jdbc:postgresql://${database.host:ec2-34-202-158-22.compute-1.amazonaws.com}:${database.port:5432}/${database.name:tsdb}
-    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:tsdb}
-    username: ${database.username:tsuser}
-    password: ${database.password:ts@12345}
+    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
+    username: ${database.username:client_user}
+    password: ${database.password:client@12345}
     data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
 

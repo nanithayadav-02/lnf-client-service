@@ -1,4 +1,4 @@
-package com.technofacts.lnf.client.dto;
+package com.technofacts.lnf.dto.client;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

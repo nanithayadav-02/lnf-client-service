@@ -1,4 +1,4 @@
-package com.technofacts.lnf.client.dto;
+package com.technofacts.lnf.dto.client;
 
 import javax.persistence.Column;
 import javax.persistence.FetchType;

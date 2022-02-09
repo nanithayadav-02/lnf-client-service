@@ -1,4 +1,4 @@
-package com.technofacts.lnf.client.exception;
+package com.technofacts.lnf.exception;
 
 import java.util.Date;
 

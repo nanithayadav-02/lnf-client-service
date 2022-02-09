@@ -1,4 +1,4 @@
-package com.technofacts.lnf.client.dto;
+package com.technofacts.lnf.dto.client;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
