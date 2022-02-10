@@ -29,17 +29,25 @@ public class ClientContactService {
     private final ClientContactRepository repository;
     private final ClientRepository clientRepository;
 
-    public List<ContactDto> findAll() {
-        List<ClientContact> entities = repository.findAll();
-        return entities.stream().map(ContactConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
-    }
-
+    /**
+     * Returns ContactDto for the client by clientId
+     *
+     * @param clientId Client Id
+     * @return ContactDto of the client
+     */
     public List<ContactDto> findByClientId(UUID clientId) {
         searchForClient(clientId);
         List<ClientContact> entities = repository.findByClientId(clientId);
         return entities.stream().map(ContactConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
+    /**
+     * Returns ContactDto of the Client by clientId and contactId
+     *
+     * @param clientId  Client Id
+     * @param contactId Contact ID
+     * @return ContactDto of the client
+     */
     public ContactDto findById(UUID clientId, UUID contactId) {
         searchForClient(clientId);
         return ContactConverter.toTransportModel(searchForContact(contactId));
@@ -58,6 +66,12 @@ public class ClientContactService {
         log.info(() -> String.format("Contact for client[%s] successfully created", clientId));
     }
 
+    /**
+     * Creates the contact for the client
+     *
+     * @param clientId Client Id
+     * @param resource ContactDto
+     */
     public void create(UUID clientId, ContactDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create contact for client[%s] with null payload", clientId));
         Client clientEntity = searchForClient(clientId);
@@ -67,6 +81,13 @@ public class ClientContactService {
         log.info(() -> String.format("Contact for client[%s] successfully created", clientId));
     }
 
+    /**
+     * Updates the contact for the client
+     *
+     * @param clientId  Client Id
+     * @param contactId Contact ID
+     * @param resource  ContactDto
+     */
     public void update(UUID clientId, UUID contactId, ContactDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to contact client[%s] with null payload", clientId));
         searchForClient(clientId);
@@ -76,18 +97,11 @@ public class ClientContactService {
         log.info(() -> String.format("Contact for client[%s] successfully updated", clientId));
     }
 
-    public void deleteById(UUID clientId, UUID contactId) {
-        searchForClient(clientId);
-        ClientContact entity = searchForContact(contactId);
-        try {
-            repository.delete(entity);
-            log.info(() -> String.format("Contact[%s] for client [%s] successfully deleted", contactId, clientId));
-        } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete contact[%s] for client [%s]", contactId, clientId);
-            throw new LnFException(errorMessage);
-        }
-    }
-
+    /**
+     * Deletes the client contact by clientId
+     *
+     * @param clientId Client Id
+     */
     public void deleteByClientId(UUID clientId) {
         searchForClient(clientId);
         List<ClientContact> entities = repository.findByClientId(clientId);
@@ -96,6 +110,24 @@ public class ClientContactService {
             log.info(() -> String.format("Contacts for client[%s] successfully deleted", clientId));
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete contacts for client [%s]", clientId);
+            throw new LnFException(errorMessage);
+        }
+    }
+
+    /**
+     * Deletes the client contact by clientId and contactId
+     *
+     * @param clientId  Client Id
+     * @param contactId Contact Id
+     */
+    public void deleteById(UUID clientId, UUID contactId) {
+        searchForClient(clientId);
+        ClientContact entity = searchForContact(contactId);
+        try {
+            repository.delete(entity);
+            log.info(() -> String.format("Contact[%s] for client [%s] successfully deleted", contactId, clientId));
+        } catch (RuntimeException e) {
+            String errorMessage = String.format("Failed to delete contact[%s] for client [%s]", contactId, clientId);
             throw new LnFException(errorMessage);
         }
     }
