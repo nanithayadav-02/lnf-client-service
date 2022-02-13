@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 import com.technofacts.lnf.client.service.ClientService;
+import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ClientDto;
+import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.util.QueryConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class ClientController {
 
     private final ClientService service;
+    private final ProjectService projectService;
 
     /**
      * Return requested page with list of ClientDto objects with requested size.  Raises LnFEntityNotFoundException
@@ -100,6 +103,18 @@ public class ClientController {
     @ResponseStatus(HttpStatus.OK)
     public ClientDto findByClientId(@PathVariable("clientId") final UUID clientId) {
         return service.findByClientId(clientId);
+    }
+
+    /**
+     * Returns List of projectsDto from the clientId.
+     *
+     * @param clientId Client Id
+     * @return ClientDto object
+     */
+    @GetMapping(value = "/clients/{clientId}/projects")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProjectDto> findProjectsByClientId(@PathVariable("clientId") final UUID clientId) {
+        return projectService.findProjectsByClientId(clientId);
     }
 
 

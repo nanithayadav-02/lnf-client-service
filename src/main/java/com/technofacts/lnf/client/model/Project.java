@@ -60,8 +60,8 @@ public class Project extends AuditableEntity {
     private LocalDate endDate;
 
     @ToString.Exclude
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "client_id", referencedColumnName="id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", referencedColumnName="id")
     private Client client;
 
     @ToString.Exclude

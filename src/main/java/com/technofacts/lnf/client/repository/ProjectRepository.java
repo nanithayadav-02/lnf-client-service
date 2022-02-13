@@ -7,6 +7,8 @@ import java.util.UUID;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.Gst;
 import com.technofacts.lnf.client.model.Project;
+import com.technofacts.lnf.client.model.Task;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -15,7 +17,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ProjectRepository extends JpaRepository<Project, UUID>, JpaSpecificationExecutor<Project> {
 
-    @Query("SELECT p FROM Project p WHERE p.client.id= :client_id")
+    @Query("SELECT p FROM Project p WHERE p.client.id= :client_id ORDER BY p.startDate ASC")
     List<Project> findByClientId(@Param("client_id") UUID client_id);
 
     @Query(value = "select extract(year from p.start_date) as year, " +

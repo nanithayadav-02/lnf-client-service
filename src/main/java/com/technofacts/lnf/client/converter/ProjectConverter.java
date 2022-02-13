@@ -28,6 +28,7 @@ public class ProjectConverter {
         dto.setType(entity.getType());
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
+        dto.setClientId(entity.getClient() != null ? entity.getClient().getId() : null);
         dto.getTasks().addAll(entity.getTasks().stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
         return dto;
     }
