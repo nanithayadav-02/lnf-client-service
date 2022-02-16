@@ -28,6 +28,12 @@ public class Client extends AuditableEntity {
     @Column(name = "pan", nullable = false)
     private String pan;
 
+    @Column(name = "tan", nullable = false)
+    private String tan;
+
+    @Column(name = "status", nullable = false)
+    private String status;
+
     @Column(name = "working_from", nullable = false)
     private LocalDate workingFrom;
 

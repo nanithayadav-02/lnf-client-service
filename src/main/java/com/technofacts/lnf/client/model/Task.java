@@ -17,7 +17,7 @@ import lombok.*;
 @Table(name = "task")
 public class Task extends AuditableEntity {
 
-    @Column(name = "task", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "type", nullable = false)
