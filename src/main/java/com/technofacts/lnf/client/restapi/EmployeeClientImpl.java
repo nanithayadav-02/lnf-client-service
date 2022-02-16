@@ -22,7 +22,7 @@ public class EmployeeClientImpl implements EmployeeService {
 
     @Override
     public List<EmployeeDto> findByEmployeeIds(List<String> employeeIds) {
-        
+        return null;
     }
 
     @Override
