@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.technofacts.lnf.client.service.TaskService;
-import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.client.TaskDto;
 import com.technofacts.lnf.util.QueryConstants;
 import lombok.RequiredArgsConstructor;

@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
-import reactor.netty.tcp.TcpClient;
 
 @Configuration
 public class WebClientConfiguration {
@@ -21,17 +20,15 @@ public class WebClientConfiguration {
     @Value("${employee.service.url}")
     private String employeeServiceUrl;
 
-    public static final int TIMEOUT = 1000;
-
     @Qualifier("EmployeeService")
     @Bean
     public WebClient employeeWebClient() {
 
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000)
-                .responseTimeout(Duration.ofMillis(1000))
-                .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(1000, TimeUnit.MILLISECONDS))
-                        .addHandlerLast(new WriteTimeoutHandler(1000, TimeUnit.MILLISECONDS)));
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 2000)
+                .responseTimeout(Duration.ofMillis(2000))
+                .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(2000, TimeUnit.MILLISECONDS))
+                        .addHandlerLast(new WriteTimeoutHandler(2000, TimeUnit.MILLISECONDS)));
 
         return WebClient.builder()
                 .baseUrl(employeeServiceUrl)

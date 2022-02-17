@@ -6,13 +6,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
-import com.technofacts.lnf.client.converter.ProjectConverter;
 import com.technofacts.lnf.client.converter.TaskConverter;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.model.Task;
 import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.client.repository.TaskRepository;
-import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.client.TaskDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;

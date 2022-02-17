@@ -2,14 +2,18 @@ package com.technofacts.lnf.client.service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.model.ProjectEmployee;
 import com.technofacts.lnf.client.repository.ProjectEmployeeRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.dto.client.ProjectEmployeeDto;
+import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
+import com.technofacts.lnf.service.employee.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,7 @@ public class ProjectEmployeeService {
 
     private final ProjectEmployeeRepository repository;
     private final ProjectRepository projectRepository;
+    private final EmployeeService employeeService;
 
     /**
      * Get employees associated to the project
@@ -31,7 +36,23 @@ public class ProjectEmployeeService {
      * @return ProjectEmployeeDto
      */
     public ProjectEmployeeDto findEmployeesByProjectId(final UUID projectId) {
-        return null;
+        // Search if the projectId exists otherwise throw LnFEntityNotFoundException
+        Project project = searchForProject(projectId);
+
+        // Get the list of employees associated with the project
+        List<ProjectEmployee> projectEmployees = repository.findByProject(project);
+        List<String> employeeIds = projectEmployees.stream().map(ProjectEmployee::getEmployeeId).collect(Collectors.toList());
+
+        // Get the list of employee details from the Employee microservice
+        List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(employeeIds);
+
+        // Return the ProjectEmployeeDtos
+        ProjectEmployeeDto projectEmployeeDto = new ProjectEmployeeDto();
+        projectEmployeeDto.setProjectId(project.getId());
+        projectEmployeeDto.setProjectCode(project.getCode());
+        projectEmployeeDto.setEmployees(employeeDtos);
+
+        return projectEmployeeDto;
     }
 
     /**
@@ -41,6 +62,7 @@ public class ProjectEmployeeService {
      * @param employeeIds List of Strings
      */
     public void addEmployeeToProject(UUID projectId, List<String> employeeIds) {
+
         Project project = searchForProject(projectId);
         employeeIds.forEach(employeeId -> {
             try {
@@ -48,13 +70,18 @@ public class ProjectEmployeeService {
                 log.info(String.format("Employee[%s] is already associated to the projectId [%s]", employeeId, projectId));
 
             } catch (LnFEntityNotFoundException ex) {
-                ProjectEmployee projectEmployee = new ProjectEmployee();
-                projectEmployee.setProject(project);
-                projectEmployee.setEmployeeId(employeeId);
-                save(projectEmployee);
+                EmployeeDto employeeDto = employeeService.findOne(employeeId);
+                if (employeeDto != null) {
+                    ProjectEmployee projectEmployee = new ProjectEmployee();
+                    projectEmployee.setProject(project);
+                    projectEmployee.setEmployeeId(employeeId);
+                    save(projectEmployee);
+                    log.log(Level.INFO, String.format("Successfully added the employee [%s] to the project [%s]", employeeId, project.getCode()));
+                } else {
+                    log.log(Level.SEVERE, String.format("Failed to add the employee [%s] to the project [%s]", employeeId, project.getCode()));
+                }
             }
         });
-
     }
 
     /**
@@ -99,7 +126,7 @@ public class ProjectEmployeeService {
     }
 
     private ProjectEmployee search(UUID projectId, String employeeId) {
-        return repository.findByProjectCodeAndEmployeeId(projectId, employeeId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("ProjectEmployee entity with projectId [%s] and employeeId [%s] does not exist", projectId, employeeId)));
+        return repository.findByProjectIdAndEmployeeId(projectId, employeeId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("ProjectEmployee entity with projectId [%s] and employeeId [%s] does not exist", projectId, employeeId)));
     }
 
     private Project searchForProject(UUID projectId) {

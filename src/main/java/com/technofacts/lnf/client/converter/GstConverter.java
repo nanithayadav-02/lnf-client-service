@@ -1,7 +1,7 @@
 package com.technofacts.lnf.client.converter;
 
-import com.technofacts.lnf.dto.client.GstDto;
 import com.technofacts.lnf.client.model.Gst;
+import com.technofacts.lnf.dto.client.GstDto;
 
 public class GstConverter {
 

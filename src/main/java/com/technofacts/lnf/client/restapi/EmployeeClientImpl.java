@@ -1,28 +1,81 @@
 package com.technofacts.lnf.client.restapi;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import com.technofacts.lnf.dto.employee.EmployeeDto;
+import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.service.employee.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Service
+@Log
 @RequiredArgsConstructor
 public class EmployeeClientImpl implements EmployeeService {
 
     private final WebClient webClient;
 
+
     @Override
     public EmployeeDto findOne(String employeeId) {
 
+        try {
+            EmployeeDto employeeDto = webClient.get()
+                    .uri("/lnf/employee/" + employeeId)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToMono(EmployeeDto.class)
+                    .block();
+
+            return employeeDto;
+        } catch (LnFEntityNotFoundException ex) {
+            log.warning(String.format("Employee with id [%s] does not exist", employeeId));
+        }
+        catch (RuntimeException ex) {
+            log.log(Level.SEVERE, String.format("Error occurred fetching the details of the employee [%s]", employeeId), ex);
+        }
         return null;
     }
 
+    /**
+     * Returns ArrayList of EmployeeDtos. Incase of any exception, the error is logged and an empty
+     * array list is returned
+     *
+     * @param employeeIds List<String></String>
+     * @return List of EmployeeDtos
+     */
     @Override
     public List<EmployeeDto> findByEmployeeIds(List<String> employeeIds) {
-        return null;
+        List<EmployeeDto> employeeDtos = new ArrayList<>();
+
+        try {
+            // POST the request
+             employeeDtos = webClient.post()
+                    .uri("/lnf/employeeList")
+                    .body(BodyInserters.fromPublisher(Mono.just(employeeIds), new ParameterizedTypeReference<List<String>>() {
+                    }))
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<EmployeeDto>>() {
+                    }).block();
+
+        } catch (RuntimeException ex) {
+            log.log(Level.SEVERE, String.format("Error occurred fetching the employee details for the employee Ids - [%s]", employeeIds), ex);
+        }
+
+        int responseSize = employeeDtos != null ? employeeDtos.size() : 0;
+        log.info(String.format("Queried for [%d] employees, Received [%d] employee details, " +
+                "Unable to fetch [%d] employees details", employeeIds.size(), responseSize, employeeIds.size() - responseSize));
+
+        return employeeDtos;
     }
 
     @Override

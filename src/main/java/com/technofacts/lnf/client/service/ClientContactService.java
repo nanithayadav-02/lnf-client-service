@@ -7,14 +7,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.technofacts.lnf.client.converter.ContactConverter;
-import com.technofacts.lnf.dto.client.ContactDto;
-import com.technofacts.lnf.exception.LnFBadRequestException;
-import com.technofacts.lnf.exception.LnFEntityNotFoundException;
-import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.ClientContact;
 import com.technofacts.lnf.client.repository.ClientContactRepository;
 import com.technofacts.lnf.client.repository.ClientRepository;
+import com.technofacts.lnf.dto.client.ContactDto;
+import com.technofacts.lnf.exception.LnFBadRequestException;
+import com.technofacts.lnf.exception.LnFEntityNotFoundException;
+import com.technofacts.lnf.exception.LnFException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;

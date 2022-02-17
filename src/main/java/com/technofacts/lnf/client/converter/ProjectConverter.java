@@ -3,8 +3,8 @@ package com.technofacts.lnf.client.converter;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.client.model.Project;
+import com.technofacts.lnf.dto.client.ProjectDto;
 
 public class ProjectConverter {
 

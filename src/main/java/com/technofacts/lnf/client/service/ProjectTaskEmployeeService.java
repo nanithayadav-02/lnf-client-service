@@ -2,16 +2,20 @@ package com.technofacts.lnf.client.service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import com.technofacts.lnf.client.model.Project;
-import com.technofacts.lnf.client.model.Task;
 import com.technofacts.lnf.client.model.ProjectTaskEmployee;
+import com.technofacts.lnf.client.model.Task;
 import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.client.repository.ProjectTaskEmployeeRepository;
 import com.technofacts.lnf.client.repository.TaskRepository;
-import com.technofacts.lnf.dto.client.TaskEmployeeDto;
+import com.technofacts.lnf.dto.client.ProjectTaskEmployeeDto;
+import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
+import com.technofacts.lnf.service.employee.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
@@ -26,25 +30,40 @@ public class ProjectTaskEmployeeService {
     private final ProjectTaskEmployeeRepository repository;
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
+    private final EmployeeService employeeService;
 
     /**
      * Get employees associated to the task
      *
-     * @param  projectId Project Id
-     * @param taskId Task Id
+     * @param projectId Project Id
+     * @param taskId    Task Id
      * @return TaskEmployeeDto
      */
-    public TaskEmployeeDto findEmployeesByProjectIdAndTaskId(final UUID projectId, final UUID taskId) {
-        searchForProject(projectId);
-        searchForTask(taskId);
-        return null;
+    public ProjectTaskEmployeeDto findEmployeesByProjectIdAndTaskId(final UUID projectId, final UUID taskId) {
+        Project project = searchForProject(projectId);
+        Task task = searchForTask(taskId);
+        List<ProjectTaskEmployee> projectTaskEmployees = repository.findByProjectAndTask(project, task);
+        List<String> employeeIds = projectTaskEmployees.stream().map(ProjectTaskEmployee::getEmployeeId).collect(Collectors.toList());
+
+        // Get the list of employee details from the Employee microservice
+        List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(employeeIds);
+
+        // Return the ProjectEmployeeDtos
+        ProjectTaskEmployeeDto projectTaskEmployeeDto = new ProjectTaskEmployeeDto();
+        projectTaskEmployeeDto.setProjectId(project.getId());
+        projectTaskEmployeeDto.setProjectCode(project.getCode());
+        projectTaskEmployeeDto.setTaskId(taskId);
+        projectTaskEmployeeDto.setTaskName(task.getName());
+        projectTaskEmployeeDto.setEmployees(employeeDtos);
+
+        return projectTaskEmployeeDto;
     }
 
     /**
      * Add employees to the task
      *
-     * @param  projectId Project Id
-     * @param taskId   Task Id
+     * @param projectId   Project Id
+     * @param taskId      Task Id
      * @param employeeIds List of Strings
      */
     public void addEmployeesToProjectAndTask(UUID projectId, UUID taskId, List<String> employeeIds) {
@@ -56,22 +75,28 @@ public class ProjectTaskEmployeeService {
                 log.info(String.format("Employee[%s] is already associated to the Task [%s]", employeeId, task.getId()));
 
             } catch (LnFEntityNotFoundException ex) {
-                ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
-                taskEmployee.setProject(project);
-                taskEmployee.setTask(task);
-                taskEmployee.setEmployeeId(employeeId);
-                save(taskEmployee);
+                EmployeeDto employeeDto = employeeService.findOne(employeeId);
+                if (employeeDto != null) {
+                    ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
+                    taskEmployee.setProject(project);
+                    taskEmployee.setTask(task);
+                    taskEmployee.setEmployeeId(employeeId);
+                    save(taskEmployee);
+                    log.log(Level.INFO, String.format("Successfully added the employee [%s] to the task [%s] of the project [%s]", employeeId, task.getName(), project.getCode()));
+
+                } else {
+                    log.log(Level.SEVERE, String.format("Failed to add the employee [%s] to the task [%s] of the project [%s]", employeeId, task.getName(), project.getCode()));
+                }
             }
         });
-
     }
 
     /**
      * Remove employees from
      * the task
      *
-     * @param  projectId Project Id
-     * @param taskId   Task Id
+     * @param projectId   Project Id
+     * @param taskId      Task Id
      * @param employeeIds List of Strings
      */
     public void removeEmployeesFromProjectAndTask(UUID projectId, UUID taskId, List<String> employeeIds) {
@@ -101,7 +126,7 @@ public class ProjectTaskEmployeeService {
             repository.delete(entity);
             log.info(() -> String.format("Employee [%s] is successfully removed from the Task[%s]", entity.getEmployeeId(), entity.getTask().getId()));
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to remove Employee [%s] from the Task[%s]", entity.getEmployeeId(),entity.getTask().getId());
+            String errorMessage = String.format("Failed to remove Employee [%s] from the Task[%s]", entity.getEmployeeId(), entity.getTask().getId());
             throw new LnFException(errorMessage, e);
         }
     }

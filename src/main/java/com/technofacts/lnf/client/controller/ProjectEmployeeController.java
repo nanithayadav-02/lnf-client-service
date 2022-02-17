@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.technofacts.lnf.client.service.ProjectEmployeeService;
-import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.client.ProjectEmployeeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -37,8 +36,8 @@ public class ProjectEmployeeController {
      */
     @PostMapping(value = "/projects/{projectId}/employees")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addEmployeesToProject(@PathVariable("projectId") final UUID projectId, @RequestBody List<String> employeeIds) {
-        service.addEmployeeToProject(projectId, employeeIds);
+    public void addEmployeesToProject(@PathVariable("projectId") final String projectId, @RequestBody List<String> employeeIds) {
+        service.addEmployeeToProject(UUID.fromString(projectId), employeeIds);
     }
 
     /**

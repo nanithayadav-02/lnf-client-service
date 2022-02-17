@@ -3,10 +3,10 @@ package com.technofacts.lnf.client.converter;
 import java.io.IOException;
 import java.util.UUID;
 
-import com.technofacts.lnf.dto.client.DocumentDto;
-import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.client.model.ClientDocument;
 import com.technofacts.lnf.client.model.enums.DocumentType;
+import com.technofacts.lnf.dto.client.DocumentDto;
+import com.technofacts.lnf.exception.LnFException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 

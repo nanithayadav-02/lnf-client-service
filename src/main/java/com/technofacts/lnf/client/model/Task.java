@@ -4,7 +4,6 @@ import javax.persistence.*;
 import java.time.LocalDate;
 
 import com.technofacts.lnf.model.AuditableEntity;
-
 import lombok.*;
 
 @ToString

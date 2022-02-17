@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.technofacts.lnf.client.service.ProjectTaskEmployeeService;
-import com.technofacts.lnf.dto.client.TaskEmployeeDto;
+import com.technofacts.lnf.dto.client.ProjectTaskEmployeeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +25,12 @@ public class ProjectTaskEmployeeController {
      */
     @GetMapping(value = "/projects/{projectId}/tasks/{taskId}/employees")
     @ResponseStatus(HttpStatus.OK)
-    public TaskEmployeeDto findEmployeesByProjectIdAndTaskId(@PathVariable("projectId") final UUID projectId, @PathVariable("taskId") final UUID taskId) {
+    public ProjectTaskEmployeeDto findEmployeesByProjectIdAndTaskId(@PathVariable("projectId") final UUID projectId, @PathVariable("taskId") final UUID taskId) {
         return service.findEmployeesByProjectIdAndTaskId(projectId, taskId);
     }
 
     /**
-     * Add employees to the project
+     * Add employees to the task
      *
      * @param projectId   Project Id
      * @param taskId    Task Id
@@ -43,7 +43,7 @@ public class ProjectTaskEmployeeController {
     }
 
     /**
-     * Remove employees to the project
+     * Remove employees from the task
      *
      * @param projectId   Project Id
      * @param employeeIds List of Strings
