@@ -1,7 +1,7 @@
 package com.technofacts.lnf.client.converter;
 
-import com.technofacts.lnf.client.dto.AddressDto;
 import com.technofacts.lnf.client.model.ClientAddress;
+import com.technofacts.lnf.dto.client.AddressDto;
 
 
 public class AddressConverter {

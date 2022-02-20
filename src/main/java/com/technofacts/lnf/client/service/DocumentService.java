@@ -1,22 +1,20 @@
 package com.technofacts.lnf.client.service;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.technofacts.lnf.client.converter.DocumentConverter;
-import com.technofacts.lnf.client.dto.DocumentDto;
-import com.technofacts.lnf.client.exception.LnFBadRequestException;
-import com.technofacts.lnf.client.exception.LnFEntityNotFoundException;
-import com.technofacts.lnf.client.exception.LnFException;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.ClientDocument;
 import com.technofacts.lnf.client.model.enums.DocumentType;
 import com.technofacts.lnf.client.repository.ClientDocumentRepository;
 import com.technofacts.lnf.client.repository.ClientRepository;
+import com.technofacts.lnf.dto.client.DocumentDto;
+import com.technofacts.lnf.exception.LnFBadRequestException;
+import com.technofacts.lnf.exception.LnFEntityNotFoundException;
+import com.technofacts.lnf.exception.LnFException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Service
 @Transactional
@@ -36,11 +33,13 @@ public class DocumentService {
     private final ClientRepository clientRepository;
     private final ClientDocumentRepository repository;
 
-    public List<DocumentDto> findAll() {
-        List<ClientDocument> entities = repository.findAll();
-        return entities.stream().map(DocumentConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
-    }
-
+    /**
+     * Returns DocumentDto client by clientId and document type.
+     *
+     * @param clientId Client Id
+     * @param type     enum DocumentType
+     * @return DocumentDto
+     */
     public DocumentDto findByClientId(UUID clientId, DocumentType type) {
         searchForClient(clientId);
         ClientDocument entity = searchForDocument(clientId, type);
@@ -49,6 +48,13 @@ public class DocumentService {
         return documentDto;
     }
 
+    /**
+     * Returns ResponseEntity with byte[] of the Client by clientId and documentId
+     *
+     * @param clientId   Client Id
+     * @param documentId Document Id
+     * @return ResponseEntity<byte [ ]>
+     */
     public ResponseEntity<byte[]> findById(UUID clientId, UUID documentId) {
         searchForClient(clientId);
         ClientDocument file = searchForDocument(documentId);
@@ -58,6 +64,13 @@ public class DocumentService {
                 .body(file.getContent());
     }
 
+    /**
+     * Creates the agreement with the client
+     *
+     * @param clientId Client Id
+     * @param type     Enum DocumentType
+     * @param file     Dcoument in MutipartFile format
+     */
     public void create(UUID clientId, DocumentType type, MultipartFile file) {
         Client client = searchForClient(clientId);
         UUID documentId = null;
@@ -85,6 +98,13 @@ public class DocumentService {
 
     }
 
+    /**
+     * Updates the client document
+     *
+     * @param clientId   Client id
+     * @param documentId Document Id
+     * @param file       Document in MutipartFile format
+     */
     public void update(UUID clientId, UUID documentId, MultipartFile file) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, file, String.format("Failed to update document for client [%s] with null payload", clientId));
         searchForClient(clientId);
@@ -99,6 +119,12 @@ public class DocumentService {
         log.info(() -> String.format("Document [%s] for Client[%s] successfully updated", documentId, clientId));
     }
 
+    /**
+     * Delete the client document by clientId and documentType
+     *
+     * @param clientId Client Id
+     * @param type     Enum DocumentType
+     */
     public void deleteByClientId(UUID clientId, DocumentType type) {
         searchForClient(clientId);
         ClientDocument entity = searchForDocument(clientId, type);
@@ -110,6 +136,12 @@ public class DocumentService {
         }
     }
 
+    /**
+     * Delete the client document by clientId and documentId
+     *
+     * @param clientId   Client Id
+     * @param documentId document Id
+     */
     public void deleteById(UUID clientId, UUID documentId) {
         searchForClient(clientId);
         ClientDocument entity = searchForDocument(documentId);
@@ -144,20 +176,6 @@ public class DocumentService {
     private ClientDocument searchForDocument(UUID clientId, DocumentType type) {
         return repository.findByClientIdAndType(clientId, type).
                 orElseThrow(() -> new LnFEntityNotFoundException(String.format("Document with clientId [%s] and type [%s] does not exist", clientId, type)));
-    }
-
-    private String constructUrlFromType(UUID clientId, DocumentType type) {
-        String url = "";
-        if (type == DocumentType.agreement) {
-            url = String.format("/lnf/clients/%s/agreement/", clientId);
-        } else if (type == DocumentType.image) {
-            url = String.format("/lnf/clients/%s/image/", clientId);
-        } else if (type == DocumentType.others) {
-            url = String.format("/lnf/clients/%s/others/", clientId);
-        } else {
-            new LnFException("Unknown document type");
-        }
-        return url;
     }
 
 }

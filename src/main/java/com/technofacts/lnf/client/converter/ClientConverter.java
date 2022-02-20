@@ -6,10 +6,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.technofacts.lnf.client.dto.ClientDto;
-import com.technofacts.lnf.client.dto.DocumentDto;
 import com.technofacts.lnf.client.model.*;
 import com.technofacts.lnf.client.model.enums.DocumentType;
+import com.technofacts.lnf.dto.client.ClientDto;
+import com.technofacts.lnf.dto.client.DocumentDto;
 
 public class ClientConverter {
 
@@ -23,6 +23,8 @@ public class ClientConverter {
         dto.setCode(entity.getCode());
         dto.setName(entity.getName());
         dto.setPan(entity.getPan());
+        dto.setTan(entity.getTan());
+        dto.setStatus(entity.getStatus());
         dto.setWorkingFrom(entity.getWorkingFrom());
         dto.setAgreementExpiryDate(entity.getAgreementExpiryDate());
         dto.setClientDetails(entity.getClientDetails());
@@ -67,6 +69,8 @@ public class ClientConverter {
         entity.setCode(transport.getCode());
         entity.setName(transport.getName());
         entity.setPan(transport.getPan());
+        entity.setTan(transport.getTan());
+        entity.setStatus(transport.getStatus());
         entity.setWorkingFrom(transport.getWorkingFrom());
         entity.setAgreementExpiryDate(transport.getAgreementExpiryDate());
         entity.setClientDetails(transport.getClientDetails());
