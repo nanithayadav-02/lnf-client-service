@@ -29,7 +29,7 @@ public class EmployeeClientImpl implements EmployeeService {
 
         try {
             EmployeeDto employeeDto = webClient.get()
-                    .uri("/lnf/employee/" + employeeId)
+                    .uri("/lnf/employees/" + employeeId)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(EmployeeDto.class)
