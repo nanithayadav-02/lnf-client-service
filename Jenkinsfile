@@ -1,4 +1,4 @@
-lnfJavaPipelineWithCD ([repo: 'lnf-client-service', awsAccount: "433686923958", awsRegion: "us-east-1", deploy: false], {
+lnfJavaPipelineWithCD ([repo: 'lnf-client-service', awsAccount: "433686923958", awsRegion: "us-east-1", deploy: true], {
     return {
         echo '=== Deploying Container Image on EC2 Docker  ==='
         sh 'docker stop ${REPO_NAME} || true && docker rm -f ${REPO_NAME} || true'
