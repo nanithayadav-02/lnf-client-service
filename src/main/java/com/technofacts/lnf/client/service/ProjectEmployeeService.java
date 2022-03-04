@@ -95,10 +95,7 @@ public class ProjectEmployeeService {
         Project project = searchForProject(projectId);
         employeeIds.forEach(employeeId -> {
             try {
-                search(projectId, employeeId);
-                ProjectEmployee projectEmployee = new ProjectEmployee();
-                projectEmployee.setProject(project);
-                projectEmployee.setEmployeeId(employeeId);
+                ProjectEmployee projectEmployee = search(projectId, employeeId);
                 repository.delete(projectEmployee);
             } catch (LnFEntityNotFoundException ex) {
                 log.warning(ex.getMessage());
