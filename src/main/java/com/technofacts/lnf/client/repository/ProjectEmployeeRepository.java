@@ -15,4 +15,6 @@ public interface ProjectEmployeeRepository extends JpaRepository<ProjectEmployee
 
     List<ProjectEmployee> findByProject(Project project);
 
+    List<ProjectEmployee> findByEmployeeId(String employeeId);
+
 }

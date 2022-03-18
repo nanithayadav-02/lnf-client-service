@@ -16,4 +16,6 @@ public interface ProjectTaskEmployeeRepository extends JpaRepository<ProjectTask
 
     List<ProjectTaskEmployee> findByProjectAndTask(Project project, Task task);
 
+    List<ProjectTaskEmployee> findByProjectAndEmployeeId(Project project, String employeeId);
+
 }
