@@ -3,8 +3,8 @@ package com.technofacts.lnf.client.converter;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.technofacts.lnf.client.dto.ProjectDto;
 import com.technofacts.lnf.client.model.Project;
+import com.technofacts.lnf.dto.client.ProjectDto;
 
 public class ProjectConverter {
 
@@ -28,6 +28,7 @@ public class ProjectConverter {
         dto.setType(entity.getType());
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
+        dto.setClientId(entity.getClient() != null ? entity.getClient().getId() : null);
         dto.getTasks().addAll(entity.getTasks().stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
         return dto;
     }

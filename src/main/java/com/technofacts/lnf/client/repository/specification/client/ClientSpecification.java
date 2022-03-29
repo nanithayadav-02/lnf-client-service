@@ -6,7 +6,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import com.technofacts.lnf.client.model.Client;
-import com.technofacts.lnf.client.util.SpecSearchCriteria;
+import com.technofacts.lnf.util.SpecSearchCriteria;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ClientSpecification implements Specification<Client> {

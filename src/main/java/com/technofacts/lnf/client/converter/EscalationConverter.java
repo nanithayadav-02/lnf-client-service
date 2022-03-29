@@ -1,7 +1,7 @@
 package com.technofacts.lnf.client.converter;
 
-import com.technofacts.lnf.client.dto.EscalationDto;
 import com.technofacts.lnf.client.model.Escalation;
+import com.technofacts.lnf.dto.client.EscalationDto;
 
 
 public class EscalationConverter {

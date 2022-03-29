@@ -3,6 +3,7 @@ package com.technofacts.lnf.client.model;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 
+import com.technofacts.lnf.model.AuditableEntity;
 import lombok.*;
 
 @ToString
