@@ -2,14 +2,12 @@ package com.technofacts.lnf.client.service;
 
 import com.technofacts.lnf.dto.client.EmployeeProjectDto;
 import com.technofacts.lnf.dto.client.EmployeeProjectTaskDto;
+import com.technofacts.lnf.dto.client.EmployeeTaskDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Transactional
@@ -21,17 +19,23 @@ public class EmployeeTaskService {
     private final EmployeeProjectTaskService employeeProjectTaskService;
     private static final String ACTIVE = "Active";
 
-    public List<EmployeeProjectTaskDto> findEmployeeTasks(final String employeeId) {
+    public EmployeeTaskDto findEmployeeTasks(final String employeeId) {
         EmployeeProjectDto employeeProjectDto = employeeProjectService.findProjectsByEmployeeId(employeeId);
-        List<EmployeeProjectTaskDto> employeeProjectTaskDtoList = new ArrayList<>();
+
+        EmployeeTaskDto employeeTaskDto = new EmployeeTaskDto();
+        employeeTaskDto.setEmployeeId(employeeId);
+
         employeeProjectDto.getProjects().stream()
                 .filter(projectDto -> ACTIVE.equalsIgnoreCase(projectDto.getStatus()))
-                .filter(Objects::nonNull)
                 .forEach(projectDto -> {
-                    employeeProjectTaskDtoList
-                            .add(employeeProjectTaskService.findTasksByEmployeeIdAndProjectId(employeeId, projectDto.getId()));
+                    EmployeeProjectTaskDto employeeProjectTaskDto =
+                            employeeProjectTaskService.findTasksByEmployeeIdAndProjectId(employeeId, projectDto.getId());
+                    if (!CollectionUtils.isEmpty(employeeProjectTaskDto.getTasks())) {
+                        employeeTaskDto.getTasks().addAll(employeeProjectTaskDto.getTasks());
+                    }
                 });
-        return employeeProjectTaskDtoList;
+
+        return employeeTaskDto;
     }
 
 }
