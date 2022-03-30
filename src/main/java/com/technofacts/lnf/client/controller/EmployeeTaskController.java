@@ -14,14 +14,14 @@ public class EmployeeTaskController {
     private final EmployeeTaskService service;
 
     /**
-     * Get projects associated to the employee
+     * Get tasks associated to the employee
      *
      * @param employeeId Employee Id
-     * @return ProjectEmployeeDto
+     * @return EmployeeTaskDto
      */
     @GetMapping(value = "/employees/{employeeId}/tasks")
     @ResponseStatus(HttpStatus.OK)
-    public EmployeeTaskDto findProjectsByEmployeeId(@PathVariable("employeeId") final String employeeId) {
+    public EmployeeTaskDto findTasksByEmployeeId(@PathVariable("employeeId") final String employeeId) {
         return service.findEmployeeTasks(employeeId);
     }
 }
