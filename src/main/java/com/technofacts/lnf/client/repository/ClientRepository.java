@@ -14,7 +14,7 @@ import org.springframework.data.repository.query.Param;
 public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecificationExecutor<Client> {
 
     @Query("select e from Client e where e.id = :id")
-    Optional<Client> findByClientId(@Param("id") String id);
+    Optional<Client> findByClientId(@Param("id") UUID id);
 
     @Query(value = "select extract(year from c.created_time) as year, " +
             " to_char(c.created_time, 'MON') as month, count(c.id) as count "

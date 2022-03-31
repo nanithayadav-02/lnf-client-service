@@ -66,4 +66,8 @@ public class Client extends AuditableEntity {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<Project> projects = new HashSet<>();
 
+    @ToString.Exclude
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private Set<ClientNotes> notes = new HashSet<>();
+
 }

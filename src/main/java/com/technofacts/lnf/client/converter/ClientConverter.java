@@ -33,6 +33,7 @@ public class ClientConverter {
         dto.setAddress(entity.getClientAddress() != null ? AddressConverter.toTransportModel(entity.getClientAddress()) : null);
         dto.getGst().addAll(entity.getGst().stream().map(GstConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
         Optional<ClientDocument> agreementOpt = entity.getFiles().stream().filter(file -> file.getType() == DocumentType.agreement).findFirst();
+        dto.setNotes(new ArrayList<>());
 
         if (agreementOpt.isPresent()) {
             DocumentDto documentDto = DocumentConverter.toTransportModel(agreementOpt.get());
@@ -46,6 +47,8 @@ public class ClientConverter {
             documentDto.setUrl(DocumentConverter.getDocumentUrl(entity.getId(), documentDto.getId(), DocumentType.image));
             dto.setClientLogo(documentDto);
         }
+        dto.getNotes().addAll(entity.getNotes().stream()
+                .map(ClientNotesConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
 
         return dto;
     }
@@ -56,6 +59,8 @@ public class ClientConverter {
         addEsacalationToEntityModel(transport, entity);
         addAdressToEntityModel(transport, entity);
         addGstToEntityModel(transport, entity);
+        addClientNotesToEntityModel(transport, entity);
+
         return entity;
     }
 
@@ -114,4 +119,15 @@ public class ClientConverter {
         });
         client.getGst().addAll(gstList);
     }
+
+    private static void addClientNotesToEntityModel(ClientDto transport, Client client) {
+        List<ClientNotes> clientNotesList = new ArrayList<>();
+        transport.getNotes().stream().filter(Objects::nonNull).forEach(dto -> {
+            ClientNotes entity = ClientNotesConverter.toEntityModel(dto);
+            entity.setClient(client);
+            clientNotesList.add(entity);
+        });
+        client.getNotes().addAll(clientNotesList);
+    }
+
 }
