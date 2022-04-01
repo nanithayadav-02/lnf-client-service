@@ -56,8 +56,8 @@ public class ClientConverter {
     public static Client toEntityModel(ClientDto transport) {
         Client entity = toEntityModel(transport, new Client());
         addContactsToEntityModel(transport, entity);
-        addEsacalationToEntityModel(transport, entity);
-        addAdressToEntityModel(transport, entity);
+        addEscalationToEntityModel(transport, entity);
+        addAddressToEntityModel(transport, entity);
         addGstToEntityModel(transport, entity);
         addClientNotesToEntityModel(transport, entity);
 
@@ -94,7 +94,7 @@ public class ClientConverter {
     }
 
 
-    private static void addEsacalationToEntityModel(ClientDto transport, Client client) {
+    private static void addEscalationToEntityModel(ClientDto transport, Client client) {
         if (transport.getEscalation() != null) {
             Escalation escalation = EscalationConverter.toEntityModel(transport.getEscalation());
             escalation.setClient(client);
@@ -102,7 +102,7 @@ public class ClientConverter {
         }
     }
 
-    private static void addAdressToEntityModel(ClientDto transport, Client client) {
+    private static void addAddressToEntityModel(ClientDto transport, Client client) {
         if (transport.getAddress() != null) {
             ClientAddress address = AddressConverter.toEntityModel(transport.getAddress());
             address.setClient(client);
