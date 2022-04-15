@@ -90,4 +90,9 @@ public class EmployeeClientImpl implements EmployeeService {
     @Override
     public void delete(String employeeId) {
     }
+
+    @Override
+    public List<EmployeeDto> findDirectReports(String employeeId) {
+        return null;
+    }
 }
