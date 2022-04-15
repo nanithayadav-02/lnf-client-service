@@ -1,7 +1,7 @@
 package com.technofacts.lnf.client.controller;
 
 import com.technofacts.lnf.client.service.EmployeeTaskService;
-import com.technofacts.lnf.dto.client.EmployeeTaskDto;
+import com.technofacts.lnf.dto.client.EmployeeProjectTasksDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +17,11 @@ public class EmployeeTaskController {
      * Get tasks associated to the employee
      *
      * @param employeeId Employee Id
-     * @return EmployeeTaskDto
+     * @return EmployeeProjectTasksDto
      */
     @GetMapping(value = "/employees/{employeeId}/tasks")
     @ResponseStatus(HttpStatus.OK)
-    public EmployeeTaskDto findTasksByEmployeeId(@PathVariable("employeeId") final String employeeId) {
-        return service.findEmployeeTasks(employeeId);
+    public EmployeeProjectTasksDto findTasksByEmployeeId(@PathVariable("employeeId") final String employeeId) {
+        return service.findTasksByEmployeeId(employeeId);
     }
 }
