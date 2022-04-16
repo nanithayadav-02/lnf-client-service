@@ -49,6 +49,23 @@ public class DocumentService {
     }
 
     /**
+     * Returns ResponseEntity<byte[]> client by clientId and document type.
+     *
+     * @param clientId Client Id
+     * @param type enum DocumentType
+     * @return ResponseEntity<byte []>
+     */
+    public ResponseEntity<byte[]>  findClientAgreement(UUID clientId, DocumentType type) {
+        searchForClient(clientId);
+        ClientDocument entity = searchForDocument(clientId, type);
+        ClientDocument file = searchForDocument(entity.getId());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, "application/pdf")
+                .contentType(MediaType.valueOf(file.getContentType()))
+                .body(file.getContent());
+    }
+
+    /**
      * Returns ResponseEntity with byte[] of the Client by clientId and documentId
      *
      * @param clientId   Client Id
