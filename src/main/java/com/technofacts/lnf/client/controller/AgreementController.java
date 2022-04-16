@@ -34,6 +34,19 @@ public class AgreementController {
     }
 
     /**
+     * Returns ResponseEntity with byte[] for the client agreement
+     *
+     * @param clientId Client Id
+     * @return ResponseEntity<byte []>
+     * @throws IOException IOException
+     */
+    @GetMapping(value = "/clients/{clientId}/agreement/download")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<byte[]> findClientAgreement(@PathVariable("clientId") final UUID clientId) throws IOException {
+        return service.findClientAgreement(clientId, DocumentType.agreement);
+    }
+
+    /**
      * Returns ResponseEntity with byte[] of the Client Agreement
      *
      * @param clientId    Client Id
