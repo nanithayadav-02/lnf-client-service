@@ -1,5 +1,7 @@
 package com.technofacts.lnf.client.service;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -31,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Log
 public class ClientService {
+
+    private static final String SEARCH_REGEX_PATTERN = "([\\w+?\\-_]+)(:|<|>)([\\w+?\\-_.@\\s]+),";
 
     private final ClientRepository repository;
 
@@ -73,7 +77,9 @@ public class ClientService {
     public List<ClientDto> findAllSorted(String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Client> entities = Lists.newArrayList(repository.findAll(sortInfo));
-        return entities.stream().map(ClientConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(ClientConverter::toTransportModel)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -83,7 +89,9 @@ public class ClientService {
      */
     public List<ClientDto> findAll() {
         List<Client> entities = repository.findAll();
-        return entities.stream().map(ClientConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(ClientConverter::toTransportModel)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -93,14 +101,16 @@ public class ClientService {
      */
     public List<ClientDto> findAll(String search) {
         ClientSpecificationBuilder builder = new ClientSpecificationBuilder();
-        Pattern pattern = Pattern.compile("(\\w+?)(:|<|>)(\\w+?),");
-        Matcher matcher = pattern.matcher(search + ",");
+        Pattern pattern = Pattern.compile(SEARCH_REGEX_PATTERN, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(URLDecoder.decode(search, StandardCharsets.UTF_8) + ",");
         while (matcher.find()) {
             builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
         }
         Specification<Client> specification = builder.build();
         List<Client> entities = repository.findAll(specification);
-        return entities.stream().map(ClientConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(ClientConverter::toTransportModel)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -121,7 +131,8 @@ public class ClientService {
      * @param resource clientDto object
      */
     public void create(ClientDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create Client with null payload");
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
+                "Failed to create Client with null payload");
         Client entity = ClientConverter.toEntityModel(resource);
         saveEntity(entity);
         log.info(() -> String.format("Client[%s] successfully created", entity.getCode()));
@@ -136,7 +147,8 @@ public class ClientService {
      */
     @Transactional
     public void update(UUID clientId, ClientDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to update Client with null payload");
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
+                "Failed to update Client with null payload");
         Client entity = search(clientId);
         Client updatedEntity = ClientConverter.toEntityModel(resource, entity);
         saveEntity(updatedEntity);
@@ -161,7 +173,8 @@ public class ClientService {
 
     private Page<ClientDto> validateAndGetPages(int page, Page<Client> resultPage) {
         if (page > resultPage.getTotalPages()) {
-            throw new LnFEntityNotFoundException(String.format("Total number of pages [%d], requested page [%d] does not exist", resultPage.getTotalPages(), page));
+            throw new LnFEntityNotFoundException(String.format("Total number of pages [%d], " +
+                    "requested page [%d] does not exist", resultPage.getTotalPages(), page));
         }
         return resultPage.map(ClientConverter::toTransportModel);
     }

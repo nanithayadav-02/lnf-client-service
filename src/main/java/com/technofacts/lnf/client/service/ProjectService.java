@@ -1,5 +1,7 @@
 package com.technofacts.lnf.client.service;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -33,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Log
 public class ProjectService {
+
+    private static final String SEARCH_REGEX_PATTERN = "([\\w+?\\-_]+)(:|<|>)([\\w+?\\-_.@\\s]+),";
 
     private final ProjectRepository repository;
     private final ClientRepository clientRepository;
@@ -86,7 +90,9 @@ public class ProjectService {
      */
     public List<ProjectDto> findAll() {
         List<Project> entities = repository.findAll();
-        return entities.stream().map(ProjectConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(ProjectConverter::toTransportModel)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -96,14 +102,17 @@ public class ProjectService {
      */
     public List<ProjectDto> findAll(String search) {
         ProjectSpecificationBuilder builder = new ProjectSpecificationBuilder();
-        Pattern pattern = Pattern.compile("(\\w+?)(:|<|>)(\\w+?),");
-        Matcher matcher = pattern.matcher(search + ",");
+        Pattern pattern = Pattern.compile(SEARCH_REGEX_PATTERN, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(URLDecoder.decode(search, StandardCharsets.UTF_8) + ",");
         while (matcher.find()) {
             builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
         }
         Specification<Project> specification = builder.build();
         List<Project> entities = repository.findAll(specification);
-        return entities.stream().map(ProjectConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream()
+                .map(ProjectConverter::toTransportModel)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -128,7 +137,9 @@ public class ProjectService {
     public List<ProjectDto> findProjectsByClientId(UUID clientId) {
         searchForClient(clientId);
         List<Project> projects = repository.findByClientId(clientId);
-        return projects.stream().map(ProjectConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return projects.stream().map(ProjectConverter::toTransportModel)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     /**
