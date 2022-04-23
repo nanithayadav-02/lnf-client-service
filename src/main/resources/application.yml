@@ -119,3 +119,10 @@ spring:
 
 printStackTrace: true
 ---
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://ec2-34-204-0-170.compute-1.amazonaws.com:8079/auth/realms/lnf/protocol/openid-connect/certs
