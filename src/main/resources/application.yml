@@ -119,3 +119,22 @@ spring:
 
 printStackTrace: true
 ---
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          lnf-client-api:
+            client-id: lnf-client-api
+            client-secret: 76942b56-0dd1-4352-b130-e8fd772c1f9f
+            scope: openid, profile, roles
+            authorization-grant-type: client_credentials
+            provider: keycloak
+        provider:
+          keycloak:
+            issuer-uri: http://ec2-34-204-0-170.compute-1.amazonaws.com:8079/auth/realms/lnf
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://ec2-34-204-0-170.compute-1.amazonaws.com:8079/auth/realms/lnf/protocol/openid-connect/certs
+
