@@ -133,8 +133,8 @@ spring:
             provider: keycloak
         provider:
           keycloak:
-            issuer-uri: http://${keycloak.host:ec2-34-204-0-170.compute-1.amazonaws.com}:${keycloak.port:8079}/auth/realms/lnf
+            issuer-uri: http://${keycloak.host:lnf-dev-keycloak.levernfulcrum.com}/auth/realms/lnf
       resourceserver:
         jwt:
-          jwk-set-uri: http://${keycloak.host:ec2-34-204-0-170.compute-1.amazonaws.com}:${keycloak.port:8079}/auth/realms/lnf/protocol/openid-connect/certs
+          jwk-set-uri: http://${keycloak.host:lnf-dev-keycloak.levernfulcrum.com}/auth/realms/lnf/protocol/openid-connect/certs
 
