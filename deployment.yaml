@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: lnf-client-service
-          image: "docker.io/levernfulcrum/lnf-client-service:{{BUILD_NUMBER}}"
+          image: "docker.io/levernfulcrum/lnf-client-service:latest"
           imagePullPolicy: Always
           env:
             - name: DATABASE_HOST
