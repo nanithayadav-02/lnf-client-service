@@ -127,7 +127,7 @@ spring:
         registration:
           lnf-client-api:
             client-id: lnf-client-api
-            client-secret: ${client-secret:76942b56-0dd1-4352-b130-e8fd772c1f9f}
+            client-secret: ${client-secret:8449d301-fd64-4196-aded-212f24478c98}
             scope: openid, profile, roles
             authorization-grant-type: client_credentials
             provider: keycloak
