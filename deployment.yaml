@@ -37,10 +37,7 @@ spec:
             - name: CLIENT-SECRET
               value: "8449d301-fd64-4196-aded-212f24478c98"
             - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: CLIENT_DATABASE_PASSWORD
-                  name: lnf-cred
+              value: "client@12345"
           ports:
             - name: http
               containerPort: 8081
