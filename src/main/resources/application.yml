@@ -89,7 +89,6 @@ spring:
       on-profile: dev
 
   datasource:
-#    url: jdbc:postgresql://${database.host:ec2-34-202-158-22.compute-1.amazonaws.com}:${database.port:5432}/${database.name:tsdb}
     url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
     username: ${database.username:client_user}
     password: ${database.password:client@12345}
@@ -127,14 +126,14 @@ spring:
         registration:
           lnf-client-api:
             client-id: lnf-client-api
-            client-secret: ${client-secret:8449d301-fd64-4196-aded-212f24478c98}
+            client-secret: ${client-secret:bbf15316-4839-4fbc-afb6-e17199c84766}
             scope: openid, profile, roles
             authorization-grant-type: client_credentials
             provider: keycloak
         provider:
           keycloak:
-            issuer-uri: http://${keycloak.host:lnf-dev-keycloak.levernfulcrum.com}/auth/realms/lnf
+            issuer-uri: http://${keycloak.host:localhost:8079}/auth/realms/lnf
       resourceserver:
         jwt:
-          jwk-set-uri: http://${keycloak.host:lnf-dev-keycloak.levernfulcrum.com}/auth/realms/lnf/protocol/openid-connect/certs
+          jwk-set-uri: http://${keycloak.host:localhost:8079}/auth/realms/lnf/protocol/openid-connect/certs
 
