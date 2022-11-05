@@ -26,7 +26,7 @@ public class Escalation extends AuditableEntity {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "mobile_number", nullable = false)
+    @Column(name = "mobile_number")
     private String mobileNumber;
 
     @ToString.Exclude
