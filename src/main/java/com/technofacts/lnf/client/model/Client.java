@@ -24,10 +24,10 @@ public class Client extends AuditableEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "pan", nullable = false)
+    @Column(name = "pan")
     private String pan;
 
-    @Column(name = "tan", nullable = false)
+    @Column(name = "tan")
     private String tan;
 
     @Column(name = "status", nullable = false)
