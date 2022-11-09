@@ -27,6 +27,7 @@ public class ClientConverter {
         dto.setStatus(entity.getStatus());
         dto.setWorkingFrom(entity.getWorkingFrom());
         dto.setAgreementExpiryDate(entity.getAgreementExpiryDate());
+        dto.setServiceType(entity.getServiceType());
         dto.setClientDetails(entity.getClientDetails());
         dto.getContacts().addAll(entity.getClientContacts().stream().map(ContactConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
         dto.setEscalation(entity.getEscalation() != null ? EscalationConverter.toTransportModel(entity.getEscalation()) : null);
@@ -78,6 +79,7 @@ public class ClientConverter {
         entity.setStatus(transport.getStatus());
         entity.setWorkingFrom(transport.getWorkingFrom());
         entity.setAgreementExpiryDate(transport.getAgreementExpiryDate());
+        entity.setServiceType(transport.getServiceType());
         entity.setClientDetails(transport.getClientDetails());
 
         return entity;

@@ -39,6 +39,9 @@ public class Client extends AuditableEntity {
     @Column(name = "agreement_expiry_date")
     private LocalDate agreementExpiryDate;
 
+    @Column(name = "service_type")
+    private String serviceType;
+
     @Column(name = "client_details", nullable = false)
     private String clientDetails;
 
