@@ -1,11 +1,11 @@
 package com.technofacts.lnf.client.model;
 
-import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.technofacts.lnf.model.AuditableEntity;
+import jakarta.persistence.*;
 import lombok.*;
 
 @ToString
@@ -50,6 +50,7 @@ public class Client extends AuditableEntity {
     private ClientAddress clientAddress;
 
     @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<ClientContact> clientContacts = new HashSet<>();
 
@@ -58,18 +59,22 @@ public class Client extends AuditableEntity {
     private Escalation escalation;
 
     @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<Gst> gst = new HashSet<>();
 
     @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<ClientDocument> files = new HashSet<>();
 
     @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<Project> projects = new HashSet<>();
 
     @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<ClientNotes> notes = new HashSet<>();
 

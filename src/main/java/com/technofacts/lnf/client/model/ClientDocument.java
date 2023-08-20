@@ -1,11 +1,9 @@
 package com.technofacts.lnf.client.model;
 
-import javax.persistence.*;
-
 import com.technofacts.lnf.client.model.enums.DocumentType;
 import com.technofacts.lnf.model.AuditableEntity;
+import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Type;
 
 @ToString
 @Entity
@@ -30,7 +28,7 @@ public class ClientDocument extends AuditableEntity {
     @Column(name = "content_type", nullable = false)
     private String contentType;
 
-    @Type(type="org.hibernate.type.BinaryType")
+    @Lob
     @Column(name = "content", nullable = false)
     private byte[] content;
 

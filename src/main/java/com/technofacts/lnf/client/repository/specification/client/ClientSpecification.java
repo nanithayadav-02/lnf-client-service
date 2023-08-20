@@ -1,12 +1,11 @@
 package com.technofacts.lnf.client.repository.specification.client;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.util.SpecSearchCriteria;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ClientSpecification implements Specification<Client> {

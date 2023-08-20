@@ -1,9 +1,8 @@
 package com.technofacts.lnf.client.model;
 
 import com.technofacts.lnf.model.AuditableEntity;
+import jakarta.persistence.*;
 import lombok.*;
-
-import javax.persistence.*;
 
 @ToString
 @Entity

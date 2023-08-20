@@ -62,9 +62,6 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: create
-      naming:
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
     properties:
       javax:
         persistence:
@@ -111,9 +108,6 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: none
-      naming:
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
     show-sql: true
 
 printStackTrace: true
@@ -122,18 +116,19 @@ printStackTrace: true
 spring:
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://${keycloak.host:localhost:8080}/auth/realms/lnf
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
       client:
         registration:
-          lnf-client-api:
+          client-service:
             client-id: lnf-client-api
-            client-secret: ${client-secret:bbf15316-4839-4fbc-afb6-e17199c84766}
-            scope: openid, profile, roles
+            client-secret: ${client-secret:lnf-client-api-secret}
+            scope: openid,profile,roles
             authorization-grant-type: client_credentials
             provider: keycloak
         provider:
           keycloak:
-            issuer-uri: http://${keycloak.host:localhost:8079}/auth/realms/lnf
-      resourceserver:
-        jwt:
-          jwk-set-uri: http://${keycloak.host:localhost:8079}/auth/realms/lnf/protocol/openid-connect/certs
+            issuer-uri: http://${keycloak.host:localhost:8080}/auth/realms/lnf
 
