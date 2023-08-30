@@ -1,5 +1,11 @@
 package com.technofacts.lnf.client.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import com.technofacts.lnf.client.converter.ClientNotesConverter;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.ClientNotes;
@@ -13,12 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
