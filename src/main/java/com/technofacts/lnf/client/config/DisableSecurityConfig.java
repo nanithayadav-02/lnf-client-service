@@ -12,23 +12,16 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@Profile("dev")
-public class SecurityConfig {
+@Profile("dev-ide")
+public class DisableSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
-                .authorizeHttpRequests((auth) ->
-                        auth
-                                .anyRequest()
-                                .authenticated())
-                .sessionManagement((sessionManagement) ->
-                        sessionManagement
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .oauth2ResourceServer((oauth2) -> oauth2
-                        .jwt(Customizer.withDefaults()))
-                .build();
+        http.csrf()
+                .disable()
+                .authorizeRequests()
+                .anyRequest()
+                .permitAll();
+        return http.build();
     }
-
 }
