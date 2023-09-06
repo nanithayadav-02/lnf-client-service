@@ -11,8 +11,8 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI usersMicroserviceOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title("lnf-recruiter-service")
-                        .description("LnF Recruiter Service")
+                .info(new Info().title("lnf-client-service")
+                        .description("LnF Client Service")
                         .version("1.0"));
     }
 
