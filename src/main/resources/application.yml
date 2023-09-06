@@ -1,9 +1,11 @@
 spring:
   profiles:
-    active: dev
+    active: dev-ide
 
   application:
     name: lnf-client-service
+
+KEYCLOAK_HOST: "keycloak:8080"
 
 server:
   port: 8081
@@ -42,6 +44,7 @@ springdoc:
     path: /lnf-client
   swagger-ui:
     path: /lnf-client-api.html
+    enabled: true
 
 ---
 spring:
@@ -49,9 +52,9 @@ spring:
     activate:
       on-profile: test
   datasource:
-    url: jdbc:h2:mem:tsdb
-    username: tsuser
-    password: ts@12345
+    url: jdbc:h2:mem:client_db
+    username: client_user
+    password: client@12345
     driverClassName: org.h2.Driver
   h2:
     console:
@@ -63,7 +66,7 @@ spring:
     hibernate:
       ddl-auto: create
     properties:
-      javax:
+      jakarta:
         persistence:
           schema-generation:
             database:
@@ -76,6 +79,24 @@ spring:
               drop-source: metadata
               create-database-schemas: true
     open-in-view: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://${KEYCLOAK_HOST}/auth/realms/lnf
+          jwk-set-uri: http://${KEYCLOAK_HOST}/auth/realms/lnf/protocol/openid-connect/certs
+      client:
+        registration:
+          client-service:
+            client-id: lnf-client-api
+            client-secret: ${client-secret:lnf-client-api-secret}
+            scope: openid,profile,roles
+            authorization-grant-type: client_credentials
+            provider: keycloak
+        provider:
+          keycloak:
+            issuer-uri: http://${KEYCLOAK_HOST}/auth/realms/lnf
+
 
 printStackTrace: true
 
@@ -109,11 +130,6 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
-
-printStackTrace: true
----
-KEYCLOAK_HOST: "keycloak:8080"
-spring:
   security:
     oauth2:
       resourceserver:
@@ -131,4 +147,44 @@ spring:
         provider:
           keycloak:
             issuer-uri: http://${KEYCLOAK_HOST}/auth/realms/lnf
+printStackTrace: true
+---
+spring:
+  config:
+    activate:
+      on-profile: dev-ide
+
+  datasource:
+    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
+    username: ${database.username:client_user}
+    password: ${database.password:client@12345}
+    data: classpath*:db/data.sql
+    driverClassName: ${database.drive:org.postgresql.Driver}
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      javax:
+        persistence:
+          schema-generation:
+            scripts:
+              action: drop-and-create
+              create-database-schemas: false
+              create-target: schema.sql
+              create-source: metadata
+              drop-target: drop-schema.sql
+              drop-source: metadata
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  autoconfigure:
+    exclude:
+      - org.keycloak.adapters.springboot.KeycloakAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+
+printStackTrace: true
+---
+
 
