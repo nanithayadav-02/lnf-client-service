@@ -15,6 +15,7 @@ import com.technofacts.lnf.dto.client.DocumentDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
+import com.technofacts.lnf.service.File.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +33,8 @@ public class DocumentService {
 
     private final ClientRepository clientRepository;
     private final ClientDocumentRepository repository;
+
+    private final FileUploadService fileUploadService;
 
     /**
      * Returns DocumentDto client by clientId and document type.
@@ -195,4 +198,7 @@ public class DocumentService {
                 orElseThrow(() -> new LnFEntityNotFoundException(String.format("Document with clientId [%s] and type [%s] does not exist", clientId, type)));
     }
 
+    public String uploadFile(String folder, MultipartFile file) {
+        return fileUploadService.uploadFile(folder,file);
+    }
 }
