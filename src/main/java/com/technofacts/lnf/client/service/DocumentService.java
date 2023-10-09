@@ -198,7 +198,7 @@ public class DocumentService {
                 orElseThrow(() -> new LnFEntityNotFoundException(String.format("Document with clientId [%s] and type [%s] does not exist", clientId, type)));
     }
 
-    public String uploadFile(String folder, MultipartFile file) {
+    private String uploadFile(String folder, MultipartFile file) {
         return fileUploadService.uploadFile(folder,file);
     }
 }
