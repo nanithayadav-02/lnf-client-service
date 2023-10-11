@@ -5,6 +5,7 @@ import com.technofacts.lnf.service.File.FileUploadService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.List;
 
 
 @Service
@@ -22,6 +25,9 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     private final WebClient webClient;
 
+    @Value("${s3.service}")
+    private String s3Service;
+
     @Override
     public String uploadFile(String folder, MultipartFile file) {
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -30,7 +36,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         try {
             String uploadedFileUrl = webClient.post()
-                    .uri("/lnf/file/upload")
+                    .uri(s3Service+"/upload")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                     .retrieve()
@@ -48,12 +54,13 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public void deleteFile(String key) {
+    public void deleteObjects(List<String> keys) {
 
     }
 
     @Override
-    public ResponseEntity<byte[]> displayObject(String key) {
+    public ResponseEntity<byte[]> retrieveObject(String key) {
         return null;
     }
+
 }
