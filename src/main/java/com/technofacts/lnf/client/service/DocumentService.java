@@ -1,10 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
 import com.technofacts.lnf.client.converter.DocumentConverter;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.ClientDocument;
@@ -18,12 +13,18 @@ import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.File.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.io.IOException;
+import java.util.*;
 
 @Service
 @Transactional
@@ -36,6 +37,15 @@ public class DocumentService {
 
     private final FileUploadService fileUploadService;
 
+    @Value("${aws.s3.bucket.enabled}")
+    private boolean awsS3BucketEnabled;
+
+    @Value("${aws.s3.bucket.folderName}")
+    private String folderName;
+
+    @Value("${aws.s3.bucket.fileName}")
+    private String fileName;
+
     /**
      * Returns DocumentDto client by clientId and document type.
      *
@@ -44,6 +54,21 @@ public class DocumentService {
      * @return DocumentDto
      */
     public DocumentDto findByClientId(UUID clientId, DocumentType type) {
+
+        if (awsS3BucketEnabled) {
+            ResponseEntity<byte[]> s3Response = retrieveObject(folderName + clientId + fileName);
+            if (s3Response.getStatusCode() == HttpStatus.OK) {
+                DocumentDto documentDto = new DocumentDto();
+                String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path("/lnf/file/key")
+                        .queryParam("key", folderName + clientId + fileName)
+                        .toUriString();
+                documentDto.setUrl(downloadURL);
+                documentDto.setContent(s3Response.getBody());
+                documentDto.setContentType("application/octet-stream");
+                return documentDto;
+            }
+        }
         searchForClient(clientId);
         ClientDocument entity = searchForDocument(clientId, type);
         DocumentDto documentDto = DocumentConverter.toTransportModel(entity);
@@ -101,21 +126,26 @@ public class DocumentService {
 
         try {
             LnFBadRequestException.throwOnCondition(Objects::isNull, file, String.format("Failed to create Document of type [%s] for client [%s] with null payload", type, client));
-            ClientDocument entity = DocumentConverter.toEntityModel(file);
-            if (documentId != null) {
-                entity.setId(documentId);
-            }
-            entity.setClient(client);
-            entity.setType(type);
-            save(entity);
-            log.info(() -> String.format("Document [%s] for Client[%s] successfully created", file.getOriginalFilename(), clientId));
 
+            String filePath = null;
+            if (awsS3BucketEnabled) {
+                filePath = uploadFile(folderName, file);
+                log.info("File uploaded successfully to S3 bucket: " + filePath);
+            } else {
+                ClientDocument entity = DocumentConverter.toEntityModel(file, false, null);
+                if (documentId != null) {
+                    entity.setId(documentId);
+                }
+                entity.setClient(client);
+                entity.setType(type);
+                save(entity);
+                log.info(() -> String.format("Document [%s] for Client[%s] successfully created", file.getOriginalFilename(), clientId));
+            }
         } catch (RuntimeException | IOException e) {
 
             String errorMessage = String.format("Failed to create document[%s] for client [%s]", clientId, file.getOriginalFilename());
             throw new LnFException(errorMessage, e);
         }
-
     }
 
     /**
@@ -130,7 +160,13 @@ public class DocumentService {
         searchForClient(clientId);
         ClientDocument entity = searchForDocument(documentId);
         try {
-            ClientDocument updatedEntity = DocumentConverter.toEntityModel(file, entity);
+            String filePath = null;
+            if (awsS3BucketEnabled) {
+                filePath = uploadFile(folderName, file);
+                String finalFilePath = filePath;
+                log.info(() -> String.format("File  for client  successfully updated in S3", finalFilePath));
+            }
+            ClientDocument updatedEntity = DocumentConverter.toEntityModel(file, entity,false, null);
             save(updatedEntity);
         } catch (RuntimeException | IOException e) {
             String errorMessage = String.format("Failed to update document[%s] for client [%s]", documentId, clientId);
@@ -146,13 +182,20 @@ public class DocumentService {
      * @param type     Enum DocumentType
      */
     public void deleteByClientId(UUID clientId, DocumentType type) {
-        searchForClient(clientId);
-        ClientDocument entity = searchForDocument(clientId, type);
-        try {
-            repository.delete(entity);
-        } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete document for client [%s]", clientId);
-            throw new LnFException(errorMessage, e);
+        if (awsS3BucketEnabled) {
+            String s3ObjectKey = folderName + clientId + fileName;
+            List<String> keys = Collections.singletonList(s3ObjectKey);
+            deleteObjects(keys);
+            log.info("S3 object deleted for employee");
+        } else {
+            searchForClient(clientId);
+            ClientDocument entity = searchForDocument(clientId, type);
+            try {
+                repository.delete(entity);
+            } catch (RuntimeException e) {
+                String errorMessage = String.format("Failed to delete document for client [%s]", clientId);
+                throw new LnFException(errorMessage, e);
+            }
         }
     }
 
@@ -200,5 +243,13 @@ public class DocumentService {
 
     private String uploadFile(String folder, MultipartFile file) {
         return fileUploadService.uploadFile(folder,file);
+    }
+
+    private void deleteObjects(List<String> keys) {
+        fileUploadService.deleteObjects(keys);
+    }
+
+    public ResponseEntity<byte[]> retrieveObject(String key) {
+        return fileUploadService.retrieveObject(key);
     }
 }

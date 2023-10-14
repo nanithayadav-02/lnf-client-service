@@ -11,8 +11,17 @@ server:
   port: 8081
   servlet:
     context-path: /api/v1
-s3:
-  service: "/lnf/file"
+
+aws:
+  s3:
+    bucket:
+      enabled: true
+      service: "/lnf/file"
+      folderName: "clients"
+      fileName:
+
+application:
+  maxInMemorySize: 10485760
 
 employee:
   service:
