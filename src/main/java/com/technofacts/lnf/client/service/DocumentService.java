@@ -64,7 +64,6 @@ public class DocumentService {
                         .queryParam("key", folderName + clientId + fileName)
                         .toUriString();
                 documentDto.setUrl(downloadURL);
-                documentDto.setContent(s3Response.getBody());
                 documentDto.setContentType("application/octet-stream");
                 return documentDto;
             }
