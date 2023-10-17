@@ -45,39 +45,37 @@ public class FileUploadServiceImpl implements FileUploadService {
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
-
-            log.info("Employee file uploaded successfully");
             return uploadedFileUrl;
         } catch (LnFEntityNotFoundException ex) {
-            log.error("File Upload for Employee Is Failed",ex.getMessage());
+            log.error("File Upload for client Is Failed",ex.getMessage());
         } catch (RuntimeException ex) {
-            log.error("File Upload for Employee Is Failed", ex.getMessage());
+            log.error("File Upload for client Is Failed", ex.getMessage());
         }
         return null;
     }
 
     @Override
-    public void deleteObjects(List<String> keys) {
+    public void delete(List<String> filePaths) {
         try {
-            String joinedKeys = String.join(",", keys);
+            String joinedKeys = String.join(",", filePaths);
 
             webClient
                     .delete()
-                    .uri(s3Service + "/keys" +"?keys=" + joinedKeys)
+                    .uri(s3Service  +"?filePaths=" + joinedKeys)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .retrieve()
                     .toBodilessEntity()
                     .block();
         } catch (Exception e) {
-            log.error("Failed to delete files with keys {}: {}", keys, e.getMessage());
-            throw new LnFException("Failed to delete files with keys " + keys, e);
+            log.error("Failed to delete files with filePaths {}: {}", filePaths, e.getMessage());
+            throw new LnFException("Failed to delete files with filePaths " + filePaths, e);
         }
     }
 
-    public ResponseEntity<byte[]> retrieveObject(String key) {
+    public ResponseEntity<byte[]> findFile(String filePath) {
         try {
             ResponseEntity<byte[]> response = webClient.get()
-                    .uri(s3Service + "/key?key={key}", key)
+                    .uri(s3Service + "?filePath={filePath}", filePath)
                     .accept(MediaType.APPLICATION_OCTET_STREAM)
                     .retrieve()
                     .toEntity(byte[].class)
