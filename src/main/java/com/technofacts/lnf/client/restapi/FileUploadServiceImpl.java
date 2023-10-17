@@ -55,7 +55,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public void deleteObjects(List<String> filePaths) {
+    public void delete(List<String> filePaths) {
         try {
             String joinedKeys = String.join(",", filePaths);
 
