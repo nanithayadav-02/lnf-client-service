@@ -43,9 +43,6 @@ public class DocumentService {
     @Value("${aws.s3.bucket.folderName}")
     private String folderName;
 
-    @Value("${aws.s3.bucket.fileName}")
-    private String fileName;
-
     /**
      * Returns DocumentDto client by clientId and document type.
      *
@@ -54,9 +51,12 @@ public class DocumentService {
      * @return DocumentDto
      */
     public DocumentDto findByClientId(UUID clientId, DocumentType type) {
-
+        searchForClient(clientId);
+        ClientDocument entity = searchForDocument(clientId, type);
         if (awsS3BucketEnabled) {
-            ResponseEntity<byte[]> s3Response = findFile(folderName + "/" + clientId + "/" + fileName);
+            String fileName = entity.getName();
+            ResponseEntity<byte[]> s3Response = fileUploadService.findFile(folderName + "/"
+                    + clientId + "/" + fileName);
             if (s3Response.getStatusCode() == HttpStatus.OK) {
                 DocumentDto documentDto = new DocumentDto();
                 String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -68,8 +68,6 @@ public class DocumentService {
                 return documentDto;
             }
         }
-        searchForClient(clientId);
-        ClientDocument entity = searchForDocument(clientId, type);
         DocumentDto documentDto = DocumentConverter.toTransportModel(entity);
         documentDto.setUrl(DocumentConverter.getDocumentUrl(clientId, documentDto.getId(), type));
         return documentDto;
@@ -122,17 +120,14 @@ public class DocumentService {
         if (entityOptional.isPresent()) {
             documentId = entityOptional.get().getId();
         }
-
         try {
             LnFBadRequestException.throwOnCondition(Objects::isNull, file, String.format("Failed to create Document of type [%s] for client [%s] with null payload", type, client));
-
-            String filePath = null;
             if (awsS3BucketEnabled) {
                 String folder = folderName + "/" + documentId + "/";
-                filePath = uploadFile(folder, file);
+                String filePath = uploadFile(folder, file);
                 log.info("File uploaded successfully to S3 bucket: " + filePath);
-            } else {
-                ClientDocument entity = DocumentConverter.toEntityModel(file, false, null);
+            }
+                ClientDocument entity = DocumentConverter.toEntityModel(file,awsS3BucketEnabled);
                 if (documentId != null) {
                     entity.setId(documentId);
                 }
@@ -140,7 +135,6 @@ public class DocumentService {
                 entity.setType(type);
                 save(entity);
                 log.info(() -> String.format("Document [%s] for Client[%s] successfully created", file.getOriginalFilename(), clientId));
-            }
         } catch (RuntimeException | IOException e) {
 
             String errorMessage = String.format("Failed to create document[%s] for client [%s]", clientId, file.getOriginalFilename());
@@ -160,14 +154,12 @@ public class DocumentService {
         searchForClient(clientId);
         ClientDocument entity = searchForDocument(documentId);
         try {
-            String filePath = null;
             if (awsS3BucketEnabled) {
                 String folder = folderName + "/" + documentId + "/";
-                filePath = uploadFile(folder, file);
-                String finalFilePath = filePath;
-                log.info(() -> String.format("File  for client  successfully updated in S3", finalFilePath));
+                String filePath = uploadFile(folder, file);
+                log.info(() -> String.format("File  for client  successfully updated in S3", filePath));
             } else {
-                ClientDocument updatedEntity = DocumentConverter.toEntityModel(file, entity,false, null);
+                ClientDocument updatedEntity = DocumentConverter.toEntityModel(file, entity,awsS3BucketEnabled);
                 save(updatedEntity);
             }
         } catch (RuntimeException | IOException e) {
@@ -184,14 +176,15 @@ public class DocumentService {
      * @param type     Enum DocumentType
      */
     public void deleteByClientId(UUID clientId, DocumentType type) {
+        searchForClient(clientId);
+        ClientDocument entity = searchForDocument(clientId, type);
         if (awsS3BucketEnabled) {
+            String fileName = entity.getName();
             String s3ObjectKey = folderName + "/" + clientId + "/" + fileName;
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
-            delete(filePaths);
+            fileUploadService.delete(filePaths);
             log.info("S3 object deleted for employee");
         } else {
-            searchForClient(clientId);
-            ClientDocument entity = searchForDocument(clientId, type);
             try {
                 repository.delete(entity);
             } catch (RuntimeException e) {
@@ -246,13 +239,4 @@ public class DocumentService {
     private String uploadFile(String folder, MultipartFile file) {
         return fileUploadService.uploadFile(folder,file);
     }
-
-    private void delete(List<String> filePaths) {
-        fileUploadService.delete(filePaths);
-    }
-
-    public ResponseEntity<byte[]> findFile(String filePath) {
-        return fileUploadService.findFile(filePath);
-    }
-
 }

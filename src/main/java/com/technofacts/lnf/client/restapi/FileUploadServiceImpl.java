@@ -47,9 +47,7 @@ public class FileUploadServiceImpl implements FileUploadService {
                     .block();
             return uploadedFileUrl;
         } catch (LnFEntityNotFoundException ex) {
-            log.error("File Upload for client Is Failed",ex.getMessage());
-        } catch (RuntimeException ex) {
-            log.error("File Upload for client Is Failed", ex.getMessage());
+            log.error("File Upload for client Is Failed{}",ex.getMessage());
         }
         return null;
     }
@@ -83,7 +81,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             log.info("file is retrieved");
             return response;
         } catch (Exception ex) {
-            log.error("File is not retrieved", ex.getMessage());
+            log.error("File is not retrieved{}", ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }

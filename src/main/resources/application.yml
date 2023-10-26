@@ -18,10 +18,12 @@ aws:
       enabled: true
       service: "/lnf/file"
       folderName: "clients"
-      fileName:
 
 application:
   maxInMemorySize: 10485760
+
+connection:
+  timeout: 2000
 
 employee:
   service:

@@ -28,15 +28,18 @@ public class WebClientConfiguration {
     @Value("${application.maxInMemorySize}")
     private int maxInMemorySize;
 
+    @Value("${connection.timeout}")
+    private int timeOut;
+
     @Qualifier("EmployeeService")
     @Bean
     public WebClient employeeWebClient() {
 
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 2000)
-                .responseTimeout(Duration.ofMillis(2000))
-                .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(2000, TimeUnit.MILLISECONDS))
-                        .addHandlerLast(new WriteTimeoutHandler(2000, TimeUnit.MILLISECONDS)));
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeOut)
+                .responseTimeout(Duration.ofMillis(timeOut))
+                .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(timeOut, TimeUnit.MILLISECONDS))
+                        .addHandlerLast(new WriteTimeoutHandler(timeOut, TimeUnit.MILLISECONDS)));
 
         return WebClient.builder()
                 .baseUrl(employeeServiceUrl)
@@ -54,10 +57,10 @@ public class WebClientConfiguration {
                 .build();
 
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 2000)
-                .responseTimeout(Duration.ofMillis(2000))
-                .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(2000, TimeUnit.MILLISECONDS))
-                        .addHandlerLast(new WriteTimeoutHandler(2000, TimeUnit.MILLISECONDS)));
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeOut)
+                .responseTimeout(Duration.ofMillis(timeOut))
+                .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(timeOut, TimeUnit.MILLISECONDS))
+                        .addHandlerLast(new WriteTimeoutHandler(timeOut, TimeUnit.MILLISECONDS)));
 
         return WebClient.builder()
                 .baseUrl(fileUploadServiceUrl)
