@@ -26,18 +26,18 @@ public class DocumentConverter {
         return dto;
     }
 
-    public static ClientDocument toEntityModel(MultipartFile transport, boolean awsS3BucketEnabled,
-                                               String filePath) throws IOException {
+    public static ClientDocument toEntityModel(MultipartFile transport, boolean awsS3BucketEnabled)
+            throws IOException {
         if (transport == null) {
             return null;
         }
         ClientDocument entity = new ClientDocument();
-        return toEntityModel(transport, entity,awsS3BucketEnabled, filePath);
+        return toEntityModel(transport, entity,awsS3BucketEnabled);
 
     }
 
     public static ClientDocument toEntityModel(MultipartFile transport, ClientDocument entity,
-                                               boolean awsS3BucketEnabled, String filePath) throws IOException {
+                                               boolean awsS3BucketEnabled) throws IOException {
         if (transport == null || entity == null) {
             return null;
         }
