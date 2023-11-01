@@ -1,14 +1,10 @@
 package com.technofacts.lnf.client.restapi;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-
 import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.service.employee.EmployeeService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,13 +14,19 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+
 @Service
 @Log
-@RequiredArgsConstructor
 public class EmployeeClientImpl implements EmployeeService {
 
     private final WebClient webClient;
 
+    public EmployeeClientImpl(@Qualifier("EmployeeService") WebClient webClient) {
+        this.webClient = webClient;
+    }
 
     @Override
     public EmployeeDto findOne(String employeeId) {

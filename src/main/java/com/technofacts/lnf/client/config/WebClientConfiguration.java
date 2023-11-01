@@ -22,8 +22,8 @@ public class WebClientConfiguration {
     @Value("${employee.service.url}")
     private String employeeServiceUrl;
 
-    @Value("${file.upload.service.url}")
-    private String fileUploadServiceUrl;
+    @Value("${file.service.url}")
+    private String fileServiceUrl;
 
     @Value("${application.maxInMemorySize}")
     private int maxInMemorySize;
@@ -49,8 +49,8 @@ public class WebClientConfiguration {
 
     @Bean
     @Primary
-    @Qualifier("fileUploadService")
-    public WebClient fileUploadServiceWebClient() {
+    @Qualifier("FileService")
+    public WebClient fileServiceWebClient() {
 
         ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(maxInMemorySize))
@@ -63,7 +63,7 @@ public class WebClientConfiguration {
                         .addHandlerLast(new WriteTimeoutHandler(timeOut, TimeUnit.MILLISECONDS)));
 
         return WebClient.builder()
-                .baseUrl(fileUploadServiceUrl)
+                .baseUrl(fileServiceUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .exchangeStrategies(exchangeStrategies)
                 .build();
