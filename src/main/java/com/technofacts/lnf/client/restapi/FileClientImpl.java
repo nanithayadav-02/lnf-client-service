@@ -4,8 +4,8 @@ import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.File.FileUploadService;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,11 +22,14 @@ import java.util.List;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 @Slf4j
-public class FileUploadServiceImpl implements FileUploadService {
+public class FileClientImpl implements FileUploadService {
 
     private final WebClient webClient;
+
+    public FileClientImpl(@Qualifier("FileService") WebClient webClient) {
+        this.webClient = webClient;
+    }
 
     @Value("${aws.s3.bucket.service}")
     private String s3Service;

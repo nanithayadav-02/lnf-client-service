@@ -30,9 +30,8 @@ employee:
     url: "http://localhost:8081/api/v1"
 
 file:
-  upload:
-    service:
-      url: "http://localhost:8081/api/v1"
+  service:
+    url: "http://localhost:8081/api/v1"
 
 # Metrics Configuration
 management:
