@@ -64,7 +64,6 @@ public class DocumentService {
                         .queryParam("filePath", folderName + "/" + clientId + "/" + fileName)
                         .toUriString();
                 documentDto.setUrl(downloadURL);
-                documentDto.setContentType("application/octet-stream");
                 return documentDto;
             }
         }
