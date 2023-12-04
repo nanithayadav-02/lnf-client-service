@@ -86,6 +86,11 @@ public class EmployeeClientImpl implements EmployeeService {
     }
 
     @Override
+    public List<String> findByStatuses(List<String> statuses) {
+        return null;
+    }
+
+    @Override
     public String create(EmployeeDto resource) {
         return null;
     }

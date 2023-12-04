@@ -2,6 +2,12 @@ spring:
   profiles:
     active: dev-ide
 
+  config:
+    import: configserver:http://localhost:8081/api/v1
+  cloud:
+    config:
+      enabled: true
+
   application:
     name: lnf-client-service
 
@@ -19,19 +25,19 @@ aws:
       service: "/lnf/file"
       folderName: "clients"
 
-application:
-  maxInMemorySize: 10485760
+#application:
+  #maxInMemorySize: 10485760
 
 connection:
   timeout: 2000
 
-employee:
-  service:
-    url: "http://localhost:8081/api/v1"
+#employee:
+  ##
+  #url: "http://localhost:8081/api/v1"
 
-file:
-  service:
-    url: "http://localhost:8081/api/v1"
+#file:
+  #service:
+   # url: "http://localhost:8081/api/v1"
 
 # Metrics Configuration
 management:
