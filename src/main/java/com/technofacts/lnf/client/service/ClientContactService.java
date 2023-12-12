@@ -38,7 +38,7 @@ public class ClientContactService {
     public List<ContactDto> findByClientId(UUID clientId) {
         searchForClient(clientId);
         List<ClientContact> entities = repository.findByClientId(clientId);
-        return entities.stream().map(ContactConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(ContactConverter::toTransportModel).filter(Objects::nonNull).toList();
     }
 
     /**

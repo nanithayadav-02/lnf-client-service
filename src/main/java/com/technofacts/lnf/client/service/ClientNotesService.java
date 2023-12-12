@@ -1,11 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.technofacts.lnf.client.converter.ClientNotesConverter;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.ClientNotes;
@@ -20,6 +14,11 @@ import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -31,13 +30,13 @@ public class ClientNotesService {
 
     public List<ClientNotesDto> findAll() {
         List<ClientNotes> entities = repository.findAll();
-        return entities.stream().map(ClientNotesConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(ClientNotesConverter::toTransportModel).filter(Objects::nonNull).toList();
     }
 
     public List<ClientNotesDto> findByClientId(UUID clientId) {
         searchForClient(clientId);
         List<ClientNotes> entities = repository.findByClientId(clientId);
-        return entities.stream().map(ClientNotesConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(ClientNotesConverter::toTransportModel).filter(Objects::nonNull).toList();
     }
 
     public ClientNotesDto findById(UUID clientId, UUID notesId) {
@@ -51,7 +50,7 @@ public class ClientNotesService {
         Client client = searchForClient(clientId);
         List<ClientNotes> entities = new ArrayList<>();
         resource.stream().filter(Objects::nonNull).forEach(notesDto -> {
-            ClientNotes entity = (ClientNotes) ClientNotesConverter.toEntityModel(notesDto, new ClientNotes());
+            ClientNotes entity = ClientNotesConverter.toEntityModel(notesDto, new ClientNotes());
             entity.setClient(client);
             entities.add(entity);
         });
@@ -62,7 +61,7 @@ public class ClientNotesService {
     public void create(UUID clientId, ClientNotesDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create Notes with null payload");
         Client employeeEntity = searchForClient(clientId);
-        ClientNotes entity = (ClientNotes) ClientNotesConverter.toEntityModel(resource, new ClientNotes());
+        ClientNotes entity = ClientNotesConverter.toEntityModel(resource, new ClientNotes());
         entity.setClient(employeeEntity);
         save(entity);
         log.info(() -> String.format("Notes for Client[%s] successfully created", clientId));
@@ -72,7 +71,7 @@ public class ClientNotesService {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to update Notes with null payload");
         searchForClient(clientId);
         ClientNotes entity = searchForNotes(notesId);
-        save((ClientNotes) ClientNotesConverter.toEntityModel(resource, entity));
+        save(ClientNotesConverter.toEntityModel(resource, entity));
         log.info(() -> String.format("Notes for Client[%s] successfully created", clientId));
     }
 

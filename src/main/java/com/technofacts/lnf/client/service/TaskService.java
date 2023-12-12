@@ -80,7 +80,7 @@ public class TaskService {
         searchForProject(projectId);
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Task> entities = Lists.newArrayList(repository.findByProjectId(projectId, sortInfo));
-        return entities.stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).toList();
     }
 
     /**
@@ -92,7 +92,7 @@ public class TaskService {
     public List<TaskDto> findAllByProjectId(final UUID projectId) {
         searchForProject(projectId);
         List<Task> entities = repository.findByProjectId(projectId);
-        return entities.stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).toList();
     }
 
     /**

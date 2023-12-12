@@ -27,7 +27,7 @@ public class FileClientImpl implements FileUploadService {
 
     private final WebClient webClient;
 
-    public FileClientImpl(@Qualifier("FileService") WebClient webClient) {
+    public FileClientImpl(@Qualifier("fileService") WebClient webClient) {
         this.webClient = webClient;
     }
 
@@ -41,14 +41,13 @@ public class FileClientImpl implements FileUploadService {
         bodyBuilder.part("file", file.getResource());
 
         try {
-            String uploadedFileUrl = webClient.post()
+            return webClient.post()
                     .uri(s3Service + "/upload")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
-            return uploadedFileUrl;
         } catch (LnFEntityNotFoundException ex) {
             log.error("File Upload for client Is Failed{}",ex.getMessage());
         }

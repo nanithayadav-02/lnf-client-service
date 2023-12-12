@@ -31,7 +31,7 @@ public class WebClientConfiguration {
     @Value("${connection.timeout}")
     private int timeOut;
 
-    @Qualifier("EmployeeService")
+    @Qualifier("employeeService")
     @Bean
     public WebClient employeeWebClient() {
 
@@ -49,7 +49,7 @@ public class WebClientConfiguration {
 
     @Bean
     @Primary
-    @Qualifier("FileService")
+    @Qualifier("fileService")
     public WebClient fileServiceWebClient() {
 
         ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
