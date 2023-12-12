@@ -43,7 +43,7 @@ public class ProjectTaskEmployeeService {
         Project project = searchForProject(projectId);
         Task task = searchForTask(taskId);
         List<ProjectTaskEmployee> projectTaskEmployees = repository.findByProjectAndTask(project, task);
-        List<String> employeeIds = projectTaskEmployees.stream().map(ProjectTaskEmployee::getEmployeeId).collect(Collectors.toList());
+        List<String> employeeIds = projectTaskEmployees.stream().map(ProjectTaskEmployee::getEmployeeId).toList();
 
         // Get the list of employee details from the Employee microservice
         List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(employeeIds);

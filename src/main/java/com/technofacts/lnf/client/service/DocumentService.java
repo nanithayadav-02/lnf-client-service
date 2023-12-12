@@ -110,7 +110,7 @@ public class DocumentService {
      *
      * @param clientId Client Id
      * @param type     Enum DocumentType
-     * @param file     Dcoument in MutipartFile format
+     * @param file     Document in MutipartFile format
      */
     public void create(UUID clientId, DocumentType type, MultipartFile file) {
         Client client = searchForClient(clientId);
@@ -156,7 +156,7 @@ public class DocumentService {
             if (awsS3BucketEnabled) {
                 String folder = folderName + "/" + documentId + "/";
                 String filePath = uploadFile(folder, file);
-                log.info(() -> String.format("File  for client  successfully updated in S3", filePath));
+                log.info(() -> String.format("File [%s] for client  successfully updated in S3", filePath));
             } else {
                 ClientDocument updatedEntity = DocumentConverter.toEntityModel(file, entity,awsS3BucketEnabled);
                 save(updatedEntity);

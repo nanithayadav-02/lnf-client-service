@@ -1,14 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.Lists;
 import com.technofacts.lnf.client.converter.ClientConverter;
 import com.technofacts.lnf.client.model.Client;
@@ -27,6 +18,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Transactional
@@ -79,7 +78,7 @@ public class ClientService {
         List<Client> entities = Lists.newArrayList(repository.findAll(sortInfo));
         return entities.stream().map(ClientConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -91,7 +90,7 @@ public class ClientService {
         List<Client> entities = repository.findAll();
         return entities.stream().map(ClientConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -110,7 +109,7 @@ public class ClientService {
         List<Client> entities = repository.findAll(specification);
         return entities.stream().map(ClientConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

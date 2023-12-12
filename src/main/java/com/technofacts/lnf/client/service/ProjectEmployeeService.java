@@ -1,10 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.model.ProjectEmployee;
 import com.technofacts.lnf.client.repository.ProjectEmployeeRepository;
@@ -18,6 +13,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
 
 @Service
 @Transactional
@@ -41,7 +40,7 @@ public class ProjectEmployeeService {
 
         // Get the list of employees associated with the project
         List<ProjectEmployee> projectEmployees = repository.findByProject(project);
-        List<String> employeeIds = projectEmployees.stream().map(ProjectEmployee::getEmployeeId).collect(Collectors.toList());
+        List<String> employeeIds = projectEmployees.stream().map(ProjectEmployee::getEmployeeId).toList();
 
         // Get the list of employee details from the Employee microservice
         List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(employeeIds);
@@ -92,7 +91,7 @@ public class ProjectEmployeeService {
      * @param employeeIds List of Strings
      */
     public void removeEmployeeFromProject(UUID projectId, List<String> employeeIds) {
-        Project project = searchForProject(projectId);
+        searchForProject(projectId);
         employeeIds.forEach(employeeId -> {
             try {
                 ProjectEmployee projectEmployee = search(projectId, employeeId);

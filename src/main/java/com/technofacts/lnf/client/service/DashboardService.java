@@ -1,8 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.client.repository.StatisticsSummary;
@@ -13,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -64,7 +63,7 @@ public class DashboardService {
         if (!statisticsSummaries.isEmpty()) {
             dashboardDto.setStatistics(statisticsSummaries.stream()
                     .map(cs -> new StatisticsDto(cs.getYear(), cs.getMonth(), cs.getStatus(), cs.getCount()))
-                    .collect(Collectors.toList()));
+                    .toList());
         }
     }
 

@@ -38,7 +38,7 @@ public class GstService {
     public List<GstDto> findByClientId(UUID clientId) {
         searchForClient(clientId);
         List<Gst> entities = repository.findByClientId(clientId);
-        return entities.stream().map(GstConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(GstConverter::toTransportModel).filter(Objects::nonNull).toList();
     }
 
     /**

@@ -80,7 +80,7 @@ public class ProjectService {
     public List<ProjectDto> findAllSorted(String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Project> entities = Lists.newArrayList(repository.findAll(sortInfo));
-        return entities.stream().map(ProjectConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(ProjectConverter::toTransportModel).filter(Objects::nonNull).toList();
     }
 
     /**
@@ -92,7 +92,7 @@ public class ProjectService {
         List<Project> entities = repository.findAll();
         return entities.stream().map(ProjectConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -112,7 +112,7 @@ public class ProjectService {
         return entities.stream()
                 .map(ProjectConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -139,7 +139,7 @@ public class ProjectService {
         List<Project> projects = repository.findByClientId(clientId);
         return projects.stream().map(ProjectConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
