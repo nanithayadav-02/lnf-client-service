@@ -1,15 +1,14 @@
 package com.technofacts.lnf.client.service;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
+
 import com.technofacts.lnf.client.converter.ProjectConverter;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.Project;
@@ -36,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Log
 public class ProjectService {
 
-    private static final String SEARCH_REGEX_PATTERN = "([\\w+?\\-_]+)(:|<|>)([\\w+?\\-_.@\\s]+),";
+    private static final String SEARCH_REGEX_PATTERN = "([\\w]+)\\s*:\\s*([\\w.@\\- ]+?)(?=(,|$))";
 
     private final ProjectRepository repository;
     private final ClientRepository clientRepository;
@@ -101,18 +100,73 @@ public class ProjectService {
      * @return List of all ProjectDto objects.
      */
     public List<ProjectDto> findAll(String search) {
-        ProjectSpecificationBuilder builder = new ProjectSpecificationBuilder();
-        Pattern pattern = Pattern.compile(SEARCH_REGEX_PATTERN, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(URLDecoder.decode(search, StandardCharsets.UTF_8) + ",");
-        while (matcher.find()) {
-            builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
-        }
-        Specification<Project> specification = builder.build();
+        Specification<Project> specification = buildProjectSpecification(search);
         List<Project> entities = repository.findAll(specification);
+        return convertToDtos(entities);
+    }
+    private List<ProjectDto> convertToDtos(List<Project> entities) {
         return entities.stream()
                 .map(ProjectConverter::toTransportModel)
                 .filter(Objects::nonNull)
                 .toList();
+    }
+    private Specification<Project> buildProjectSpecification(String search) {
+        final ProjectSpecificationBuilder builder = new ProjectSpecificationBuilder();
+        createSearchConditions(search, builder);
+        return builder.build();
+    }
+
+    private void createSearchConditions(String search, ProjectSpecificationBuilder builder) {
+        log.info(() -> String.format("search [%s]", search));
+        log.info(() -> String.format("builder [%s]", builder.toString()));
+        final Matcher matcher = Pattern.compile(SEARCH_REGEX_PATTERN, Pattern.CASE_INSENSITIVE).matcher(search);
+        while (matcher.find()) {
+            processSearchGroup(matcher, builder);
+        }
+    }
+
+    private void processSearchGroup(final Matcher matcher, final ProjectSpecificationBuilder builder) {
+        String key = matcher.group(1).trim();
+        String value = matcher.group(2).trim();
+        log.info("Key: " + key + ", Value: " + value);
+        Class<?> fieldType = getFieldClass(key);
+        addCondition(builder, key, fieldType, value);
+    }
+
+    private void addCondition(final ProjectSpecificationBuilder builder, final String key, Class<?> fieldType, final String value) {
+        if (fieldType != null) {
+            Object convertedValue = convertToFieldType(fieldType, value);
+            builder.with(key, ":", convertedValue);
+        }
+    }
+    private Class<?> getFieldClass(String fieldName) {
+        try {
+            Class<?> clazz = Class.forName("com.technofacts.lnf.client.model.Project");
+            Field field = clazz.getDeclaredField(fieldName);
+            return field.getType();
+        } catch (ClassNotFoundException | NoSuchFieldException e) {
+            return null;
+        }
+    }
+
+    private Object convertToFieldType(Class<?> fieldType, String value) {
+        if (fieldType.isEnum()) {
+            return getEnumConstant(fieldType, value);
+        } else if (fieldType == Integer.class || fieldType == int.class) {
+            return Integer.valueOf(value);
+        } else {
+            return value;
+        }
+    }
+
+    private Enum<?> getEnumConstant(Class<?> fieldType, String value) {
+        String uppercaseValue = value.toUpperCase();
+        for (Enum<?> enumConstant : ((Class<? extends Enum>) fieldType).getEnumConstants()) {
+            if (enumConstant.name().toUpperCase().equals(uppercaseValue)) {
+                return enumConstant;
+            }
+        }
+        return null;
     }
 
     /**

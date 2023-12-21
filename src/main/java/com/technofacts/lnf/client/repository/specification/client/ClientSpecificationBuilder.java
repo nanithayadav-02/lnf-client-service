@@ -1,12 +1,12 @@
 package com.technofacts.lnf.client.repository.specification.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.util.SearchOperation;
 import com.technofacts.lnf.util.SpecSearchCriteria;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClientSpecificationBuilder {
 
@@ -21,7 +21,7 @@ public class ClientSpecificationBuilder {
     }
 
     public final ClientSpecificationBuilder with(final String orPredicate, final String key, final String operation,
-                                                 final Object value, final String prefix, final String suffix) {
+                                                   final Object value, final String prefix, final String suffix) {
         SearchOperation op = SearchOperation.getSimpleOperation(operation.charAt(0));
         if (op != null) {
             if (op == SearchOperation.EQUALITY) {

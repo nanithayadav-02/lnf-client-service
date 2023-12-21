@@ -86,9 +86,9 @@ public class ClientController {
      *
      * @return List of all ClientDto objects.
      */
-    @GetMapping(value = "/clients", params = {QueryConstants.SEARCH})
+    @GetMapping(value = "/clients", params = {"search"})
     @ResponseStatus(HttpStatus.OK)
-    public List<ClientDto> search(@RequestParam(value = QueryConstants.SEARCH) String search) {
+    public List<ClientDto> search(@RequestParam(value = "search") String search) {
         return service.findAll(search);
     }
 

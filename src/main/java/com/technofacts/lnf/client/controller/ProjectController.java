@@ -82,9 +82,9 @@ public class ProjectController {
      *
      * @return List of all ProjectDto objects.
      */
-    @GetMapping(value = "/projects", params = {QueryConstants.SEARCH})
+    @GetMapping(value = "/projects", params = {"search"})
     @ResponseStatus(HttpStatus.OK)
-    public List<ProjectDto> search(@RequestParam(value = QueryConstants.SEARCH) String search) {
+    public List<ProjectDto> search(@RequestParam(value = "search") String search) {
         return service.findAll(search);
     }
 

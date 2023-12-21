@@ -19,8 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -33,7 +32,7 @@ import java.util.regex.Pattern;
 @Log
 public class ClientService {
 
-    private static final String SEARCH_REGEX_PATTERN = "([\\w+?\\-_]+)(:|<|>)([\\w+?\\-_.@\\s]+),";
+    private static final String SEARCH_REGEX_PATTERN = "([\\w]+)\\s*:\\s*([\\w.@\\- ]+?)(?=(,|$))";
 
     private final ClientRepository repository;
 
@@ -88,25 +87,6 @@ public class ClientService {
      */
     public List<ClientDto> findAll() {
         List<Client> entities = repository.findAll();
-        return entities.stream().map(ClientConverter::toTransportModel)
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
-    /**
-     * Return list of all ClientDto objects matching the search query.
-     *
-     * @return List of all ClientDto objects.
-     */
-    public List<ClientDto> findAll(String search) {
-        ClientSpecificationBuilder builder = new ClientSpecificationBuilder();
-        Pattern pattern = Pattern.compile(SEARCH_REGEX_PATTERN, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(URLDecoder.decode(search, StandardCharsets.UTF_8) + ",");
-        while (matcher.find()) {
-            builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
-        }
-        Specification<Client> specification = builder.build();
-        List<Client> entities = repository.findAll(specification);
         return entities.stream().map(ClientConverter::toTransportModel)
                 .filter(Objects::nonNull)
                 .toList();
@@ -201,6 +181,82 @@ public class ClientService {
     private Client search(UUID clientId) {
         return repository.findById(clientId).
                 orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
+    }
+
+
+    /**
+     * Return list of all ClientDto objects matching the search query.
+     *
+     * @return List of all ClientDto objects.
+     */
+    public List<ClientDto> findAll(String search) {
+        Specification<Client> specification = buildClientSpecification(search);
+        List<Client> entities = repository.findAll(specification);
+        return convertToDtos(entities);
+    }
+    private List<ClientDto> convertToDtos(List<Client> entities) {
+        return entities.stream()
+                .map(ClientConverter::toTransportModel)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+    private Specification<Client> buildClientSpecification(String search) {
+        final ClientSpecificationBuilder builder = new ClientSpecificationBuilder();
+        createSearchConditions(search, builder);
+        return builder.build();
+    }
+
+    private void createSearchConditions(String search, ClientSpecificationBuilder builder) {
+        log.info(() -> String.format("search [%s]", search));
+        log.info(() -> String.format("builder [%s]", builder.toString()));
+        final Matcher matcher = Pattern.compile(SEARCH_REGEX_PATTERN, Pattern.CASE_INSENSITIVE).matcher(search);
+        while (matcher.find()) {
+            processSearchGroup(matcher, builder);
+        }
+    }
+
+    private void processSearchGroup(final Matcher matcher, final ClientSpecificationBuilder builder) {
+        String key = matcher.group(1).trim();
+        String value = matcher.group(2).trim();
+        log.info("Key: " + key + ", Value: " + value);
+        Class<?> fieldType = getFieldClass(key);
+        addCondition(builder, key, fieldType, value);
+    }
+
+    private void addCondition(final ClientSpecificationBuilder builder, final String key, Class<?> fieldType, final String value) {
+        if (fieldType != null) {
+            Object convertedValue = convertToFieldType(fieldType, value);
+            builder.with(key, ":", convertedValue);
+        }
+    }
+    private Class<?> getFieldClass(String fieldName) {
+        try {
+            Class<?> clazz = Class.forName("com.technofacts.lnf.client.model.Client");
+            Field field = clazz.getDeclaredField(fieldName);
+            return field.getType();
+        } catch (ClassNotFoundException | NoSuchFieldException e) {
+            return null;
+        }
+    }
+
+    private Object convertToFieldType(Class<?> fieldType, String value) {
+        if (fieldType.isEnum()) {
+            return getEnumConstant(fieldType, value);
+        } else if (fieldType == Integer.class || fieldType == int.class) {
+            return Integer.valueOf(value);
+        } else {
+            return value;
+        }
+    }
+
+    private Enum<?> getEnumConstant(Class<?> fieldType, String value) {
+        String uppercaseValue = value.toUpperCase();
+        for (Enum<?> enumConstant : ((Class<? extends Enum>) fieldType).getEnumConstants()) {
+            if (enumConstant.name().toUpperCase().equals(uppercaseValue)) {
+                return enumConstant;
+            }
+        }
+        return null;
     }
 }
 
