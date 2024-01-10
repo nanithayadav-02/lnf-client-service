@@ -6,10 +6,12 @@ import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
+import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
+import com.technofacts.lnf.service.common.page.PaginatedAndSortedService;
 import com.technofacts.lnf.service.specification.GenericSpecificationBuilder;
 import com.technofacts.lnf.util.RestUtil;
 import com.technofacts.lnf.util.specification.SpecificationUtil;
@@ -31,7 +33,7 @@ import java.util.function.Function;
 @Transactional
 @RequiredArgsConstructor
 @Log
-public class ProjectService {
+public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
 
     private final ProjectRepository repository;
     private final ClientRepository clientRepository;
@@ -44,6 +46,7 @@ public class ProjectService {
      * @param size Requested size in the page
      * @return A Page object with projectDto
      */
+    @Override
     public Page<ProjectDto> findPaginated(final int page, final int size) {
         Page<Project> resultPage = repository.findAll(PageRequest.of(page, size));
         return validateAndGetPages(page, resultPage);
@@ -59,6 +62,7 @@ public class ProjectService {
      * @param sortOrder sort order ASC or DESC
      * @return A Page object with sorted projectDtos
      */
+    @Override
     public Page<ProjectDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         Page<Project> resultPage = repository.findAll(PageRequest.of(page, size, sortInfo));
@@ -72,6 +76,7 @@ public class ProjectService {
      * @param sortOrder sort order ASC or DESC
      * @return Sorted list of all ProjectDto objects.
      */
+    @Override
     public List<ProjectDto> findAllSorted(String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Project> entities = Lists.newArrayList(repository.findAll(sortInfo));
@@ -83,6 +88,7 @@ public class ProjectService {
      *
      * @return List of all ProjectDto objects.
      */
+    @Override
     public List<ProjectDto> findAll() {
         List<Project> entities = repository.findAll();
         return entities.stream().map(ProjectConverter::toTransportModel)

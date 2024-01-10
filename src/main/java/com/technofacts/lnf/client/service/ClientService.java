@@ -5,9 +5,11 @@ import com.technofacts.lnf.client.converter.ClientConverter;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.dto.client.ClientDto;
+import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
+import com.technofacts.lnf.service.common.page.PaginatedAndSortedService;
 import com.technofacts.lnf.service.specification.GenericSpecificationBuilder;
 import com.technofacts.lnf.util.RestUtil;
 import com.technofacts.lnf.util.specification.SpecificationUtil;
@@ -29,7 +31,7 @@ import java.util.function.Function;
 @Transactional
 @RequiredArgsConstructor
 @Log
-public class ClientService {
+public class ClientService implements PaginatedAndSortedService<ClientDto> {
 
     private final ClientRepository repository;
 
@@ -41,6 +43,7 @@ public class ClientService {
      * @param size Requested size in the page
      * @return A Page object with clientDtos
      */
+    @Override
     public Page<ClientDto> findPaginated(final int page, final int size) {
         Page<Client> resultPage = repository.findAll(PageRequest.of(page, size));
         return validateAndGetPages(page, resultPage);
@@ -56,6 +59,7 @@ public class ClientService {
      * @param sortOrder sort order ASC or DESC
      * @return A Page object with sorted clientDtos
      */
+    @Override
     public Page<ClientDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         Page<Client> resultPage = repository.findAll(PageRequest.of(page, size, sortInfo));
@@ -69,6 +73,7 @@ public class ClientService {
      * @param sortOrder sort order ASC or DESC
      * @return Sorted list of all ClientDto objects.
      */
+    @Override
     public List<ClientDto> findAllSorted(String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Client> entities = Lists.newArrayList(repository.findAll(sortInfo));
@@ -82,6 +87,7 @@ public class ClientService {
      *
      * @return List of all ClientDto objects.
      */
+    @Override
     public List<ClientDto> findAll() {
         List<Client> entities = repository.findAll();
         return entities.stream().map(ClientConverter::toTransportModel)
@@ -113,7 +119,6 @@ public class ClientService {
         saveEntity(entity);
         log.info(() -> String.format("Client[%s] successfully created", entity.getCode()));
     }
-
 
     /**
      * Updates the client
