@@ -1,15 +1,17 @@
 package com.technofacts.lnf.client.controller;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ProjectDto;
-import com.technofacts.lnf.util.QueryConstants;
+import com.technofacts.lnf.dto.common.PageRequestDto;
+import com.technofacts.lnf.service.common.page.PageableAsQueryParam;
+import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,64 +19,17 @@ import org.springframework.web.bind.annotation.*;
 public class ProjectController {
 
     private final ProjectService service;
+    private final PaginationAndSortingHandler paginationAndSortingHandler;
 
     /**
-     * Return requested page with list of ProjectDto objects with requested size.  Raises LnFEntityNotFoundException
+     * Return requested page with list of ProjectDto objects with requested sortBy and sortOrder and size and page.  Raises LnFEntityNotFoundException
      * if the requested page is more than the total number of pages.
      *
-     * @param page Requested Page Number
-     * @param size Requested size in the page
-     * @return A Page object with projectDtos
-     */
-    @GetMapping(value = "/projects", params = {QueryConstants.PAGE, QueryConstants.SIZE})
-    @ResponseStatus(HttpStatus.OK)
-    public Page<ProjectDto> findPaginated(@RequestParam(value = QueryConstants.PAGE) final int page,
-                                          @RequestParam(value = QueryConstants.SIZE) final int size) {
-        return service.findPaginated(page, size);
-    }
-
-    /**
-     * Return requested page with sorted list of ProjectDto objects with requested size. Raises LnFEntityNotFoundException
-     * if the requested page is more than the total number of pages.
-     *
-     * @param page      Requested Page Number
-     * @param size      Requested size in the page
-     * @param sortBy    sorting parameter
-     * @param sortOrder sort order ASC or DESC
-     * @return A Page object with sorted projectDtos
-     */
-    @GetMapping(value = "/projects", params = {QueryConstants.PAGE, QueryConstants.SIZE, QueryConstants.SORT_BY})
-    @ResponseStatus(HttpStatus.OK)
-    public Page<ProjectDto> findPaginatedAndSorted(@RequestParam(value = QueryConstants.PAGE) final int page,
-                                                  @RequestParam(value = QueryConstants.SIZE) final int size,
-                                                  @RequestParam(value = QueryConstants.SORT_BY) final String sortBy,
-                                                  @RequestParam(value = QueryConstants.SORT_ORDER) final String sortOrder) {
-        return service.findPaginatedAndSorted(page, size, sortBy, sortOrder);
-    }
-
-    /**
-     * Return sorted list of all ProjectDto objects
-     *
-     * @param sortBy    sorting parameter
-     * @param sortOrder sort order ASC or DESC
-     * @return Sorted list of all ProjectDto objects.
-     */
-    @GetMapping(value = "/projects", params = {QueryConstants.SORT_BY, QueryConstants.SORT_ORDER})
-    @ResponseStatus(HttpStatus.OK)
-    public List<ProjectDto> findAllSorted(@RequestParam(value = QueryConstants.SORT_BY) final String sortBy,
-                                         @RequestParam(value = QueryConstants.SORT_ORDER) final String sortOrder) {
-        return service.findAllSorted(sortBy, sortOrder);
-    }
-
-    /**
-     * Return list of all ProjectDto objects
-     *
-     * @return List of all ProjectDto objects.
      */
     @GetMapping(value = "/projects")
     @ResponseStatus(HttpStatus.OK)
-    public List<ProjectDto> findAll() {
-        return service.findAll();
+    public ResponseEntity<?> findAll(@PageableAsQueryParam PageRequestDto pageRequest) {
+        return paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
     }
 
     /**
