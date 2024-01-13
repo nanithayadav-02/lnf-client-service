@@ -31,7 +31,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: dev
             - name: EMPLOYEE_SERVICE_URL
-              value: "http://lnf-employee-service:8085/api/v1"
+              value: "http://lnf-employee-service:8085/api/v2"
             - name: KEYCLOAK_HOST
               value: keycloak:8080
             - name: CLIENT-SECRET

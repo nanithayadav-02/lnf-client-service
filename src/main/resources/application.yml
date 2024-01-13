@@ -10,7 +10,7 @@ KEYCLOAK_HOST: "keycloak:8080"
 server:
   port: 8081
   servlet:
-    context-path: /api/v1
+    context-path: /api/v2
 
 aws:
   s3:
@@ -27,11 +27,11 @@ connection:
 
 employee:
   service:
-    url: "http://localhost:8081/api/v1"
+    url: "http://localhost:8081/api/v2"
 
 file:
   service:
-    url: "http://localhost:8081/api/v1"
+    url: "http://localhost:8081/api/v2"
 
 # Metrics Configuration
 management:
