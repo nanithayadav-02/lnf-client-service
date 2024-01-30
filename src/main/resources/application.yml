@@ -100,8 +100,9 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://${KEYCLOAK_HOST}/auth/realms/lnf
-          jwk-set-uri: http://${KEYCLOAK_HOST}/auth/realms/lnf/protocol/openid-connect/certs
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf/protocol/openid-connect/certs
+
       client:
         registration:
           client-service:
@@ -112,7 +113,7 @@ spring:
             provider: keycloak
         provider:
           keycloak:
-            issuer-uri: http://${KEYCLOAK_HOST}/auth/realms/lnf
+            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
 
 
 printStackTrace: true
@@ -151,8 +152,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://${KEYCLOAK_HOST}/auth/realms/lnf
-          jwk-set-uri: http://${KEYCLOAK_HOST}/auth/realms/lnf/protocol/openid-connect/certs
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf/protocol/openid-connect/certs
       client:
         registration:
           client-service:
@@ -163,7 +164,7 @@ spring:
             provider: keycloak
         provider:
           keycloak:
-            issuer-uri: http://${KEYCLOAK_HOST}/auth/realms/lnf
+            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
 printStackTrace: true
 ---
 spring:
@@ -195,7 +196,23 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf/protocol/openid-connect/certs
+      client:
+        registration:
+          client-service:
+            client-id: lnf-client-api
+            client-secret: ${client-secret:lnf-client-api-secret}
+            scope: openid,profile,roles
+            authorization-grant-type: client_credentials
+            provider: keycloak
+        provider:
+          keycloak:
+            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
   autoconfigure:
     exclude:
       - org.keycloak.adapters.springboot.KeycloakAutoConfiguration

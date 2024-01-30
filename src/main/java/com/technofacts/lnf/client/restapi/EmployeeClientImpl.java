@@ -7,6 +7,8 @@ import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -29,9 +31,11 @@ public class EmployeeClientImpl implements EmployeeService {
 
     @Override
     public EmployeeDto findOne(String employeeId) {
+        Jwt jwt = getJwtToken();
         try {
             return webClient.get()
                     .uri("/lnf/employees/" + employeeId)
+                    .headers(header -> header.setBearerAuth(jwt.getTokenValue()))
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(EmployeeDto.class)
@@ -55,11 +59,12 @@ public class EmployeeClientImpl implements EmployeeService {
     @Override
     public List<EmployeeDto> findByEmployeeIds(List<String> employeeIds) {
         List<EmployeeDto> employeeDtos = new ArrayList<>();
-
+        Jwt jwt = getJwtToken();
         try {
             // POST the request
              employeeDtos = webClient.post()
                      .uri("/lnf/employeeList")
+                     .headers(header -> header.setBearerAuth(jwt.getTokenValue()))
                      .body(BodyInserters.fromPublisher(Mono.just(employeeIds), new ParameterizedTypeReference<List<String>>() {}))
                      .accept(MediaType.APPLICATION_JSON)
                      .retrieve()
@@ -99,4 +104,9 @@ public class EmployeeClientImpl implements EmployeeService {
     public List<EmployeeDto> findDirectReports(String employeeId) {
         return null;
     }
+
+    private Jwt getJwtToken() {
+        return (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
 }
