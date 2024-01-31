@@ -65,7 +65,8 @@ public class EmployeeClientImpl implements EmployeeService {
              employeeDtos = webClient.post()
                      .uri("/lnf/employeeList")
                      .headers(header -> header.setBearerAuth(jwt.getTokenValue()))
-                     .body(BodyInserters.fromPublisher(Mono.just(employeeIds), new ParameterizedTypeReference<List<String>>() {}))
+                     .body(BodyInserters.fromPublisher(Mono.just(employeeIds), new ParameterizedTypeReference<>() {
+                     }))
                      .accept(MediaType.APPLICATION_JSON)
                      .retrieve()
                      .bodyToMono(new ParameterizedTypeReference<List<EmployeeDto>>() {})
@@ -94,10 +95,12 @@ public class EmployeeClientImpl implements EmployeeService {
 
     @Override
     public void update(String employeeId, EmployeeDto resource) {
+        //To be implemented
     }
 
     @Override
     public void delete(String employeeId) {
+        //To be implemented
     }
 
     @Override
