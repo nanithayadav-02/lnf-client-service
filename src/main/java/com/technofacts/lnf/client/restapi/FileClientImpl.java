@@ -62,7 +62,6 @@ public class FileClientImpl implements FileUploadService {
         Jwt jwt = getJwtToken();
         try {
             String joinedKeys = String.join(",", filePaths);
-
             webClient
                     .delete()
                     .uri(s3Service  +"?filePaths=" + joinedKeys)
