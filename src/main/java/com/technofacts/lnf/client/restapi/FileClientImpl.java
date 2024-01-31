@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -39,10 +41,11 @@ public class FileClientImpl implements FileUploadService {
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("folder", folder);
         bodyBuilder.part("file", file.getResource());
-
+        Jwt jwt = getJwtToken();
         try {
             return webClient.post()
                     .uri(s3Service + "/upload")
+                    .headers(header -> header.setBearerAuth(jwt.getTokenValue()))
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                     .retrieve()
@@ -56,12 +59,14 @@ public class FileClientImpl implements FileUploadService {
 
     @Override
     public void delete(List<String> filePaths) {
+        Jwt jwt = getJwtToken();
         try {
             String joinedKeys = String.join(",", filePaths);
 
             webClient
                     .delete()
                     .uri(s3Service  +"?filePaths=" + joinedKeys)
+                    .headers(header -> header.setBearerAuth(jwt.getTokenValue()))
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .retrieve()
                     .toBodilessEntity()
@@ -73,9 +78,11 @@ public class FileClientImpl implements FileUploadService {
     }
 
     public ResponseEntity<byte[]> findFile(String filePath) {
+        Jwt jwt = getJwtToken();
         try {
             ResponseEntity<byte[]> response = webClient.get()
                     .uri(s3Service + "?filePath={filePath}", filePath)
+                    .headers(header -> header.setBearerAuth(jwt.getTokenValue()))
                     .accept(MediaType.APPLICATION_OCTET_STREAM)
                     .retrieve()
                     .toEntity(byte[].class)
@@ -87,4 +94,9 @@ public class FileClientImpl implements FileUploadService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    private Jwt getJwtToken() {
+        return (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
 }
