@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: dev-ide
 
   application:
     name: lnf-client-service
