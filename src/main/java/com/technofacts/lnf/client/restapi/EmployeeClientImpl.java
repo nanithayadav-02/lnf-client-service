@@ -66,7 +66,7 @@ public class EmployeeClientImpl extends BaseWebClientService  implements Employe
                      .accept(MediaType.APPLICATION_JSON);
             // Conditionally add the JWT token to the request headers
             addJwtToken(spec);
-            return spec.retrieve()
+            employeeDtos = spec.retrieve()
                      .bodyToMono(new ParameterizedTypeReference<List<EmployeeDto>>() {})
                      .block();
 
