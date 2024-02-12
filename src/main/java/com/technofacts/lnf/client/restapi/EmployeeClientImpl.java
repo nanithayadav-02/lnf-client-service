@@ -7,8 +7,6 @@ import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,7 +19,7 @@ import java.util.logging.Level;
 
 @Service
 @Log
-public class EmployeeClientImpl implements EmployeeService {
+public class EmployeeClientImpl extends BaseWebClientService  implements EmployeeService {
 
     private final WebClient webClient;
 
@@ -31,19 +29,19 @@ public class EmployeeClientImpl implements EmployeeService {
 
     @Override
     public EmployeeDto findOne(String employeeId) {
-        Jwt jwt = getJwtToken();
         try {
-            return webClient.get()
+            // Create the web request, adding JWT token if available
+            WebClient.RequestHeadersSpec<?> spec =  webClient.get()
                     .uri("/lnf/employees/" + employeeId)
-                    .headers(header -> header.setBearerAuth(jwt.getTokenValue()))
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
+                    .accept(MediaType.APPLICATION_JSON);
+            // Conditionally add the JWT token to the request headers
+            addJwtToken(spec);
+            return spec.retrieve()
                     .bodyToMono(EmployeeDto.class)
                     .block();
         } catch (LnFEntityNotFoundException ex) {
             log.warning(String.format("Employee with id [%s] does not exist", employeeId));
-        }
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             log.log(Level.SEVERE, String.format("Error occurred fetching the details of the employee [%s]", employeeId), ex);
         }
         return null;
@@ -59,16 +57,16 @@ public class EmployeeClientImpl implements EmployeeService {
     @Override
     public List<EmployeeDto> findByEmployeeIds(List<String> employeeIds) {
         List<EmployeeDto> employeeDtos = new ArrayList<>();
-        Jwt jwt = getJwtToken();
         try {
             // POST the request
-             employeeDtos = webClient.post()
+            WebClient.RequestHeadersSpec<?> spec = webClient.post()
                      .uri("/lnf/employeeList")
-                     .headers(header -> header.setBearerAuth(jwt.getTokenValue()))
                      .body(BodyInserters.fromPublisher(Mono.just(employeeIds), new ParameterizedTypeReference<>() {
                      }))
-                     .accept(MediaType.APPLICATION_JSON)
-                     .retrieve()
+                     .accept(MediaType.APPLICATION_JSON);
+            // Conditionally add the JWT token to the request headers
+            addJwtToken(spec);
+            employeeDtos = spec.retrieve()
                      .bodyToMono(new ParameterizedTypeReference<List<EmployeeDto>>() {})
                      .block();
 
@@ -105,11 +103,7 @@ public class EmployeeClientImpl implements EmployeeService {
 
     @Override
     public List<EmployeeDto> findDirectReports(String employeeId) {
-        return null;
-    }
-
-    private Jwt getJwtToken() {
-        return (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return Collections.emptyList();
     }
 
 }
