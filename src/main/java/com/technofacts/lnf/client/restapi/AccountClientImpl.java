@@ -29,7 +29,6 @@ public class AccountClientImpl extends BaseWebClientService implements InvoiceSe
     public List<InvoiceDto> search(UUID projectId) {
         List<InvoiceDto> invoiceDtos = new ArrayList<>();
         try {
-            // POST the request
             WebClient.RequestHeadersSpec<?> spec = webClient.get()
                     .uri("/lnf/invoices?search=projectId:{projectId}", projectId)
                     .accept(MediaType.APPLICATION_JSON);
@@ -54,7 +53,6 @@ public class AccountClientImpl extends BaseWebClientService implements InvoiceSe
     public List<InvoiceDto> findInvoicesByDateRange(LocalDate startDate, LocalDate endDate) {
         List<InvoiceDto> invoiceDtos = new ArrayList<>();
         try {
-            // POST the request
             WebClient.RequestHeadersSpec<?> spec = webClient.get()
                     .uri("/lnf/invoices/dateRange?startDate={startDate}&endDate={endDate}", startDate, endDate)
                     .accept(MediaType.APPLICATION_JSON);

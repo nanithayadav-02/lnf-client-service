@@ -23,7 +23,7 @@ application:
   maxInMemorySize: 10485760
 
 connection:
-  timeout: 8000
+  timeout: 5000
 
 employee:
   service:
