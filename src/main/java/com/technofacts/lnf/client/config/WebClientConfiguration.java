@@ -25,6 +25,9 @@ public class WebClientConfiguration {
     @Value("${file.service.url}")
     private String fileServiceUrl;
 
+    @Value("${account.service.url}")
+    private String accountServiceUrl;
+
     @Value("${application.maxInMemorySize}")
     private int maxInMemorySize;
 
@@ -66,6 +69,22 @@ public class WebClientConfiguration {
                 .baseUrl(fileServiceUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .exchangeStrategies(exchangeStrategies)
+                .build();
+    }
+
+    @Qualifier("invoiceService")
+    @Bean
+    public WebClient invoiceWebClient() {
+
+        HttpClient httpClient = HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeOut)
+                .responseTimeout(Duration.ofMillis(timeOut))
+                .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(timeOut, TimeUnit.MILLISECONDS))
+                        .addHandlerLast(new WriteTimeoutHandler(timeOut, TimeUnit.MILLISECONDS)));
+
+        return WebClient.builder()
+                .baseUrl(accountServiceUrl)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
 }

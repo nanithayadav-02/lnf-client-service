@@ -23,13 +23,17 @@ application:
   maxInMemorySize: 10485760
 
 connection:
-  timeout: 2000
+  timeout: 8000
 
 employee:
   service:
     url: "http://localhost:8081/api/v2"
 
 file:
+  service:
+    url: "http://localhost:8081/api/v2"
+
+account:
   service:
     url: "http://localhost:8081/api/v2"
 
