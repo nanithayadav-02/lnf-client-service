@@ -22,11 +22,11 @@ public class WebClientConfiguration {
     @Value("${employee.service.url}")
     private String employeeServiceUrl;
 
-    @Value("${file.service.url}")
-    private String fileServiceUrl;
-
     @Value("${account.service.url}")
     private String accountServiceUrl;
+
+    @Value("${file.service.url}")
+    private String fileServiceUrl;
 
     @Value("${application.maxInMemorySize}")
     private int maxInMemorySize;
@@ -36,19 +36,11 @@ public class WebClientConfiguration {
 
     @Qualifier("employeeService")
     @Bean
-    public WebClient employeeWebClient() {
+    public WebClient employeeWebClient() { return createWebClient(employeeServiceUrl);}
 
-        HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeOut)
-                .responseTimeout(Duration.ofMillis(timeOut))
-                .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(timeOut, TimeUnit.MILLISECONDS))
-                        .addHandlerLast(new WriteTimeoutHandler(timeOut, TimeUnit.MILLISECONDS)));
-
-        return WebClient.builder()
-                .baseUrl(employeeServiceUrl)
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .build();
-    }
+    @Bean
+    @Qualifier("invoiceService")
+    public WebClient invoiceWebClient() { return createWebClient(accountServiceUrl);}
 
     @Bean
     @Primary
@@ -72,10 +64,7 @@ public class WebClientConfiguration {
                 .build();
     }
 
-    @Qualifier("invoiceService")
-    @Bean
-    public WebClient invoiceWebClient() {
-
+    private WebClient createWebClient(String baseUrl) {
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeOut)
                 .responseTimeout(Duration.ofMillis(timeOut))
@@ -83,9 +72,9 @@ public class WebClientConfiguration {
                         .addHandlerLast(new WriteTimeoutHandler(timeOut, TimeUnit.MILLISECONDS)));
 
         return WebClient.builder()
-                .baseUrl(accountServiceUrl)
+                .baseUrl(baseUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
-}
 
+}

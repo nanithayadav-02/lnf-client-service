@@ -16,7 +16,7 @@ public class AccountStatementController {
 
     private final AccountStatementService service;
 
-    @GetMapping(value = "/clients/accountStatement/dateRange")
+    @GetMapping(value = "/clients/account-statement")
     @ResponseStatus(HttpStatus.OK)
     public List<AccountStatementDto> findAccountStatement(@RequestParam LocalDate startDate,
                                                           @RequestParam LocalDate endDate) {
