@@ -1,6 +1,7 @@
 package com.technofacts.lnf.client.restapi;
 
 import com.technofacts.lnf.dto.account.InvoiceDto;
+import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.service.account.InvoiceService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -71,5 +72,29 @@ public class AccountClientImpl extends BaseWebClientService implements InvoiceSe
                 "Unable to fetch [%d] projects details", invoiceDtos.size(), responseSize, invoiceDtos.size() - responseSize));
 
         return invoiceDtos;
+    }
+
+    @Override
+    public List<InvoiceDto> findAll(String search) {
+        List<InvoiceDto> invoiceDTOs = new ArrayList<>();
+
+        try {
+            WebClient.RequestHeadersSpec<?> spec =  webClient.get()
+                    .uri("/lnf/invoices?search={search}", search)
+                    .accept(MediaType.APPLICATION_JSON);
+
+            addJwtToken(spec);
+
+            invoiceDTOs = spec.retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<InvoiceDto>>() {})
+                    .block();
+
+        } catch (LnFEntityNotFoundException ex) {
+            log.warning("Failed to get the Invoice details");
+        } catch (RuntimeException ex) {
+            log.log(Level.SEVERE, String.format("Error occurred fetching the Invoice details [%s]", ex.getMessage()));
+        }
+
+        return invoiceDTOs;
     }
 }
