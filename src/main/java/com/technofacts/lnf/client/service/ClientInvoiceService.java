@@ -36,6 +36,8 @@ public class ClientInvoiceService {
         return invoiceDtos.stream().map(e -> {
             ClientInvoiceDto clientInvoiceDto = ClientInvoiceDto.builder()
                     .reference(e.getReference())
+                    .invoiceDate(e.getInvoiceDate())
+                    .terms(e.getProjectPaymentTerms())
                     .purchaseOrderReference(e.getPurchaseOrderReference())
                     .status(e.getStatus()).build();
             if (!CollectionUtils.isEmpty(projectsByClientId)) {
