@@ -15,8 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -30,6 +31,7 @@ public class AccountStatementService {
     private final ThymeleafDocumentService documentService;
 
     private final ThymeleafEmailService emailService;
+
 
     public List<AccountStatementDto> findByClientId(UUID clientId) {
         List<ProjectDto> projects = projectService.findProjectsByClientId(clientId);
@@ -66,15 +68,17 @@ public class AccountStatementService {
             });
         }
         return filteredStream
+                .filter(invoiceDto -> invoiceDto.getProjectId() != null)
                 .map(this::createAccountStatement)
                 .toList();
     }
 
-    private AccountStatementDto createAccountStatement(InvoiceDto invoiceDto) {
-        ProjectDto projectDto = retrieveProjectDetails(invoiceDto.getProjectId());
+    private AccountStatementDto createAccountStatement(UUID projectId) {
+
+        ProjectDto projectDto = retrieveProjectDetails(projectId);
+        InvoiceDto invoiceDto = retrieveInvoiceDetails(projectId);
 
         AccountStatementDto statementDto = new AccountStatementDto();
-        statementDto.setInvoiceReference(invoiceDto.getReference());
         statementDto.setProjectId(projectDto.getId());
         statementDto.setProjectName(projectDto.getName());
         statementDto.setProjectType(projectDto.getType());
@@ -161,3 +165,5 @@ public class AccountStatementService {
     }
 
 }
+
+
