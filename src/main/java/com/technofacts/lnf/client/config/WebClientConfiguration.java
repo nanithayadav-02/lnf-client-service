@@ -42,7 +42,7 @@ public class WebClientConfiguration {
     public WebClient employeeWebClient() { return createWebClient(employeeServiceUrl);}
 
     @Bean
-    @Qualifier("invoiceService")
+    @Qualifier("accountService")
     public WebClient invoiceWebClient() { return createWebClient(accountServiceUrl);}
 
     @Bean
