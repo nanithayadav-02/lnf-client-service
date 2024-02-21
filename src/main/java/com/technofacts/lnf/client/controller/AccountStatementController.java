@@ -1,10 +1,7 @@
 package com.technofacts.lnf.client.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.technofacts.lnf.client.service.AccountStatementService;
 import com.technofacts.lnf.dto.client.AccountStatementDto;
-import com.technofacts.lnf.dto.payroll.PayrollDto;
-import com.technofacts.lnf.dto.payroll.PayslipDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,10 +42,10 @@ public class AccountStatementController {
                 .body(pdfBytes);
     }
 
-    @PostMapping("/clients/statement/email")
+    @PostMapping("/clients/account-statement/email")
     public void emailClientsAccountStatement(@RequestParam LocalDate startDate,
                                       @RequestParam LocalDate endDate,
                                       String email) {
-        service.sendEmailWithPdfAttachment(startDate, endDate,email);
+        service.sendEmailWithPdfAttachment(startDate, endDate, email);
     }
 }
