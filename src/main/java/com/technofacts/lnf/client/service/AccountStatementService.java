@@ -15,9 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -42,7 +41,6 @@ public class AccountStatementService {
         return createAccountStatements(null, invoices);
     }
 
-
     public List<AccountStatementDto> findStatementForDesiredMonths(UUID clientId, int months) {
         LocalDate startDate = LocalDate.now().minusMonths(months);
         LocalDate endDate = LocalDate.now();
@@ -63,8 +61,8 @@ public class AccountStatementService {
         Stream<InvoiceDto> filteredStream = dtoList.stream();
         if (clientId != null) {
             filteredStream = filteredStream.filter(invoiceDto -> {
-               UUID existingClientId = invoiceDto.getClientId();
-               return existingClientId != null && existingClientId.equals(clientId);
+                UUID existingClientId = invoiceDto.getClientId();
+                return existingClientId != null && existingClientId.equals(clientId);
             });
         }
         return filteredStream
@@ -73,12 +71,11 @@ public class AccountStatementService {
                 .toList();
     }
 
-    private AccountStatementDto createAccountStatement(UUID projectId) {
-
-        ProjectDto projectDto = retrieveProjectDetails(projectId);
-        InvoiceDto invoiceDto = retrieveInvoiceDetails(projectId);
+    private AccountStatementDto createAccountStatement(InvoiceDto invoiceDto) {
+        ProjectDto projectDto = retrieveProjectDetails(invoiceDto.getProjectId());
 
         AccountStatementDto statementDto = new AccountStatementDto();
+        statementDto.setInvoiceReference(invoiceDto.getReference());
         statementDto.setProjectId(projectDto.getId());
         statementDto.setProjectName(projectDto.getName());
         statementDto.setProjectType(projectDto.getType());
@@ -96,7 +93,6 @@ public class AccountStatementService {
 
         return statementDto;
     }
-
     private ProjectDto retrieveProjectDetails(UUID projectId) {
         return projectService.findByProjectId(projectId);
     }
@@ -165,5 +161,3 @@ public class AccountStatementService {
     }
 
 }
-
-
