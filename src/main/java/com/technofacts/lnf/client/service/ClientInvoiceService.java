@@ -26,56 +26,51 @@ public class ClientInvoiceService {
 
     private final ProjectService projectService;
 
-
-   public List<ClientInvoiceDto> getInvoicesByClientId(UUID clientId, LocalDate startDate, LocalDate endDate) {
-       List<InvoiceDto> invoiceDtos = (Objects.isNull(startDate) && Objects.isNull(endDate)) ?
-               getAllInvoicesByClientId(clientId) : getInvoicesByDateRange(startDate, endDate);
-
-       List<ProjectDto> projectsByClientId = projectService.findProjectsByClientId(clientId);
-
-       return mapToClientInvoiceDtos(invoiceDtos, projectsByClientId, clientId);
-   }
-
-    private List<InvoiceDto> getAllInvoicesByClientId(UUID clientId) {
-        return accountClient.findAll("clientId:%s".formatted(clientId));
+    public List<ClientInvoiceDto> getInvoicesByClientId(UUID clientId, LocalDate startDate, LocalDate endDate) {
+        List<InvoiceDto> invoiceDtos = retrieveClientInvoices(clientId, startDate, endDate);
+        List<ProjectDto> projectsByClientId = projectService.findProjectsByClientId(clientId);
+        return getClientInvoiceDtos(invoiceDtos, projectsByClientId);
     }
 
-    private List<InvoiceDto> getInvoicesByDateRange(LocalDate startDate, LocalDate endDate) {
-        if (Objects.isNull(startDate)) {
-            throw new LnFBadRequestException("Start date is required");
-        }
-        if (endDate != null && endDate.isBefore(startDate)) {
-            throw new LnFBadRequestException("End date should not be before start date");
-        }
-        endDate = Objects.isNull(endDate) ? LocalDate.now() : endDate;
-        return accountClient.findInvoicesByDateRange(startDate, endDate);
+    private static List<ClientInvoiceDto> getClientInvoiceDtos(List<InvoiceDto> invoiceDtos, List<ProjectDto> projectsByClientId) {
+        return invoiceDtos.stream().map(e -> {
+            ClientInvoiceDto clientInvoiceDto = ClientInvoiceDto.builder()
+                    .reference(e.getReference())
+                    .purchaseOrderReference(e.getPurchaseOrderReference())
+                    .status(e.getStatus()).build();
+            if (!CollectionUtils.isEmpty(projectsByClientId)) {
+                projectsByClientId.stream()
+                        .filter(pro -> pro.getId().equals(e.getProjectId()))
+                        .findFirst().ifPresent(p -> {
+                            clientInvoiceDto.setProjectName(p.getName());
+                            clientInvoiceDto.setProjectType(p.getType());
+                        });
+            }
+            return clientInvoiceDto;
+        }).toList();
     }
 
-    private List<ClientInvoiceDto> mapToClientInvoiceDtos(List<InvoiceDto> invoiceDtos, List<ProjectDto> projectsByClientId, UUID clientId) {
+    private List<InvoiceDto> retrieveClientInvoices(UUID clientId , LocalDate startDate , LocalDate endDate) {
+        List<InvoiceDto> invoiceDtos;
+        if (Objects.isNull(startDate) && Objects.isNull(endDate)) {
+            invoiceDtos = accountClient.findAll("clientId:%s".formatted(clientId));
+        } else {
+            if (Objects.isNull(startDate)) {
+                throw new LnFBadRequestException("Start date is required");
+            }
+            if (Objects.nonNull(endDate) && endDate.isBefore(startDate)) {
+                throw new LnFBadRequestException("End date should not be before start date");
+            }
+            endDate = Objects.isNull(endDate) ? LocalDate.now() : endDate;
+            List<InvoiceDto> invoicesByDateRange = accountClient.findInvoicesByDateRange(startDate , endDate);
+            if (CollectionUtils.isEmpty(invoicesByDateRange)) {
+                throw new LnFEntityNotFoundException("Invoice details not found for clientId : " + clientId);
+            }
+            invoiceDtos = invoicesByDateRange.stream().filter(e -> e.getClientId().equals(clientId)).toList();
+        }
         if (CollectionUtils.isEmpty(invoiceDtos)) {
-            throw new LnFEntityNotFoundException("Invoice details not found for clientId: " + clientId);
+            throw new LnFEntityNotFoundException("Invoice details not found for clientId : " + clientId);
         }
-
-        return invoiceDtos.stream()
-                .map(invoiceDto -> mapToClientInvoiceDto(invoiceDto, projectsByClientId))
-                .toList();
-    }
-
-    private ClientInvoiceDto mapToClientInvoiceDto(InvoiceDto invoiceDto, List<ProjectDto> projectsByClientId) {
-        ClientInvoiceDto clientInvoiceDto = ClientInvoiceDto.builder()
-                .reference(invoiceDto.getReference())
-                .purchaseOrderReference(invoiceDto.getPurchaseOrderReference())
-                .status(invoiceDto.getStatus())
-                .build();
-
-        projectsByClientId.stream()
-                .filter(projectDto -> projectDto.getId().equals(invoiceDto.getProjectId()))
-                .findFirst()
-                .ifPresent(projectDto -> {
-                    clientInvoiceDto.setProjectName(projectDto.getName());
-                    clientInvoiceDto.setProjectType(projectDto.getType());
-                });
-
-        return clientInvoiceDto;
+        return invoiceDtos;
     }
 }
