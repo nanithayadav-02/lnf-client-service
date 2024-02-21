@@ -4,7 +4,7 @@ import com.technofacts.lnf.dto.account.InvoiceDto;
 import com.technofacts.lnf.dto.account.InvoiceItemDto;
 import com.technofacts.lnf.dto.client.AccountStatementDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
-import com.technofacts.lnf.service.account.AccountService;
+import com.technofacts.lnf.service.account.InvoiceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 @Log
 public class AccountStatementService {
 
-    private final AccountService accountService;
+    private final InvoiceService invoiceService;
     private final ProjectService projectService;
 
     public List<AccountStatementDto> findByClientId(UUID clientId) {
@@ -94,7 +94,7 @@ public class AccountStatementService {
 
     private List<InvoiceDto> retrieveInvoiceDetails(UUID projectId) {
         try {
-            return accountService.search(projectId);
+            return invoiceService.search(projectId);
         } catch (Exception e) {
             log.info("An error occurred while retrieving invoice details with projectId : " + projectId);
             return Collections.emptyList();
@@ -103,7 +103,7 @@ public class AccountStatementService {
 
     private List<InvoiceDto> retrieveInvoiceDetails(LocalDate startDate, LocalDate endDate) {
         try {
-            return accountService.findInvoicesByDateRange(startDate, endDate);
+            return invoiceService.findInvoicesByDateRange(startDate, endDate);
         } catch (Exception e) {
             log.info("An error occurred while retrieving invoice details : " + e.getMessage());
             return Collections.emptyList();
