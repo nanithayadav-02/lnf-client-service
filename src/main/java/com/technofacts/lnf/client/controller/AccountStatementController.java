@@ -43,7 +43,7 @@ public class AccountStatementController {
     }
 
     @PostMapping("/clients/account-statement/email")
-    public void emailClientsAccountStatement(@RequestParam LocalDate startDate,
+    public void emailAccountStatement(@RequestParam LocalDate startDate,
                                       @RequestParam LocalDate endDate,
                                       String email) {
         service.sendEmailWithPdfAttachment(startDate, endDate, email);
