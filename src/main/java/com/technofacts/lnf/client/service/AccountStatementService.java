@@ -60,7 +60,10 @@ public class AccountStatementService {
     private List<AccountStatementDto> createAccountStatements(UUID clientId, List<InvoiceDto> dtoList) {
         Stream<InvoiceDto> filteredStream = dtoList.stream();
         if (clientId != null) {
-            filteredStream = filteredStream.filter(invoiceDto -> invoiceDto.getClientId().equals(clientId));
+            filteredStream = filteredStream.filter(invoiceDto -> {
+               UUID existingClientId = invoiceDto.getClientId();
+               return existingClientId != null && existingClientId.equals(clientId);
+            });
         }
         return filteredStream
                 .map(this::createAccountStatement)
