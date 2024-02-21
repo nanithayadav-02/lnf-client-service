@@ -40,6 +40,7 @@ public class AccountStatementService {
         return createAccountStatements(null, invoices);
     }
 
+
     public List<AccountStatementDto> findStatementForDesiredMonths(UUID clientId, int months) {
         LocalDate startDate = LocalDate.now().minusMonths(months);
         LocalDate endDate = LocalDate.now();
