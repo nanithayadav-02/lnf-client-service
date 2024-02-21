@@ -4,7 +4,7 @@ import com.technofacts.lnf.dto.account.InvoiceDto;
 import com.technofacts.lnf.dto.account.InvoiceItemDto;
 import com.technofacts.lnf.dto.client.AccountStatementDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
-import com.technofacts.lnf.service.account.InvoiceService;
+import com.technofacts.lnf.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 @Log
 public class AccountStatementService {
 
-    private final InvoiceService invoiceService;
+    private final AccountService accountService;
     private final ProjectService projectService;
 
     public List<AccountStatementDto> findByClientId(UUID clientId) {
@@ -54,9 +54,13 @@ public class AccountStatementService {
     private List<AccountStatementDto> createAccountStatements(UUID clientId, List<InvoiceDto> dtoList) {
         Stream<InvoiceDto> filteredStream = dtoList.stream();
         if (clientId != null) {
-            filteredStream = filteredStream.filter(invoiceDto -> invoiceDto.getClientId().equals(clientId));
+            filteredStream = filteredStream.filter(invoiceDto -> {
+               UUID existingClientId = invoiceDto.getClientId();
+               return existingClientId != null && existingClientId.equals(clientId);
+            });
         }
         return filteredStream
+                .filter(invoiceDto -> invoiceDto.getProjectId() != null)
                 .map(this::createAccountStatement)
                 .toList();
     }
@@ -90,7 +94,7 @@ public class AccountStatementService {
 
     private List<InvoiceDto> retrieveInvoiceDetails(UUID projectId) {
         try {
-            return invoiceService.search(projectId);
+            return accountService.search(projectId);
         } catch (Exception e) {
             log.info("An error occurred while retrieving invoice details with projectId : " + projectId);
             return Collections.emptyList();
@@ -99,7 +103,7 @@ public class AccountStatementService {
 
     private List<InvoiceDto> retrieveInvoiceDetails(LocalDate startDate, LocalDate endDate) {
         try {
-            return invoiceService.findInvoicesByDateRange(startDate, endDate);
+            return accountService.findInvoicesByDateRange(startDate, endDate);
         } catch (Exception e) {
             log.info("An error occurred while retrieving invoice details : " + e.getMessage());
             return Collections.emptyList();
