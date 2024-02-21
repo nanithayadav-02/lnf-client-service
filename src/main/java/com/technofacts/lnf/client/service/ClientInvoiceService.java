@@ -1,78 +1,78 @@
 package com.technofacts.lnf.client.service;
 
-import com.technofacts.lnf.client.restapi.AccountClientImpl;
+import com.technofacts.lnf.client.restapi.InvoiceServiceImpl;
 import com.technofacts.lnf.dto.account.InvoiceDto;
 import com.technofacts.lnf.dto.client.ClientInvoiceDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
-import lombok.RequiredArgsConstructor;
+import com.technofacts.lnf.service.account.InvoiceService;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 @Log
 public class ClientInvoiceService {
-    private final AccountClientImpl accountClient;
 
+    private final InvoiceService invoiceService;
     private final ProjectService projectService;
 
+    public ClientInvoiceService(InvoiceServiceImpl invoiceService, ProjectService projectService) {
+        this.invoiceService = invoiceService;
+        this.projectService = projectService;
+    }
+
     public List<ClientInvoiceDto> getInvoicesByClientId(UUID clientId, LocalDate startDate, LocalDate endDate) {
-        List<InvoiceDto> invoiceDtos = retrieveClientInvoices(clientId, startDate, endDate);
-        List<ProjectDto> projectsByClientId = projectService.findProjectsByClientId(clientId);
-        return getClientInvoiceDtos(invoiceDtos, projectsByClientId);
-    }
+        validateClientInvoiceParameters(startDate, endDate);
+        LocalDate effectiveEndDate = Optional.ofNullable(endDate).orElse(LocalDate.now());
 
-    private static List<ClientInvoiceDto> getClientInvoiceDtos(List<InvoiceDto> invoiceDtos, List<ProjectDto> projectsByClientId) {
-        return invoiceDtos.stream().map(e -> {
-            ClientInvoiceDto clientInvoiceDto = ClientInvoiceDto.builder()
-                    .reference(e.getReference())
-                    .invoiceDate(e.getInvoiceDate())
-                    .terms(e.getProjectPaymentTerms())
-                    .purchaseOrderReference(e.getPurchaseOrderReference())
-                    .status(e.getStatus()).build();
-            if (!CollectionUtils.isEmpty(projectsByClientId)) {
-                projectsByClientId.stream()
-                        .filter(pro -> pro.getId().equals(e.getProjectId()))
-                        .findFirst().ifPresent(p -> {
-                            clientInvoiceDto.setProjectName(p.getName());
-                            clientInvoiceDto.setProjectType(p.getType());
-                        });
-            }
-            return clientInvoiceDto;
-        }).toList();
-    }
-
-    private List<InvoiceDto> retrieveClientInvoices(UUID clientId , LocalDate startDate , LocalDate endDate) {
-        List<InvoiceDto> invoiceDtos;
-        if (Objects.isNull(startDate) && Objects.isNull(endDate)) {
-            invoiceDtos = accountClient.findAll("clientId:%s".formatted(clientId));
-        } else {
-            if (Objects.isNull(startDate)) {
-                throw new LnFBadRequestException("Start date is required");
-            }
-            if (Objects.nonNull(endDate) && endDate.isBefore(startDate)) {
-                throw new LnFBadRequestException("End date should not be before start date");
-            }
-            endDate = Objects.isNull(endDate) ? LocalDate.now() : endDate;
-            List<InvoiceDto> invoicesByDateRange = accountClient.findInvoicesByDateRange(startDate , endDate);
-            if (CollectionUtils.isEmpty(invoicesByDateRange)) {
-                throw new LnFEntityNotFoundException("Invoice details not found for clientId : " + clientId);
-            }
-            invoiceDtos = invoicesByDateRange.stream().filter(e -> e.getClientId().equals(clientId)).toList();
-        }
+        List<InvoiceDto> invoiceDtos = invoiceService.findAll(String.format("clientId:[%s],startDate:[%s],endDate:[%s]",
+                clientId, startDate, effectiveEndDate));
         if (CollectionUtils.isEmpty(invoiceDtos)) {
-            throw new LnFEntityNotFoundException("Invoice details not found for clientId : " + clientId);
+            throw new LnFEntityNotFoundException("Invoice details not found for clientId: " + clientId);
         }
-        return invoiceDtos;
+
+        List<ProjectDto> projectsByClientId = projectService.findProjectsByClientId(clientId);
+        return mapInvoicesToClientInvoiceDtos(invoiceDtos, projectsByClientId);
     }
+
+    private List<ClientInvoiceDto> mapInvoicesToClientInvoiceDtos(List<InvoiceDto> invoices, List<ProjectDto> projects) {
+        Map<UUID, ProjectDto> projectMap = projects.stream()
+                .collect(Collectors.toMap(ProjectDto::getId, Function.identity()));
+
+        return invoices.stream()
+                .map(invoice -> toClientInvoiceDto(invoice, projectMap))
+                .toList();
+    }
+
+    private ClientInvoiceDto toClientInvoiceDto(InvoiceDto invoice, Map<UUID, ProjectDto> projectMap) {
+        ProjectDto project = projectMap.get(invoice.getProjectId());
+        return ClientInvoiceDto.builder()
+                .reference(invoice.getReference())
+                .invoiceDate(invoice.getInvoiceDate())
+                .terms(invoice.getProjectPaymentTerms())
+                .purchaseOrderReference(invoice.getPurchaseOrderReference())
+                .status(invoice.getStatus())
+                .projectName(project != null ? project.getName() : null)
+                .projectType(project != null ? project.getType() : null)
+                .build();
+    }
+
+    private void validateClientInvoiceParameters(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null) {
+            throw new LnFBadRequestException("Start date is required.");
+        }
+        if (endDate != null && endDate.isBefore(startDate)) {
+            throw new LnFBadRequestException("End date should not be before start date.");
+        }
+    }
+
 }

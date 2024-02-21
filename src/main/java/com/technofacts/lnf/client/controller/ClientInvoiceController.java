@@ -17,7 +17,7 @@ public class ClientInvoiceController {
 
     private final ClientInvoiceService service;
 
-    @GetMapping(value = "/clients/invoices/{clientId}")
+    @GetMapping(value = "/clients/{clientId}/invoices")
     @ResponseStatus(HttpStatus.OK)
     public List<ClientInvoiceDto> getInvoicesByClientId(@PathVariable("clientId") final UUID clientId,
                                                         @RequestParam(required = false) LocalDate startDate ,
