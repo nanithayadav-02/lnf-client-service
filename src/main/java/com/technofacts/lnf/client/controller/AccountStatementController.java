@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,11 +20,32 @@ public class AccountStatementController {
 
     private final AccountStatementService service;
 
+    @GetMapping(value = "/clients/{clientId}/account-statement")
+    @ResponseStatus(HttpStatus.OK)
+    public List<AccountStatementDto> findByClientId(@PathVariable UUID clientId) {
+        return service.findByClientId(clientId);
+    }
+
+    @GetMapping(value = "/clients/{clientId}/account-statement/{months}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<AccountStatementDto> findStatementForDesiredMonths(@PathVariable UUID clientId,
+                                                                   @PathVariable int months) {
+        return service.findStatementForDesiredMonths(clientId, months);
+    }
+
+    @GetMapping(value = "/clients/{clientId}/account-statement/dateRange")
+    @ResponseStatus(HttpStatus.OK)
+    public List<AccountStatementDto> findByClientIdAndDateRange(@PathVariable UUID clientId,
+                                                                @RequestParam LocalDate startDate,
+                                                                @RequestParam LocalDate endDate) {
+        return service.findByClientIdAndDateRange(clientId, startDate, endDate);
+    }
+
     @GetMapping(value = "/clients/account-statement")
     @ResponseStatus(HttpStatus.OK)
-    public List<AccountStatementDto> findAccountStatement(@RequestParam LocalDate startDate,
-                                                          @RequestParam LocalDate endDate) {
-        return service.findAccountStatement(startDate, endDate);
+    public List<AccountStatementDto> findByDateRange(@RequestParam LocalDate startDate,
+                                                     @RequestParam LocalDate endDate) {
+        return service.findByDateRange(startDate, endDate);
     }
 
     @GetMapping("/clients/account-statement/pdf")
@@ -49,3 +71,5 @@ public class AccountStatementController {
         service.sendEmailWithPdfAttachment(startDate, endDate, email);
     }
 }
+
+
