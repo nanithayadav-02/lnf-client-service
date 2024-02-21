@@ -6,8 +6,6 @@ import com.technofacts.lnf.dto.client.AccountStatementDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.email.ThymeleafDocumentDto;
 import com.technofacts.lnf.dto.email.ThymeleafEmailDto;
-import com.technofacts.lnf.dto.payroll.PayrollDto;
-import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.service.account.InvoiceService;
 import com.technofacts.lnf.service.email.ThymeleafDocumentService;
 import com.technofacts.lnf.service.email.ThymeleafEmailService;
@@ -18,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -32,19 +31,46 @@ public class AccountStatementService {
 
     private final ThymeleafEmailService emailService;
 
-    public List<AccountStatementDto> findAccountStatement(LocalDate startDate, LocalDate endDate) {
+    public List<AccountStatementDto> findByClientId(UUID clientId) {
+        List<ProjectDto> projects = projectService.findProjectsByClientId(clientId);
+        List<InvoiceDto> invoices = projects.stream()
+                .map(ProjectDto::getId)
+                .flatMap(projectId -> retrieveInvoiceDetails(projectId).stream())
+                .toList();
+        return createAccountStatements(null, invoices);
+    }
+
+    public List<AccountStatementDto> findStatementForDesiredMonths(UUID clientId, int months) {
+        LocalDate startDate = LocalDate.now().minusMonths(months);
+        LocalDate endDate = LocalDate.now();
+        return findByClientIdAndDateRange(clientId, startDate, endDate);
+    }
+
+    public List<AccountStatementDto> findByClientIdAndDateRange(UUID clientId, LocalDate startDate, LocalDate endDate) {
         List<InvoiceDto> dtoList = retrieveInvoiceDetails(startDate, endDate);
-        return dtoList.stream()
-                .map(invoiceDto -> createAccountStatement(invoiceDto.getProjectId()))
+        return createAccountStatements(clientId, dtoList);
+    }
+
+    public List<AccountStatementDto> findByDateRange(LocalDate startDate, LocalDate endDate) {
+        List<InvoiceDto> dtoList = retrieveInvoiceDetails(startDate, endDate);
+        return createAccountStatements(null, dtoList);
+    }
+
+    private List<AccountStatementDto> createAccountStatements(UUID clientId, List<InvoiceDto> dtoList) {
+        Stream<InvoiceDto> filteredStream = dtoList.stream();
+        if (clientId != null) {
+            filteredStream = filteredStream.filter(invoiceDto -> invoiceDto.getClientId().equals(clientId));
+        }
+        return filteredStream
+                .map(this::createAccountStatement)
                 .toList();
     }
 
-    private AccountStatementDto createAccountStatement(UUID projectId) {
-
-        ProjectDto projectDto = retrieveProjectDetails(projectId);
-        InvoiceDto invoiceDto = retrieveInvoiceDetails(projectId);
+    private AccountStatementDto createAccountStatement(InvoiceDto invoiceDto) {
+        ProjectDto projectDto = retrieveProjectDetails(invoiceDto.getProjectId());
 
         AccountStatementDto statementDto = new AccountStatementDto();
+        statementDto.setInvoiceReference(invoiceDto.getReference());
         statementDto.setProjectId(projectDto.getId());
         statementDto.setProjectName(projectDto.getName());
         statementDto.setProjectType(projectDto.getType());
@@ -67,23 +93,27 @@ public class AccountStatementService {
         return projectService.findByProjectId(projectId);
     }
 
-    private InvoiceDto retrieveInvoiceDetails(UUID projectId) {
-        return invoiceService.search(projectId).stream().findFirst()
-                .orElseThrow(() -> new LnFEntityNotFoundException("Error occurred while retrieving invoice details: " + projectId));
+    private List<InvoiceDto> retrieveInvoiceDetails(UUID projectId) {
+        try {
+            return invoiceService.search(projectId);
+        } catch (Exception e) {
+            log.info("An error occurred while retrieving invoice details with projectId : " + projectId);
+            return Collections.emptyList();
+        }
     }
 
     private List<InvoiceDto> retrieveInvoiceDetails(LocalDate startDate, LocalDate endDate) {
         try {
             return invoiceService.findInvoicesByDateRange(startDate, endDate);
         } catch (Exception e) {
-            log.info("An error occurred while retrieving invoice details: " + e.getMessage());
+            log.info("An error occurred while retrieving invoice details : " + e.getMessage());
             return Collections.emptyList();
         }
     }
 
     public byte[] generateStatementPdf(LocalDate startDate, LocalDate endDate) {
 
-        List<AccountStatementDto> accountStatementDtos = findAccountStatement(startDate, endDate);
+        List<AccountStatementDto> accountStatementDtos = findByDateRange(startDate, endDate);
         return generatePdfFromAccountDtos(accountStatementDtos, "account-statement",
                 "account-statement.pdf");
     }
@@ -102,7 +132,7 @@ public class AccountStatementService {
 
     public void sendEmailWithPdfAttachment(LocalDate startDate, LocalDate endDate, String email) {
 
-        List<AccountStatementDto> accountStatementDtos = findAccountStatement(startDate, endDate);
+        List<AccountStatementDto> accountStatementDtos = findByDateRange(startDate, endDate);
 
         ThymeleafEmailDto thymeleafEmailDto = createEmailDtoWithPdfAttachment(
                 accountStatementDtos, "account-statement", "account-statement","Clients Account Statement", email);
