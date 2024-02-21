@@ -4,17 +4,20 @@ import com.technofacts.lnf.dto.account.InvoiceDto;
 import com.technofacts.lnf.dto.account.InvoiceItemDto;
 import com.technofacts.lnf.dto.client.AccountStatementDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
+import com.technofacts.lnf.dto.email.ThymeleafDocumentDto;
+import com.technofacts.lnf.dto.email.ThymeleafEmailDto;
+import com.technofacts.lnf.dto.payroll.PayrollDto;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.service.account.InvoiceService;
+import com.technofacts.lnf.service.email.ThymeleafDocumentService;
+import com.technofacts.lnf.service.email.ThymeleafEmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -24,6 +27,10 @@ public class AccountStatementService {
 
     private final InvoiceService invoiceService;
     private final ProjectService projectService;
+
+    private final ThymeleafDocumentService documentService;
+
+    private final ThymeleafEmailService emailService;
 
     public List<AccountStatementDto> findAccountStatement(LocalDate startDate, LocalDate endDate) {
         List<InvoiceDto> dtoList = retrieveInvoiceDetails(startDate, endDate);
@@ -73,4 +80,50 @@ public class AccountStatementService {
             return Collections.emptyList();
         }
     }
+
+    public byte[] generateStatementPdf(LocalDate startDate, LocalDate endDate) {
+
+        List<AccountStatementDto> accountStatementDtos = findAccountStatement(startDate, endDate);
+        return generatePdfFromAccountDtos(accountStatementDtos, "account-statement",
+                "account-statement.pdf");
+    }
+
+    private byte[] generatePdfFromAccountDtos(List<AccountStatementDto> accountStatementDtos, String templateName, String fileName) {
+        Map<String, Object> dynamicData = new HashMap<>();
+        dynamicData.put("listObjects", accountStatementDtos);
+
+        ThymeleafDocumentDto thymeleafDocumentDto = new ThymeleafDocumentDto();
+        thymeleafDocumentDto.setTemplateName(templateName);
+        thymeleafDocumentDto.setFileName(fileName);
+        thymeleafDocumentDto.setDynamicData(dynamicData);
+
+        return documentService.generatePdf(thymeleafDocumentDto);
+    }
+
+    public void sendEmailWithPdfAttachment(LocalDate startDate, LocalDate endDate, String email) {
+
+        List<AccountStatementDto> accountStatementDtos = findAccountStatement(startDate, endDate);
+
+        ThymeleafEmailDto thymeleafEmailDto = createEmailDtoWithPdfAttachment(
+                accountStatementDtos, "account-statement", "account-statement","Clients Account Statement", email);
+
+        emailService.sendEmailWithPdf(thymeleafEmailDto);
+    }
+
+    private ThymeleafEmailDto createEmailDtoWithPdfAttachment(List<AccountStatementDto> accountStatementDtos, String templateName,
+                                                              String fileName, String subject, String to) {
+        ThymeleafEmailDto thymeleafEmailDto = new ThymeleafEmailDto();
+        thymeleafEmailDto.setText("Please find your attachment in this email.");
+        thymeleafEmailDto.setTemplateName(templateName);
+        thymeleafEmailDto.setFileName(fileName);
+        thymeleafEmailDto.setSubject(subject);
+        thymeleafEmailDto.setTo(to);
+
+        Map<String, Object> dynamicData = new HashMap<>();
+        dynamicData.put("listObjects", accountStatementDtos);
+        thymeleafEmailDto.setDynamicData(dynamicData);
+
+        return thymeleafEmailDto;
+    }
+
 }
