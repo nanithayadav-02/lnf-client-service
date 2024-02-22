@@ -27,11 +27,11 @@ public class AccountClientImpl extends BaseWebClientService implements AccountSe
     }
 
     @Override
-    public List<InvoiceDto> search(UUID id) {
+    public List<InvoiceDto> search(UUID projectId) {
         List<InvoiceDto> invoiceDtos = new ArrayList<>();
         try {
             WebClient.RequestHeadersSpec<?> spec = webClient.get()
-                    .uri("/lnf/invoices?search=id:{id}", id)
+                    .uri("/lnf/invoices?search=projectId:{projectId}", projectId)
                     .accept(MediaType.APPLICATION_JSON);
             // Conditionally add the JWT token to the request headers
             addJwtToken(spec);
@@ -40,7 +40,7 @@ public class AccountClientImpl extends BaseWebClientService implements AccountSe
                     .block();
 
         } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, String.format("Error occurred fetching the invoice details for the client - [%s]", id), ex);
+            log.log(Level.SEVERE, "Error occurred fetching invoices with id : " + projectId, ex);
         }
 
         int responseSize = invoiceDtos != null ? invoiceDtos.size() : 0;
@@ -88,7 +88,7 @@ public class AccountClientImpl extends BaseWebClientService implements AccountSe
                     .block();
 
         } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, String.format("Error occurred fetching the expense details for the client - [%s]", projectId), ex);
+            log.log(Level.SEVERE, "Error occurred fetching invoices with projectId : " + projectId, ex);
         }
 
         int responseSize = expenseDtos != null ? expenseDtos.size() : 0;

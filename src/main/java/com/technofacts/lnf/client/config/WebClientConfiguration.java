@@ -52,8 +52,9 @@ public class WebClientConfiguration {
     @Bean
     @Primary
     @Qualifier("fileService")
-    public WebClient fileServiceWebClient() {
+    public WebClient fileServiceWebClient() {return createWebClient(fileServiceUrl);}
 
+    private WebClient createWebClient(String baseUrl) {
         ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(maxInMemorySize))
                 .build();
@@ -65,22 +66,9 @@ public class WebClientConfiguration {
                         .addHandlerLast(new WriteTimeoutHandler(timeOut, TimeUnit.MILLISECONDS)));
 
         return WebClient.builder()
-                .baseUrl(fileServiceUrl)
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .exchangeStrategies(exchangeStrategies)
-                .build();
-    }
-
-    private WebClient createWebClient(String baseUrl) {
-        HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeOut)
-                .responseTimeout(Duration.ofMillis(timeOut))
-                .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(timeOut, TimeUnit.MILLISECONDS))
-                        .addHandlerLast(new WriteTimeoutHandler(timeOut, TimeUnit.MILLISECONDS)));
-
-        return WebClient.builder()
                 .baseUrl(baseUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .exchangeStrategies(exchangeStrategies)
                 .build();
     }
 
