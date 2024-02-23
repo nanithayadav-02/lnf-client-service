@@ -205,7 +205,7 @@ public class DocumentService {
             String s3ObjectKey = folderName + "/" + clientId + "/" + fileName;
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileUploadService.delete(filePaths);
-            log.info("S3 object deleted for employee");
+            log.info("S3 object deleted for client");
         } else {
             try {
                 repository.delete(entity);
