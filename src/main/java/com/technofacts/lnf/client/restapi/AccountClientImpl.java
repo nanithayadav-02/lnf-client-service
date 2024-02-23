@@ -39,7 +39,7 @@ public class AccountClientImpl extends BaseWebClientService implements AccountSe
                     .block();
 
         } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, "Error occurred fetching invoices with id : " + search, ex);
+            log.log(Level.SEVERE, "Error occurred fetching invoices with search : " + search, ex);
         }
 
         int responseSize = invoiceDtos != null ? invoiceDtos.size() : 0;
@@ -87,7 +87,7 @@ public class AccountClientImpl extends BaseWebClientService implements AccountSe
                     .block();
 
         } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, "Error occurred fetching invoices with projectId : " + search, ex);
+            log.log(Level.SEVERE, "Error occurred fetching expenses with search : " + search, ex);
         }
 
         int responseSize = expenseDtos != null ? expenseDtos.size() : 0;
