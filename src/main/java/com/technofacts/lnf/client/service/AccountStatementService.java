@@ -6,7 +6,7 @@ import com.technofacts.lnf.dto.client.AccountStatementDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.email.ThymeleafDocumentDto;
 import com.technofacts.lnf.dto.email.ThymeleafEmailDto;
-import com.technofacts.lnf.service.account.InvoiceService;
+import com.technofacts.lnf.service.account.AccountService;
 import com.technofacts.lnf.service.email.ThymeleafDocumentService;
 import com.technofacts.lnf.service.email.ThymeleafEmailService;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +24,9 @@ import java.util.stream.Stream;
 @Log
 public class AccountStatementService {
 
-    private final InvoiceService invoiceService;
+    private final AccountService accountService;
     private final ProjectService projectService;
-
     private final ThymeleafDocumentService documentService;
-
     private final ThymeleafEmailService emailService;
 
 
@@ -99,7 +97,7 @@ public class AccountStatementService {
 
     private List<InvoiceDto> retrieveInvoiceDetails(UUID projectId) {
         try {
-            return invoiceService.search(projectId);
+            return accountService.searchForInvoice("projectId:%s".formatted(projectId));
         } catch (Exception e) {
             log.info("An error occurred while retrieving invoice details with projectId : " + projectId);
             return Collections.emptyList();
@@ -108,7 +106,7 @@ public class AccountStatementService {
 
     private List<InvoiceDto> retrieveInvoiceDetails(LocalDate startDate, LocalDate endDate) {
         try {
-            return invoiceService.findInvoicesByDateRange(startDate, endDate);
+            return accountService.findInvoicesByDateRange(startDate, endDate);
         } catch (Exception e) {
             log.info("An error occurred while retrieving invoice details : " + e.getMessage());
             return Collections.emptyList();
