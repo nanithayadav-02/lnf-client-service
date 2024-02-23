@@ -97,7 +97,7 @@ public class AccountStatementService {
 
     private List<InvoiceDto> retrieveInvoiceDetails(UUID projectId) {
         try {
-            return accountService.search(projectId);
+            return accountService.findAll("projectId:%s".formatted(projectId));
         } catch (Exception e) {
             log.info("An error occurred while retrieving invoice details with projectId : " + projectId);
             return Collections.emptyList();

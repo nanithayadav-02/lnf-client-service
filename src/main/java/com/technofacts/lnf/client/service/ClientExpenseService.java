@@ -89,7 +89,7 @@ public class ClientExpenseService {
 
     private List<ExpenseDto> retrieveExpenseDetails(UUID projectId) {
         try {
-            return accountService.searchForExpense(projectId);
+            return accountService.searchForExpense("projectId:%s".formatted(projectId));
         } catch (Exception e) {
             log.info("An error occurred while retrieving expense details with projectId : " + projectId);
             return Collections.emptyList();

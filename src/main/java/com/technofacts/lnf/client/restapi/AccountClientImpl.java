@@ -27,11 +27,11 @@ public class AccountClientImpl extends BaseWebClientService implements AccountSe
     }
 
     @Override
-    public List<InvoiceDto> search(UUID projectId) {
+    public List<InvoiceDto> findAll(String search) {
         List<InvoiceDto> invoiceDtos = new ArrayList<>();
         try {
             WebClient.RequestHeadersSpec<?> spec = webClient.get()
-                    .uri("/lnf/invoices?search=projectId:{projectId}", projectId)
+                    .uri("/lnf/invoices?search={search}", search)
                     .accept(MediaType.APPLICATION_JSON);
             // Conditionally add the JWT token to the request headers
             addJwtToken(spec);
@@ -40,7 +40,7 @@ public class AccountClientImpl extends BaseWebClientService implements AccountSe
                     .block();
 
         } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, "Error occurred fetching invoices with id : " + projectId, ex);
+            log.log(Level.SEVERE, "Error occurred fetching invoices with id : " + search, ex);
         }
 
         int responseSize = invoiceDtos != null ? invoiceDtos.size() : 0;
@@ -75,11 +75,11 @@ public class AccountClientImpl extends BaseWebClientService implements AccountSe
     }
 
     @Override
-    public List<ExpenseDto> searchForExpense(UUID projectId) {
+    public List<ExpenseDto> searchForExpense(String search) {
         List<ExpenseDto> expenseDtos = new ArrayList<>();
         try {
             WebClient.RequestHeadersSpec<?> spec = webClient.get()
-                    .uri("/lnf/account/expenses?search=projectId:{projectId}", projectId)
+                    .uri("/lnf/account/expenses?search={search}", search)
                     .accept(MediaType.APPLICATION_JSON);
             // Conditionally add the JWT token to the request headers
             addJwtToken(spec);
@@ -88,7 +88,7 @@ public class AccountClientImpl extends BaseWebClientService implements AccountSe
                     .block();
 
         } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, "Error occurred fetching invoices with projectId : " + projectId, ex);
+            log.log(Level.SEVERE, "Error occurred fetching invoices with projectId : " + search, ex);
         }
 
         int responseSize = expenseDtos != null ? expenseDtos.size() : 0;
