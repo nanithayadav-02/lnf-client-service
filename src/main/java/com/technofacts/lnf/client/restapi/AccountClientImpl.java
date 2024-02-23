@@ -13,7 +13,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 
 @Service
@@ -27,7 +26,7 @@ public class AccountClientImpl extends BaseWebClientService implements AccountSe
     }
 
     @Override
-    public List<InvoiceDto> findAll(String search) {
+    public List<InvoiceDto> searchForInvoice(String search) {
         List<InvoiceDto> invoiceDtos = new ArrayList<>();
         try {
             WebClient.RequestHeadersSpec<?> spec = webClient.get()
