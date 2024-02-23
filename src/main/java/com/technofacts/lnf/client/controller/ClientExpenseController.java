@@ -17,20 +17,20 @@ public class ClientExpenseController {
 
     private final ClientExpenseService service;
 
-    @GetMapping(value = "/clients/{clientId}/clientExpense")
+    @GetMapping(value = "/clients/{clientId}/expense")
     @ResponseStatus(HttpStatus.OK)
     public List<ClientExpenseDto> findByClientId(@PathVariable UUID clientId) {
         return service.findByClientId(clientId);
     }
 
-    @GetMapping(value = "/clients/{clientId}/clientExpense/{months}")
+    @GetMapping(value = "/clients/{clientId}/expense/{months}")
     @ResponseStatus(HttpStatus.OK)
     public List<ClientExpenseDto> findForDesiredMonths(@PathVariable UUID clientId,
                                                                 @PathVariable int months) {
         return service.findForDesiredMonths(clientId, months);
     }
 
-    @GetMapping(value = "/clients/{clientId}/clientExpense/dateRange")
+    @GetMapping(value = "/clients/{clientId}/expense/dateRange")
     @ResponseStatus(HttpStatus.OK)
     public List<ClientExpenseDto> findByClientIdAndDateRange(@PathVariable UUID clientId,
                                                                 @RequestParam LocalDate startDate,
@@ -38,7 +38,7 @@ public class ClientExpenseController {
         return service.findByClientIdAndDateRange(clientId, startDate, endDate);
     }
 
-    @GetMapping(value = "/clients/clientExpense")
+    @GetMapping(value = "/clients/expense")
     @ResponseStatus(HttpStatus.OK)
     public List<ClientExpenseDto> findByDateRange(@RequestParam LocalDate startDate,
                                                   @RequestParam LocalDate endDate) {
