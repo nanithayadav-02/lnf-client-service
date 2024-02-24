@@ -66,7 +66,7 @@ public class ClientController {
      * Returns List of projectsDto from the clientId.
      *
      * @param clientId Client Id
-     * @return List of all clientDto objects
+     * @return List of all projectDto objects
      */
     @GetMapping(value = "/clients/{clientId}/projects")
     @ResponseStatus(HttpStatus.OK)
