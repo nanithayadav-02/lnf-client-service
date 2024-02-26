@@ -5,6 +5,7 @@ import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
+import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.service.common.page.PageableAsQueryParam;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
@@ -65,7 +66,7 @@ public class ClientController {
      * Returns List of projectsDto from the clientId.
      *
      * @param clientId Client Id
-     * @return ClientDto object
+     * @return List of all projectDto objects
      */
     @GetMapping(value = "/clients/{clientId}/projects")
     @ResponseStatus(HttpStatus.OK)
@@ -73,6 +74,17 @@ public class ClientController {
         return projectService.findProjectsByClientId(clientId);
     }
 
+    /**
+     * Returns List of employeeDto associated with the given clientId.
+     * Raises LnFEntityNotFoundException if there is no client with the input clientId
+     * @param clientId Client Id
+     * @return List of all employeeDto objects.
+     */
+    @GetMapping(value = "/clients/{clientId}/employees")
+    @ResponseStatus(HttpStatus.OK)
+    public List<EmployeeDto> findEmployeesByClientId(@PathVariable("clientId") final UUID clientId) {
+        return projectService.findEmployeesByClientId(clientId);
+    }
 
     /**
      * Creates the client

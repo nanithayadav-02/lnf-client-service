@@ -8,6 +8,7 @@ import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
+import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
@@ -37,6 +38,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
 
     private final ProjectRepository repository;
     private final ClientRepository clientRepository;
+    private final ProjectEmployeeService projectEmployeeService;
 
     /**
      * Return requested page with list of ProjectDto objects with requested size. Raises LnFEntityNotFoundException
@@ -147,6 +149,25 @@ public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
         List<Project> projects = repository.findByClientId(clientId);
         return projects.stream().map(ProjectConverter::toTransportModel)
                 .filter(Objects::nonNull)
+                .toList();
+    }
+
+    /**
+     * Returns a list of EmployeeDto objects associated with the given clientId.
+     * Raises a LnFEntityNotFoundException if there is no client with the input clientId.
+     *
+     * @param clientId The UUID of the client.
+     * @return A list of EmployeeDto objects associated with the client.
+     */
+    public List<EmployeeDto> findEmployeesByClientId(UUID clientId) {
+        searchForClient(clientId);
+        List<Project> projects = repository.findByClientId(clientId);
+
+        return projects.stream()
+                .filter(Objects::nonNull)
+                .flatMap(project ->
+                        projectEmployeeService.findEmployeesByProjectId(project.getId())
+                                .getEmployees().stream())
                 .toList();
     }
 
