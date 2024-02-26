@@ -83,17 +83,6 @@ public class DocumentService {
         searchForClient(clientId);
         ClientDocument entity = searchForDocument(clientId, type);
         ClientDocument file = searchForDocument(entity.getId());
-
-        if(awsS3BucketEnabled) {
-            String fileName = entity.getName();
-            ResponseEntity<byte[]> s3Response =  fileUploadService.findFile(folderName + "/" + clientId + "/" + fileName);
-            if (s3Response.getStatusCode() == HttpStatus.OK) {
-                return ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
-                        .contentType(MediaType.valueOf(file.getContentType()))
-                        .body(s3Response.getBody());
-            }
-        }
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, "application/pdf")
                 .contentType(MediaType.valueOf(file.getContentType()))
@@ -200,19 +189,11 @@ public class DocumentService {
     public void deleteByClientId(UUID clientId, DocumentType type) {
         searchForClient(clientId);
         ClientDocument entity = searchForDocument(clientId, type);
-        if (awsS3BucketEnabled) {
-            String fileName = entity.getName();
-            String s3ObjectKey = folderName + "/" + clientId + "/" + fileName;
-            List<String> filePaths = Collections.singletonList(s3ObjectKey);
-            fileUploadService.delete(filePaths);
-            log.info("S3 object deleted for client");
-        } else {
-            try {
-                repository.delete(entity);
-            } catch (RuntimeException e) {
-                String errorMessage = String.format("Failed to delete document for client [%s]", clientId);
-                throw new LnFException(errorMessage, e);
-            }
+        try {
+            repository.delete(entity);
+        } catch (RuntimeException e) {
+            String errorMessage = String.format("Failed to delete document for client [%s]", clientId);
+            throw new LnFException(errorMessage, e);
         }
     }
 
@@ -225,12 +206,20 @@ public class DocumentService {
     public void deleteById(UUID clientId, UUID documentId) {
         searchForClient(clientId);
         ClientDocument entity = searchForDocument(documentId);
-        try {
-            repository.delete(entity);
-            log.info(() -> String.format("Document[%s] for client [%s] successfully deleted", documentId, clientId));
-        } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete Document[[%s] for client [%s]", documentId, clientId);
-            throw new LnFException(errorMessage);
+        if (awsS3BucketEnabled) {
+            String fileName = entity.getName();
+            String s3ObjectKey = folderName + "/" + clientId + "/" + fileName;
+            List<String> filePaths = Collections.singletonList(s3ObjectKey);
+            fileUploadService.delete(filePaths);
+            log.info("S3 object deleted for client");
+        } else {
+            try {
+                repository.delete(entity);
+                log.info(() -> String.format("Document[%s] for client [%s] successfully deleted", documentId, clientId));
+            } catch (RuntimeException e) {
+                String errorMessage = String.format("Failed to delete Document[[%s] for client [%s]", documentId, clientId);
+                throw new LnFException(errorMessage);
+            }
         }
     }
 
