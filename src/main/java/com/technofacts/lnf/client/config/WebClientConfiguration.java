@@ -22,14 +22,8 @@ public class WebClientConfiguration {
     @Value("${employee.service.url}")
     private String employeeServiceUrl;
 
-    @Value("${account.service.url}")
-    private String accountServiceUrl;
-
     @Value("${file.service.url}")
     private String fileServiceUrl;
-
-    @Value("${email.service.url}")
-    private String emailServiceUrl;
 
     @Value("${application.maxInMemorySize}")
     private int maxInMemorySize;
@@ -40,14 +34,6 @@ public class WebClientConfiguration {
     @Qualifier("employeeService")
     @Bean
     public WebClient employeeWebClient() { return createWebClient(employeeServiceUrl);}
-
-    @Bean
-    @Qualifier("accountService")
-    public WebClient invoiceWebClient() { return createWebClient(accountServiceUrl);}
-
-    @Bean
-    @Qualifier("emailService")
-    public WebClient emailWebClient() { return createWebClient(emailServiceUrl);}
 
     @Bean
     @Primary
