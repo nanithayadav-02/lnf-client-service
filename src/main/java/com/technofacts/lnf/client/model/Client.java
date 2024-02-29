@@ -55,8 +55,9 @@ public class Client extends AuditableEntity {
     private Set<ClientContact> clientContacts = new HashSet<>();
 
     @ToString.Exclude
-    @OneToOne(mappedBy = "client", cascade = CascadeType.ALL)
-    private Escalation escalation;
+    @Builder.Default
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private Set<Escalation> escalations = new HashSet<>();
 
     @ToString.Exclude
     @Builder.Default

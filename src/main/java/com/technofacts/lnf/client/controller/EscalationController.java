@@ -1,5 +1,6 @@
 package com.technofacts.lnf.client.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.technofacts.lnf.client.service.EscalationService;
@@ -23,7 +24,7 @@ public class EscalationController {
      */
     @GetMapping(value = "/clients/{clientId}/escalation")
     @ResponseStatus(HttpStatus.OK)
-    public EscalationDto findByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<EscalationDto> findByClientId(@PathVariable("clientId") final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
@@ -48,7 +49,7 @@ public class EscalationController {
      */
     @PostMapping(value = "/clients/{clientId}/escalation")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable("clientId") final UUID clientId, @RequestBody final EscalationDto resource) {
+    public void create(@PathVariable("clientId") final UUID clientId, @RequestBody final List<EscalationDto> resource) {
         service.create(clientId, resource);
     }
 

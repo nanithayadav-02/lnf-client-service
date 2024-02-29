@@ -10,13 +10,11 @@ public class GstConverter {
             return null;
         }
 
-        GstDto dto = GstDto.builder()
+        return GstDto.builder()
                 .id(entity.getId())
                 .location(entity.getLocation())
                 .number(entity.getNumber())
                 .build();
-
-        return dto;
     }
 
     public static Gst toEntityModel(GstDto transport) {
