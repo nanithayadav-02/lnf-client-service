@@ -5,8 +5,6 @@ spring:
   application:
     name: lnf-client-service
 
-KEYCLOAK_HOST: "keycloak:8080"
-
 server:
   port: 8081
   servlet:

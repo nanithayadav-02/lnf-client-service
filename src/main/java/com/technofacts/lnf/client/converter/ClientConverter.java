@@ -29,10 +29,10 @@ public class ClientConverter {
         dto.setAgreementExpiryDate(entity.getAgreementExpiryDate());
         dto.setServiceType(entity.getServiceType());
         dto.setClientDetails(entity.getClientDetails());
-        dto.getContacts().addAll(entity.getClientContacts().stream().map(ContactConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
-        dto.setEscalation(entity.getEscalation() != null ? EscalationConverter.toTransportModel(entity.getEscalation()) : null);
+        dto.getContacts().addAll(entity.getClientContacts ().stream ().map (ContactConverter::toTransportModel).filter (Objects::nonNull).toList ());
+        dto.getEscalations().addAll (entity.getEscalations ().stream ().map (EscalationConverter::toTransportModel).filter (Objects::nonNull).toList ());
         dto.setAddress(entity.getClientAddress() != null ? AddressConverter.toTransportModel(entity.getClientAddress()) : null);
-        dto.getGst().addAll(entity.getGst().stream().map(GstConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
+        dto.getGst().addAll(entity.getGst ().stream ().map (GstConverter::toTransportModel).filter (Objects::nonNull).toList ());
         Optional<ClientDocument> agreementOpt = entity.getFiles().stream().filter(file -> file.getType() == DocumentType.agreement).findFirst();
         dto.setNotes(new ArrayList<>());
 
@@ -95,13 +95,14 @@ public class ClientConverter {
         client.getClientContacts().addAll(contactList);
     }
 
-
     private static void addEscalationToEntityModel(ClientDto transport, Client client) {
-        if (transport.getEscalation() != null) {
-            Escalation escalation = EscalationConverter.toEntityModel(transport.getEscalation());
+        List<Escalation> escalationList = new ArrayList<>();
+        transport.getEscalations ().stream().filter(Objects::nonNull).forEach(dto -> {
+            Escalation escalation = EscalationConverter.toEntityModel(dto);
             escalation.setClient(client);
-            client.setEscalation(escalation);
-        }
+            escalationList.add(escalation);
+        });
+        client.getEscalations().addAll(escalationList);
     }
 
     private static void addAddressToEntityModel(ClientDto transport, Client client) {

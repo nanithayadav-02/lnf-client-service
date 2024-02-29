@@ -4,6 +4,7 @@ import com.technofacts.lnf.model.AuditableEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
+import org.apache.commons.lang3.builder.ToStringExclude;
 
 @ToString
 @Entity
@@ -28,8 +29,8 @@ public class Escalation extends AuditableEntity {
     @Column(name = "mobile_number")
     private String mobileNumber;
 
-    @ToString.Exclude
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @ToStringExclude
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name="client_id", referencedColumnName="id", nullable = false)
     private Client client;
 

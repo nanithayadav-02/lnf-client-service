@@ -11,15 +11,13 @@ public class EscalationConverter {
             return null;
         }
 
-        EscalationDto dto = EscalationDto.builder()
+        return EscalationDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .mobileNumber(entity.getMobileNumber())
                 .phoneNumber(entity.getPhoneNumber())
                 .email(entity.getEmail())
                 .build();
-
-        return dto;
     }
 
     public static Escalation toEntityModel(EscalationDto transport) {

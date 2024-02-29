@@ -66,7 +66,7 @@ public class DocumentConverter {
         } else if (type == DocumentType.others) {
             url = String.format("/lnf/clients/%s/others/", clientId);
         } else {
-            new LnFException("Unknown document type");
+            throw new LnFException("Unknown document type");
         }
         return url;
     }
