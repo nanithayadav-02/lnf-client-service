@@ -1,8 +1,5 @@
 package com.technofacts.lnf.client.controller;
 
-import java.io.IOException;
-import java.util.UUID;
-
 import com.technofacts.lnf.client.model.enums.DocumentType;
 import com.technofacts.lnf.client.service.DocumentService;
 import com.technofacts.lnf.dto.client.DocumentDto;
@@ -11,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.UUID;
 
 
 @RestController
@@ -38,12 +38,11 @@ public class AgreementController {
      *
      * @param clientId Client Id
      * @return ResponseEntity<byte []>
-     * @throws IOException IOException
      */
     @GetMapping(value = "/clients/{clientId}/agreement/download")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<byte[]> findClientAgreement(@PathVariable("clientId") final UUID clientId) throws IOException {
-        return service.findClientAgreement(clientId, DocumentType.agreement);
+    public ResponseEntity<byte[]> findClientAgreement(@PathVariable("clientId") final UUID clientId, @RequestParam("fileName") String fileName) {
+        return service.findClientAgreement(clientId, DocumentType.agreement, fileName);
     }
 
     /**
@@ -79,11 +78,11 @@ public class AgreementController {
      * @param agreement   Agreement in MutipartFile format
      * @throws IOException IOException
      */
-    @PutMapping(value = "/clients/{clientId}/agreement/{agreementId}")
+    @PutMapping(value = "/clients/{clientId}/agreement")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("clientId") final UUID clientId, @PathVariable("agreementId") final UUID agreementId,
+    public void update(@PathVariable("clientId") final UUID clientId, @RequestParam(value = "agreementId", required = false) final UUID agreementId,
                        @RequestParam MultipartFile agreement) throws IOException {
-        service.update(clientId, agreementId, agreement);
+        service.update(clientId, agreementId, DocumentType.agreement, agreement);
     }
 
     /**
@@ -91,10 +90,10 @@ public class AgreementController {
      *
      * @param clientId Client Id
      */
-    @DeleteMapping(value = "/clients/{clientId}/agreement")
+    @DeleteMapping(value = "/clients/{clientId}/agreement/{fileName}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId) {
-        service.deleteByClientId(clientId, DocumentType.agreement);
+    public void delete(@PathVariable("clientId") final UUID clientId, @PathVariable("fileName") String fileName) {
+        service.deleteByClientId(clientId, DocumentType.agreement, fileName);
     }
 
     /**
@@ -103,9 +102,9 @@ public class AgreementController {
      * @param clientId    Client Id
      * @param agreementId Agreement Id
      */
-    @DeleteMapping(value = "/clients/{clientId}/agreement/{agreementId}")
+    @DeleteMapping(value = "/clients/{clientId}/agreement")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId, @PathVariable("agreementId") final UUID agreementId) {
+    public void delete(@PathVariable("clientId") final UUID clientId, @RequestParam(value = "agreementId", required = true) final UUID agreementId) {
         service.deleteById(clientId, agreementId);
     }
 }

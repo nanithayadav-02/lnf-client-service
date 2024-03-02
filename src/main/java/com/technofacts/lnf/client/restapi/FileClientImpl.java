@@ -1,12 +1,14 @@
 package com.technofacts.lnf.client.restapi;
 
+import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
-import com.technofacts.lnf.service.File.FileUploadService;
+import com.technofacts.lnf.service.file.FileService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,13 +20,14 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 @Service
 @Transactional
 @Slf4j
-public class FileClientImpl extends BaseWebClientService implements FileUploadService {
+public class FileClientImpl extends BaseWebClientService implements FileService {
 
     private final WebClient webClient;
 
@@ -64,6 +67,26 @@ public class FileClientImpl extends BaseWebClientService implements FileUploadSe
             log.error("Unexpected error occurred during file upload", e);
             throw new LnFException("File Upload for employee failed" + e);
         }
+    }
+
+    @Override
+    public List<String> findFilesInFolder (String folderName) {
+        List<String> files = new ArrayList<> ();
+        try {
+            WebClient.RequestHeadersSpec<?> spec = webClient.get()
+                    .uri("/lnf/files/folder?folderName={folderName}", folderName)
+                    .accept(MediaType.APPLICATION_JSON);
+            // Conditionally add the JWT token to the request headers
+            addJwtToken(spec);
+            // Execute the request and block to get the response, consider using subscribe for a non-blocking approach
+            files = spec.retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<String>> () {})
+                    .block();
+
+        } catch (LnFEntityNotFoundException ex) {
+            log.error("Failed to get the files in the folder");
+        }
+        return files;
     }
 
     @Override
