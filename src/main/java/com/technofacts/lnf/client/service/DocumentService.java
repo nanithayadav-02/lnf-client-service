@@ -54,25 +54,31 @@ public class DocumentService {
      * @return DocumentDto
      */
     public DocumentDto findByClientId (UUID clientId, DocumentType type) {
-        if (awsS3BucketEnabled) {
-            String filePath = folderName + "/" + clientId + "/" + type + "/";
-            List<String> filePaths = fileService.findFilesInFolder (filePath);
-            String url = filePaths.stream ().map (file -> ServletUriComponentsBuilder.fromCurrentContextPath ().path ("/lnf/file").queryParam ("filePath", file).toUriString ()).collect (Collectors.joining (", "));
+        try {
+            if (awsS3BucketEnabled) {
+                String filePath = folderName + "/" + clientId + "/" + type + "/";
+                List<String> filePaths = fileService.findFilesInFolder (filePath);
+                String url = filePaths.stream ().map (file -> ServletUriComponentsBuilder.fromCurrentContextPath ()
+                                .path ("/lnf/file").queryParam ("filePath", file).toUriString ())
+                        .collect (Collectors.joining (", "));
 
-            DocumentDto documentDto = new DocumentDto ();
-            String fileName = Paths.get (filePaths.get (0)).getFileName ().toString ();
-            documentDto.setName (fileName);
-            documentDto.setUrl (url);
+                DocumentDto documentDto = new DocumentDto ();
+                String fileName = Paths.get (filePaths.get (0)).getFileName ().toString ();
+                documentDto.setName (fileName);
+                documentDto.setUrl (url);
 
-            return documentDto;
+                return documentDto;
+            } else {
+                searchForClient (clientId);
+                ClientDocument entity = searchForDocument (clientId, type);
+                DocumentDto documentDto = DocumentConverter.toTransportModel (entity);
+                documentDto.setUrl (DocumentConverter.getDocumentUrl (clientId, documentDto.getId (), type));
+                return documentDto;
+            }
+        } catch (Exception e) {
+            throw new LnFException ("file not found for clientId:" + e.getMessage());
         }
-        searchForClient (clientId);
-        ClientDocument entity = searchForDocument (clientId, type);
-        DocumentDto documentDto = DocumentConverter.toTransportModel (entity);
-        documentDto.setUrl (DocumentConverter.getDocumentUrl (clientId, documentDto.getId (), type));
-        return documentDto;
     }
-
 
     /**
      * Returns ResponseEntity<byte[]> client by clientId and document type.
@@ -82,23 +88,22 @@ public class DocumentService {
      * @return ResponseEntity<byte [ ]>
      */
     public ResponseEntity<byte[]> findClientAgreement (UUID clientId, DocumentType type, String fileName) {
-
-        if (awsS3BucketEnabled) {
-            String filePath = folderName + "/" + clientId + "/" + type + "/" + fileName;
-            ResponseEntity<byte[]> s3Response = fileService.findFile (filePath);
-            if (s3Response.getStatusCode () == HttpStatus.OK) {
-                return ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
-                                StringUtils.substringAfterLast(filePath, "/") + "\"")
-                        .body(s3Response.getBody());
+        try {
+            if (awsS3BucketEnabled) {
+                String filePath = folderName + "/" + clientId + "/" + type + "/" + fileName;
+                return fileService.findFileContent (filePath);
+            } else {
+                searchForClient (clientId);
+                ClientDocument entity = searchForDocument (clientId, type);
+                ClientDocument file = searchForDocument (entity.getId ());
+                return ResponseEntity.ok ().header (HttpHeaders.CONTENT_TYPE, "application/pdf")
+                        .contentType (MediaType.valueOf (file.getContentType ()))
+                        .body (file.getContent ());
             }
+        } catch (RuntimeException e ) {
+            String errorMessage = String.format ("file not found for Client[%s]", clientId);
+            throw new com.technofacts.lnf.exception.LnFException (errorMessage, e);
         }
-        searchForClient (clientId);
-        ClientDocument entity = searchForDocument (clientId, type);
-        ClientDocument file = searchForDocument (entity.getId ());
-        return ResponseEntity.ok ().header (HttpHeaders.CONTENT_TYPE, "application/pdf")
-                .contentType (MediaType.valueOf (file.getContentType ()))
-                .body (file.getContent ());
     }
 
     /**
@@ -108,12 +113,22 @@ public class DocumentService {
      * @param documentId Document Id
      * @return ResponseEntity<byte [ ]>
      */
-    public ResponseEntity<byte[]> findById (UUID clientId, UUID documentId) {
-        searchForClient (clientId);
-        ClientDocument file = searchForDocument (documentId);
-        return ResponseEntity.ok ().header (HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName () + "\"")
-                .contentType (MediaType.valueOf (file.getContentType ()))
-                .body (file.getContent ());
+    public ResponseEntity<byte[]> findById (UUID clientId, UUID documentId, DocumentType type, String fileName) {
+        try {
+            if (awsS3BucketEnabled) {
+                String filePath = folderName + "/" + clientId + "/" + type + "/" + fileName;
+                return fileService.findFileContent (filePath);
+            } else {
+                searchForClient (clientId);
+                ClientDocument file = searchForDocument (documentId);
+                return ResponseEntity.ok ().header (HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName () + "\"")
+                        .contentType (MediaType.valueOf (file.getContentType ()))
+                        .body (file.getContent ());
+            }
+        } catch (RuntimeException e ) {
+            String errorMessage = String.format ("file not found for client[%s]", clientId);
+            throw new LnFException (errorMessage, e);
+        }
     }
 
     /**
