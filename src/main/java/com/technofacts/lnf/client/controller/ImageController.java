@@ -34,16 +34,30 @@ public class ImageController {
     }
 
     /**
+     * Returns ResponseEntity with byte[] for the client agreement
+     *
+     * @param clientId Client Id
+     * @return ResponseEntity<byte []>
+     */
+    @GetMapping(value = "/clients/{clientId}/image/download")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<byte[]> findClientAgreement(@PathVariable("clientId") final UUID clientId, @RequestParam("fileName") String fileName) {
+        return service.findClientAgreement(clientId, DocumentType.image, fileName);
+    }
+
+    /**
      * Returns ResponseEntity with byte[] of the Client Agreement
      *
      * @param clientId Client Id
      * @param imageId  Image Id
      * @return ResponseEntity<byte [ ]>
      */
-    @GetMapping(value = "/clients/{clientId}/image/{imageId}")
+    @GetMapping(value = "/clients/{clientId}/image/{fileName}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<byte[]> findById(@PathVariable("clientId") final UUID clientId, @PathVariable("imageId") final UUID imageId) {
-        return service.findById(clientId, imageId);
+    public ResponseEntity<byte[]> findById(@PathVariable("clientId") final UUID clientId, @RequestParam(value = "imageId",required = false) final UUID imageId,
+                                           @PathVariable("fileName") String fileName) {
+
+        return service.findById(clientId, imageId ,DocumentType.image, fileName);
     }
 
     /**

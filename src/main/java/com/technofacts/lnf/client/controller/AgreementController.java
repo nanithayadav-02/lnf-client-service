@@ -52,10 +52,11 @@ public class AgreementController {
      * @param agreementId Agreement Id
      * @return ResponseEntity<byte [ ]>
      */
-    @GetMapping(value = "/clients/{clientId}/agreement/{agreementId}")
+    @GetMapping(value = "/clients/{clientId}/agreement/{fileName}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<byte[]> findById(@PathVariable("clientId") final UUID clientId, @PathVariable("agreementId") final UUID agreementId) {
-        return service.findById(clientId, agreementId);
+    public ResponseEntity<byte[]> findById(@PathVariable("clientId") final UUID clientId, @RequestParam(value = "agreementId", required = false) final UUID agreementId,
+                                           @PathVariable("fileName") String fileName) {
+        return service.findById(clientId, agreementId,  DocumentType.agreement, fileName);
     }
 
     /**
