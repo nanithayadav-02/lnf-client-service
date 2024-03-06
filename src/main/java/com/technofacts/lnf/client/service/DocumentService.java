@@ -13,10 +13,8 @@ import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.file.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -60,11 +58,11 @@ public class DocumentService {
             if (awsS3BucketEnabled) {
                 String filePath = String.format ("%s/%s/%s/", folderName, clientId, type);
                 List<String> filePaths = fileService.findFilesInFolder (filePath);
-                String fileName = Paths.get (filePaths.get (0)).getFileName ().toString ();
+                String fileName = Paths.get(filePaths.get (0)).getFileName ().toString ();
                 String url = filePaths.stream ()
                         .map (file -> ServletUriComponentsBuilder.fromCurrentContextPath ()
-                                .path (constructUrlFromType (clientId, type))
-                                .path (fileName)
+                                .path (constructUrlFromType(clientId, type))
+                                .path(fileName)
                                 .toUriString ())
                         .collect (Collectors.joining (", "));
 
