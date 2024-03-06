@@ -57,7 +57,7 @@ public class DocumentConverter {
     }
 
 
-    private static String constructUrlFromType(UUID clientId, DocumentType type) {
+    public static String constructUrlFromType(UUID clientId, DocumentType type) {
         String url = "";
         if (type == DocumentType.agreement) {
             url = String.format("/lnf/clients/%s/agreement/", clientId);

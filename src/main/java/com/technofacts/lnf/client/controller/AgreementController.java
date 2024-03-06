@@ -105,7 +105,7 @@ public class AgreementController {
      */
     @DeleteMapping(value = "/clients/{clientId}/agreement")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId, @RequestParam(value = "agreementId", required = true) final UUID agreementId) {
+    public void delete(@PathVariable("clientId") final UUID clientId, @RequestParam(value = "agreementId") final UUID agreementId) {
         service.deleteById(clientId, agreementId);
     }
 }
