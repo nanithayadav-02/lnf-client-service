@@ -33,16 +33,20 @@ public class WebClientConfiguration {
 
     @Qualifier("employeeService")
     @Bean
-    public WebClient employeeWebClient() { return createWebClient(employeeServiceUrl);}
+    public WebClient employeeWebClient() {
+        return createWebClient(employeeServiceUrl);
+    }
 
     @Bean
     @Primary
     @Qualifier("fileService")
-    public WebClient fileServiceWebClient() {return createWebClient(fileServiceUrl);}
+    public WebClient fileServiceWebClient() {
+        return createWebClient(fileServiceUrl);
+    }
 
     private WebClient createWebClient(String baseUrl) {
         ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(maxInMemorySize))
+                .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(maxInMemorySize))
                 .build();
 
         HttpClient httpClient = HttpClient.create()
