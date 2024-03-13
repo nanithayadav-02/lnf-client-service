@@ -33,23 +33,9 @@ public class ClientConverter {
         dto.getEscalations().addAll (entity.getEscalations ().stream ().map (EscalationConverter::toTransportModel).filter (Objects::nonNull).toList ());
         dto.setAddress(entity.getClientAddress() != null ? AddressConverter.toTransportModel(entity.getClientAddress()) : null);
         dto.getGst().addAll(entity.getGst ().stream ().map (GstConverter::toTransportModel).filter (Objects::nonNull).toList ());
-        Optional<ClientDocument> agreementOpt = entity.getFiles().stream().filter(file -> file.getType() == DocumentType.agreement).findFirst();
         dto.setNotes(new ArrayList<>());
-
-        if (agreementOpt.isPresent()) {
-            DocumentDto documentDto = DocumentConverter.toTransportModel(agreementOpt.get());
-            documentDto.setUrl(DocumentConverter.getDocumentUrl(entity.getId(), documentDto.getId(), DocumentType.agreement));
-            dto.setAgreement(documentDto);
-        }
-
-        Optional<ClientDocument> imageOpt = entity.getFiles().stream().filter(file -> file.getType() == DocumentType.image).findFirst();
-        if (imageOpt.isPresent()) {
-            DocumentDto documentDto = DocumentConverter.toTransportModel(imageOpt.get());
-            documentDto.setUrl(DocumentConverter.getDocumentUrl(entity.getId(), documentDto.getId(), DocumentType.image));
-            dto.setClientLogo(documentDto);
-        }
         dto.getNotes().addAll(entity.getNotes().stream()
-                .map(ClientNotesConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
+                .map(ClientNotesConverter::toTransportModel).filter(Objects::nonNull).toList());
 
         return dto;
     }
