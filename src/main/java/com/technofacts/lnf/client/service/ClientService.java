@@ -3,8 +3,10 @@ package com.technofacts.lnf.client.service;
 import com.google.common.collect.Lists;
 import com.technofacts.lnf.client.converter.ClientConverter;
 import com.technofacts.lnf.client.model.Client;
+import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.dto.client.ClientDto;
+import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
@@ -34,6 +36,8 @@ import java.util.function.Function;
 public class ClientService implements PaginatedAndSortedService<ClientDto> {
 
     private final ClientRepository repository;
+    private final ProjectService projectService;
+
 
     /**
      * Return requested page with list of ClientDto objects with requested size. Raises LnFEntityNotFoundException
@@ -143,6 +147,8 @@ public class ClientService implements PaginatedAndSortedService<ClientDto> {
      */
     public void delete(UUID clientId) {
         Client entity = search(clientId);
+        List<ProjectDto> projectList = projectService.findProjectsByClientId(clientId);
+        projectList.forEach(project -> projectService.delete(project.getId()));
         try {
             repository.delete(entity);
             log.info(() -> String.format("Client[%s] successfully deleted", entity.getCode()));

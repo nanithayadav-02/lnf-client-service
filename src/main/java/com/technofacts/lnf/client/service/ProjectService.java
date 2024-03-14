@@ -6,7 +6,6 @@ import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
-import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
@@ -39,6 +38,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
     private final ProjectRepository repository;
     private final ClientRepository clientRepository;
     private final ProjectEmployeeService projectEmployeeService;
+    private final TaskService taskService;
 
     /**
      * Return requested page with list of ProjectDto objects with requested size. Raises LnFEntityNotFoundException
@@ -216,6 +216,16 @@ public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
      */
     public void delete(UUID projectId) {
         Project entity = search(projectId);
+        deleteRelatedEntities(entity);
+        deleteProject(entity);
+    }
+
+    private void deleteRelatedEntities(Project project) {
+        projectEmployeeService.deleteProjectEmployeesByProject(project);
+        taskService.deleteByProjectId(project.getId());
+    }
+
+    private void deleteProject(Project entity) {
         try {
             repository.delete(entity);
             log.info(() -> String.format("Project[%s] successfully deleted", entity.getCode()));
