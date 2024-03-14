@@ -111,6 +111,17 @@ public class ProjectEmployeeService {
         }
     }
 
+    public void deleteProjectEmployeesByProject(Project project) {
+        List<ProjectEmployee> projectEmployees = repository.findByProject(project);
+        try {
+            repository.deleteAll(projectEmployees);
+            log.info(() -> String.format("projectEmployees is successfully removed from the Project[%s]", project.getId()));
+        } catch (RuntimeException e) {
+            String errorMessage = String.format("Failed to remove projectEmployees from the Project[%s]", project.getId());
+            throw new LnFException(errorMessage, e);
+        }
+    }
+
     public void delete(ProjectEmployee entity) {
         try {
             repository.delete(entity);

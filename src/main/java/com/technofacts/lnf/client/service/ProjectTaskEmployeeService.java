@@ -1,10 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.model.ProjectTaskEmployee;
 import com.technofacts.lnf.client.model.Task;
@@ -20,6 +15,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
 
 @Service
 @Transactional
@@ -118,6 +117,17 @@ public class ProjectTaskEmployeeService {
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to save Project[%s], Task [%s] and employeeId [%s]", entity.getProject().getId(), entity.getTask().getId(), entity.getEmployeeId());
             throw new LnFException(errorMessage);
+        }
+    }
+
+    public void deleteAllByTask(Task task) {
+        List<ProjectTaskEmployee> projectTaskEmployees = repository.findByTask(task);
+        try {
+            repository.deleteAll(projectTaskEmployees);
+            log.info(() -> String.format("projectTaskEmployees is successfully removed from the Task[%s]", task.getId()));
+        } catch (RuntimeException e) {
+            String errorMessage = String.format("Failed to remove projectTaskEmployees from the Task[%s]", task.getId());
+            throw new LnFException(errorMessage, e);
         }
     }
 
