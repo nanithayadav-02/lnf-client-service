@@ -225,12 +225,12 @@ public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
         taskService.deleteByProjectId(project.getId());
     }
 
-    private void deleteProject(Project project) {
+    private void deleteProject(Project entity) {
         try {
-            repository.delete(project);
-            log.info(() -> String.format("Project[%s] successfully deleted", project.getCode()));
+            repository.delete(entity);
+            log.info(() -> String.format("Project[%s] successfully deleted", entity.getCode()));
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete Project [%s]", project.getCode());
+            String errorMessage = String.format("Failed to delete Project [%s]", entity.getCode());
             throw new LnFException(errorMessage, e);
         }
     }
