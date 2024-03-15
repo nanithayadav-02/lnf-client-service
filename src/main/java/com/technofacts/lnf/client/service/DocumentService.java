@@ -58,13 +58,11 @@ public class DocumentService {
             if (awsS3BucketEnabled) {
                 String filePath = String.format ("%s/%s/%s/", folderName, clientId, type);
                 List<String> filePaths = fileService.findFilesInFolder (filePath);
-                String fileName = Paths.get(filePaths.get (0)).getFileName ().toString ();
-                String url = filePaths.stream ()
-                        .map (file -> ServletUriComponentsBuilder.fromCurrentContextPath ()
+                String fileName = Paths.get(filePaths.get (0)).getFileName().toString ();
+                String url = ServletUriComponentsBuilder.fromCurrentContextPath ()
                                 .path (constructUrlFromType(clientId, type))
                                 .path(fileName)
-                                .toUriString ())
-                        .collect (Collectors.joining (", "));
+                                .toUriString();
 
                 DocumentDto documentDto = new DocumentDto ();
                 documentDto.setName (fileName);
