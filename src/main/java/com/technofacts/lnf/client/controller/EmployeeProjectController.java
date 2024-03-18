@@ -19,7 +19,7 @@ public class EmployeeProjectController {
      * @param employeeId EmployeeId
      * @return ProjectEmployeeDto
      */
-    @GetMapping(value = "/projects")
+    @GetMapping(value = "/project")
     @ResponseStatus(HttpStatus.OK)
     public EmployeeProjectDto findProjectsByEmployeeId(@RequestParam("employeeId") final String employeeId) {
         return service.findProjectsByEmployeeId(employeeId);

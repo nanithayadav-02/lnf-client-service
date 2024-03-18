@@ -21,7 +21,7 @@ public class EmployeeProjectTaskController {
      * @param employeeId EmployeeId
      * @return ProjectEmployeeDto
      */
-    @GetMapping(value = "/projects/{projectId}/tasks")
+    @GetMapping(value = "/projects/{projectId}/task")
     @ResponseStatus(HttpStatus.OK)
     public EmployeeProjectTaskDto findTasksByEmployeeIdAndProjectId(@RequestParam("employeeId") final String employeeId, @PathVariable("projectId") final UUID projectId) {
         return service.findTasksByEmployeeIdAndProjectId(employeeId, projectId);
