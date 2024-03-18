@@ -80,7 +80,7 @@ public class TaskController {
      * @param projectId Project Id
      * @return List of all ProjectDto objects.
      */
-    @GetMapping(value = "/projects/{projectId}/tasks")
+    @GetMapping(value = "/projects/{projectId}/task")
     @ResponseStatus(HttpStatus.OK)
     public List<TaskDto> findAllByProjectId(@PathVariable("projectId") final UUID projectId) {
         return service.findAllByProjectId(projectId);

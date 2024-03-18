@@ -26,7 +26,7 @@ public class ProjectController {
      * if the requested page is more than the total number of pages.
      *
      */
-    @GetMapping(value = "/projects")
+    @GetMapping(value = "/project")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> findAll(@PageableAsQueryParam PageRequestDto pageRequest) {
         return paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
