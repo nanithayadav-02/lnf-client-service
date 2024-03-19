@@ -1,0 +1,20 @@
+[
+  {
+    "id": "cfe94b9f-c86f-4733-be96-a9b619f7bca7",
+    "name": "Data Analytics",
+    "type": "Power BI",
+    "status": "Active",
+    "description": "Development",
+    "startDate": "2022-11-01",
+    "endDate": "2023-12-31"
+  },
+  {
+    "id": "019d9f96-8f91-4725-9056-ed022b4cb65f",
+    "name": "Testing",
+    "type": "QA",
+    "status": "InActive",
+    "description": "Testing",
+    "startDate": "2022-10-01",
+    "endDate": "2023-11-30"
+  }
+]

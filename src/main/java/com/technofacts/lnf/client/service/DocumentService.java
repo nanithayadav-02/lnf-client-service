@@ -35,6 +35,7 @@ import static com.technofacts.lnf.client.converter.DocumentConverter.constructUr
 @Log
 public class DocumentService {
 
+    public static final String S_S_S_S = "%s/%s/%s/%s";
     private final ClientRepository clientRepository;
     private final ClientDocumentRepository repository;
 
@@ -56,9 +57,9 @@ public class DocumentService {
     public DocumentDto findByClientId (UUID clientId, DocumentType type) {
         try {
             if (awsS3BucketEnabled) {
-                String filePath = String.format ("%s/%s/%s/", folderName, clientId, type);
+                var filePath = String.format ("%s/%s/%s/", folderName, clientId, type);
                 List<String> filePaths = fileService.findFilesInFolder (filePath);
-                String fileName = Paths.get(filePaths.get (0)).getFileName().toString ();
+                var fileName = Paths.get(filePaths.get (0)).getFileName().toString ();
                 String url = ServletUriComponentsBuilder.fromCurrentContextPath ()
                                 .path (constructUrlFromType(clientId, type))
                                 .path(fileName)
@@ -91,7 +92,7 @@ public class DocumentService {
     public ResponseEntity<byte[]> findClientAgreement (UUID clientId, DocumentType type, String fileName) {
         try {
             if (awsS3BucketEnabled) {
-                String filePath = String.format ("%s/%s/%s/%s", folderName, clientId, type, fileName);
+                var filePath = String.format (S_S_S_S, folderName, clientId, type, fileName);
                 return fileService.findFileContent (filePath);
             } else {
                 searchForClient (clientId);
@@ -117,7 +118,7 @@ public class DocumentService {
     public ResponseEntity<byte[]> findById (UUID clientId, UUID documentId, DocumentType type, String fileName) {
         try {
             if (awsS3BucketEnabled) {
-                String filePath = String.format ("%s/%s/%s/%s", folderName, clientId, type, fileName);
+                var filePath = String.format (S_S_S_S, folderName, clientId, type, fileName);
                 return fileService.findFileContent (filePath);
             } else {
                 searchForClient (clientId);
@@ -142,7 +143,7 @@ public class DocumentService {
     public void create (UUID clientId, DocumentType type, MultipartFile file) {
         try {
             if (awsS3BucketEnabled) {
-                String folder = String.format ("%s/%s/%s/", folderName, clientId, type);
+                var folder = String.format ("%s/%s/%s/", folderName, clientId, type);
                 String filePath = uploadFile (folder, file);
                 log.info ("File uploaded successfully to S3 bucket: " + filePath);
             } else {
@@ -180,7 +181,7 @@ public class DocumentService {
         LnFBadRequestException.throwOnCondition (Objects::isNull, file, String.format ("Failed to update document for client [%s] with null payload", clientId));
         try {
             if (awsS3BucketEnabled) {
-                String folder = String.format ("%s/%s/%s/", folderName, clientId, type);
+                var folder = String.format ("%s/%s/%s/", folderName, clientId, type);
                 String filePath = uploadFile (folder, file);
                 log.info (() -> String.format ("File [%s] for client  successfully updated in S3", filePath));
             } else {
@@ -204,7 +205,7 @@ public class DocumentService {
      */
     public void deleteByClientId (UUID clientId, DocumentType type, String fileName) {
         if (awsS3BucketEnabled) {
-            String filePath = String.format ("%s/%s/%s/%s", folderName, clientId, type, fileName);
+            var filePath = String.format (S_S_S_S, folderName, clientId, type, fileName);
             List<String> filePaths = Collections.singletonList (filePath);
             fileService.delete (filePaths);
             log.info ("S3 object deleted for client");

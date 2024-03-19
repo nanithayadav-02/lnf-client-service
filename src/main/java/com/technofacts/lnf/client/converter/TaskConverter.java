@@ -23,8 +23,7 @@ public class TaskConverter {
     }
 
     public static Task toEntityModel(TaskDto transport) {
-        Task entity = toEntityModel(transport, new Task());
-        return entity;
+        return toEntityModel(transport, new Task());
     }
 
     public static Task toEntityModel(TaskDto transport, Task entity) {

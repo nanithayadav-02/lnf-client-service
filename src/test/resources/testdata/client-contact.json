@@ -1,0 +1,18 @@
+[
+  {
+    "id": "cfe94b9f-c86f-4733-be96-a9b619f7bca7",
+    "name": "Vijay",
+    "phoneNumber": "9090998988",
+    "email": "vijay200@gmail.com",
+    "designation": "Product Manager",
+    "department": "IT"
+  },
+  {
+    "id": "1b49b31c-573a-4b47-b13f-01d320e11ec5",
+    "name": "Hari",
+    "phoneNumber": "8671300589",
+    "email": "hari264@gmail.com",
+    "designation": "Manager",
+    "department": "RECRUITMENT"
+  }
+]
