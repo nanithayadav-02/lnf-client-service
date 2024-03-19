@@ -45,11 +45,11 @@ public class WebClientConfiguration {
     }
 
     private WebClient createWebClient(String baseUrl) {
-        ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
+        var exchangeStrategies = ExchangeStrategies.builder()
                 .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(maxInMemorySize))
                 .build();
 
-        HttpClient httpClient = HttpClient.create()
+        var httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeOut)
                 .responseTimeout(Duration.ofMillis(timeOut))
                 .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(timeOut, TimeUnit.MILLISECONDS))

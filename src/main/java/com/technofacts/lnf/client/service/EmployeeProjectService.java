@@ -34,7 +34,7 @@ public class EmployeeProjectService {
      */
     public EmployeeProjectDto findProjectsByEmployeeId(final String employeeId) {
 
-        EmployeeDto employeeDto = searchForEmployee(employeeId);
+        searchForEmployee(employeeId);
         List<ProjectEmployee> projectEmployees = searchForProjects(employeeId);
         List<Project> projects = projectEmployees.stream().map(ProjectEmployee::getProject).toList();
         List<ProjectDto> projectDtos = projects.stream()
