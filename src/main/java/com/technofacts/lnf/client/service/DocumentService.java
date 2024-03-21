@@ -59,6 +59,10 @@ public class DocumentService {
             if (awsS3BucketEnabled) {
                 var filePath = String.format ("%s/%s/%s/", folderName, clientId, type);
                 List<String> filePaths = fileService.findFilesInFolder (filePath);
+                if(filePaths == null || filePaths.isEmpty()) {
+                    log.info(String.format("Document not found for client[%s]", clientId));
+                    return null;
+                }
                 var fileName = Paths.get(filePaths.get (0)).getFileName().toString ();
                 String url = ServletUriComponentsBuilder.fromCurrentContextPath ()
                                 .path (constructUrlFromType(clientId, type))
