@@ -9,6 +9,7 @@ import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.service.common.page.PageableAsQueryParam;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/lnf")
+@Slf4j
 public class ClientController {
 
     private final ClientService service;
@@ -36,6 +38,13 @@ public class ClientController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> findAll(@PageableAsQueryParam PageRequestDto pageRequest) {
         return paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
+    }
+
+    @GetMapping(value = "/clients/health")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> health() {
+        log.info("Client service is healthy");
+        return ResponseEntity.ok("Client SVC healthy!");
     }
 
     /**
