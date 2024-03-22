@@ -47,6 +47,13 @@ public class ClientController {
         return ResponseEntity.ok("Client SVC healthy!");
     }
 
+    @GetMapping(value = "/timesheet/health")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> health1() {
+        log.info("timesheet service is healthy");
+        return ResponseEntity.ok("Timesheet SVC healthy!");
+    }
+
     /**
      * Return list of all ClientDto objects matching the search query.
      *
