@@ -1,13 +1,14 @@
 package com.technofacts.lnf.client.controller;
 
 import com.technofacts.lnf.client.service.DashboardService;
+import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.common.DashboardDto;
+import com.technofacts.lnf.dto.employee.EmployeeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,4 +49,10 @@ public class DashboardController {
     public DashboardDto getTaskDashboardStatistics() {
         return service.getTaskDashboardStatistics();
     }
+
+    @GetMapping(value = "/dashboard/clients", params = {"addedSince"})
+    public List<ClientDto> findNewlyAddedClients(@RequestParam(value = "addedSince") int daysAgo) {
+        return service.findNewlyAddedClients(daysAgo);
+    }
+
 }
