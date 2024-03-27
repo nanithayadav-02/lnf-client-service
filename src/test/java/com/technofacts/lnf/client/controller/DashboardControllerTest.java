@@ -94,16 +94,15 @@ class DashboardControllerTest extends BaseTestClass {
     @Test
     void getNewlyAddedClientDashboardStatistics() throws Exception {
         List<ClientDto> mockDto= Arrays.asList(createClient1());
+        int daysAgo = 30;
+        given(service.findNewlyAddedClients(daysAgo)).willReturn(mockDto);
 
-        given(service.findNewlyAddedClients()).willReturn(mockDto);
-
-        String url = "/lnf/dashboard/newly-added-clients";
-
+        String url = "/lnf/dashboard/clients?addedSince="+daysAgo;
         mockMvc.perform(MockMvcRequestBuilders.get(url))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-        verify(service, times(1)).findNewlyAddedClients();
+        verify(service, times(1)).findNewlyAddedClients(daysAgo);
     }
 
     private ClientDto createClient1() {
