@@ -1,14 +1,14 @@
 package com.technofacts.lnf.client.repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import com.technofacts.lnf.client.model.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 
 public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecificationExecutor<Client> {
@@ -21,4 +21,6 @@ public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecif
             + " from client as c group by year, month order by year desc", nativeQuery = true)
     List<StatisticsSummary> clientsByYearAndMonth();
 
+    @Query(value = "SELECT * FROM client WHERE created_time >= CURRENT_DATE - INTERVAL '30 days'", nativeQuery = true)
+    List<Client> findByCurrentMonth();
 }

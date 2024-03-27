@@ -1,9 +1,11 @@
 package com.technofacts.lnf.client.service;
 
+import com.technofacts.lnf.client.converter.ClientConverter;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.client.repository.StatisticsSummary;
 import com.technofacts.lnf.client.repository.TaskRepository;
+import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.common.DashboardDto;
 import com.technofacts.lnf.dto.common.StatisticsDto;
 import lombok.RequiredArgsConstructor;
@@ -67,5 +69,9 @@ public class DashboardService {
         }
     }
 
+    public List<ClientDto> findNewlyAddedClients() {
+        return clientRepository.findByCurrentMonth().stream().map(ClientConverter::toTransportModel).toList();
+
+    }
 }
 

@@ -1,6 +1,7 @@
 package com.technofacts.lnf.client.controller;
 
 import com.technofacts.lnf.client.service.DashboardService;
+import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.common.DashboardDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,5 +50,10 @@ public class DashboardController {
     @ResponseStatus(HttpStatus.OK)
     public DashboardDto getTaskDashboardStatistics() {
         return service.getTaskDashboardStatistics();
+    }
+
+    @GetMapping(value = "/dashboard/newly-added-clients")
+    public List<ClientDto> findNewlyAddedClients() {
+        return service.findNewlyAddedClients();
     }
 }
