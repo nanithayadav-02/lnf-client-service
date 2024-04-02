@@ -31,7 +31,6 @@ class EmployeeProjectTaskControllerTest extends BaseTestClass {
     private String employeeId;
     private UUID projectId;
 
-
     @BeforeAll
     void beforeAll() {
         employeeId = "HRD-FE-TF-1008";
