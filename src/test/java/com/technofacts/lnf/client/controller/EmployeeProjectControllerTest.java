@@ -5,7 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.technofacts.lnf.client.BaseTestClass;
 import com.technofacts.lnf.client.service.EmployeeProjectService;
 import com.technofacts.lnf.dto.client.EmployeeProjectDto;
-import com.technofacts.lnf.model.BaseEntity;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
