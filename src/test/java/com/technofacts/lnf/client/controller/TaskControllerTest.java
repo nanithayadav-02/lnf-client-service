@@ -4,7 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.technofacts.lnf.client.BaseTestClass;
 import com.technofacts.lnf.client.service.TaskService;
+import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.TaskDto;
+import com.technofacts.lnf.dto.common.PageRequestDto;
+import com.technofacts.lnf.dto.employee.EmployeeDto;
+import com.technofacts.lnf.dto.timesheet.WeeklyTimesheetDto;
+import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
+import com.technofacts.lnf.util.RestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +18,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -20,7 +31,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.aspectj.bridge.MessageUtil.fail;
@@ -51,6 +64,65 @@ class TaskControllerTest extends BaseTestClass {
     void setUp() {
         // Common setup code if necessary
     }
+
+    @Autowired
+    private PaginationAndSortingHandler paginationAndSortingHandler;
+
+    @Test
+    void testFindPaginatedByProjectId() throws Exception {
+        int page = 0;
+        int size = 5;
+        List<TaskDto> taskList = Arrays.asList(new TaskDto(), new TaskDto());
+        Page<TaskDto> leavePage = new PageImpl<>(taskList, PageRequest.of(page, size), taskList.size());
+
+        when(service.findPaginatedByProjectId(projectId, page, size)).thenReturn(leavePage);
+
+        mockMvc.perform(get("/lnf/projects/"+projectId+"/tasks")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size)))
+                .andExpect(status().isOk());
+
+    }
+
+    @Test
+    void findAllSortedByEmployeeId() throws Exception {
+
+        String sortBy = "status";
+        String sortOrder = "asc";
+        List<TaskDto> leaveList = Arrays.asList(new TaskDto(), new TaskDto());
+        when(service.findAllSortedByProjectId(projectId, sortBy, sortOrder)).thenReturn(leaveList);
+
+        mockMvc.perform(get("/lnf/projects/"+projectId+"/tasks")
+                        .param("sortBy", sortBy)
+                        .param("sortOrder", sortOrder))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+    }
+
+    @Test
+    void findPaginatedAndSortedByEmployeeId() throws Exception {
+
+        int page = 0;
+        int size = 5;
+        String sortBy = "status";
+        String sortOrder = "asc";
+        final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
+        List<TaskDto> leaveList = Arrays.asList(new TaskDto(), new TaskDto());
+        Page<TaskDto> leavePage = new PageImpl<>(leaveList, PageRequest.of(page, size, sortInfo), leaveList.size());
+
+        when(service.findPaginatedAndSortedByProjectId(projectId, page, size, sortBy, sortOrder)).thenReturn(leavePage);
+
+        mockMvc.perform(get("/lnf/projects/"+projectId+"/tasks")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
+                        .param("sortBy", sortBy)
+                        .param("sortOrder", sortOrder))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+    }
+
 
     @Test
     void findAllByProjectId() throws Exception {

@@ -7,7 +7,10 @@ import com.technofacts.lnf.client.service.ClientService;
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
+import com.technofacts.lnf.dto.common.PageRequestDto;
+import com.technofacts.lnf.dto.employee.EducationDto;
 import com.technofacts.lnf.dto.employee.EmployeeDto;
+import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -48,6 +53,9 @@ class ClientControllerTest extends BaseTestClass {
     private ProjectService projectService;
     private UUID clientId;
 
+    @Autowired
+    private PaginationAndSortingHandler paginationAndSortingHandler;
+
     @BeforeAll
     void beforeAll() {
         clientId = UUID.fromString("123e4567-e89b-12d3-a456-556642440000");
@@ -58,6 +66,37 @@ class ClientControllerTest extends BaseTestClass {
         // Common setup code if necessary
     }
 
+    @Test
+    void findAll() {
+        Page<ClientDto> mockedPage = mock(Page.class);
+        PageRequestDto pageRequest = new PageRequestDto(0, 10, "degree", "asc");
+
+        List<ClientDto> mockedList = List.of(createClient1(), createClient2());
+        when(service.findPaginatedAndSorted(0, 10, "degree", "asc")).thenReturn(mockedPage);
+        when(service.findPaginated(0, 10)).thenReturn(mockedPage);
+        when(service.findAllSorted("degree", "asc")).thenReturn(mockedList);
+        when(service.findAll()).thenReturn(mockedList);
+
+        ClientController controller = new ClientController(service,projectService,paginationAndSortingHandler);
+        // Test for paginated and sorted request
+        ResponseEntity<?> response = controller.findAll(pageRequest);
+        assertEquals(ResponseEntity.ok(mockedPage), response);
+
+        // Pagination with  sortBy and sortOrder
+        pageRequest = new PageRequestDto(0, 10,null,null);
+        response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
+        assertEquals(ResponseEntity.ok(mockedPage), response);
+
+        // Pagination with sortBy and sortOrder
+        pageRequest = new PageRequestDto(null, null, "degree", "asc");
+        response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
+        assertEquals(ResponseEntity.ok(mockedList), response);
+
+        //find All
+        pageRequest = new PageRequestDto();
+        response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
+        assertEquals(ResponseEntity.ok(mockedList), response);
+    }
     @Test
     void testSearch() throws Exception {
         String status = "Active";
