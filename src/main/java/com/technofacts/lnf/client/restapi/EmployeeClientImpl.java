@@ -61,7 +61,7 @@ public class EmployeeClientImpl extends BaseWebClientService  implements Employe
             // POST the request
             WebClient.RequestHeadersSpec<?> spec = webClient.post()
                      .uri("/lnf/employeeList")
-                     .body(BodyInserters.fromPublisher(Mono.just(employeeIds), new ParameterizedTypeReference<>() {
+                     .body(BodyInserters.fromPublisher(Mono.just(employeeIds), new ParameterizedTypeReference<List<String>>() {
                      }))
                      .accept(MediaType.APPLICATION_JSON);
             // Conditionally add the JWT token to the request headers
