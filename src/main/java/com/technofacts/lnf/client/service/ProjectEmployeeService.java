@@ -14,6 +14,7 @@ import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -139,6 +140,34 @@ public class ProjectEmployeeService {
     private Project searchForProject(UUID projectId) {
         return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
     }
+
+
+    public void addAllActiveEmployeeToProject(UUID projectId) {
+
+        Project project = searchForProject(projectId);
+        List<String> newEmployeeIds=new ArrayList<>();
+        newEmployeeIds.addAll(employeeService.findAll("active").parallelStream().map(EmployeeDto::getEmployeeId).toList());
+        List<String> existingEmployeeIds=repository.findAllByProjectId(projectId).stream().map(ProjectEmployee::getEmployeeId).toList();
+        List<String> requiredIds = newEmployeeIds.stream()
+                .filter(employeeId -> !existingEmployeeIds.contains(employeeId))
+                .toList();
+
+        requiredIds.parallelStream().forEach(employeeId -> {
+
+                EmployeeDto employeeDto = employeeService.findOne(employeeId);
+                if (employeeDto != null) {
+                    ProjectEmployee projectEmployee = new ProjectEmployee();
+                    projectEmployee.setProject(project);
+                    projectEmployee.setEmployeeId(employeeId);
+                    save(projectEmployee);
+                    log.log(Level.INFO, String.format("Successfully added the employee [%s] to the project [%s]", employeeId, project.getCode()));
+                } else {
+                    log.log(Level.SEVERE, String.format("Failed to add the employee [%s] to the project [%s]", employeeId, project.getCode()));
+                }
+        });
+
+    }
+
 
 
 }

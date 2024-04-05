@@ -76,6 +76,24 @@ class ProjectEmployeeControllerTest extends BaseTestClass {
         }
         verify(service, times(1)).addEmployeeToProject(any((UUID.class)), eq(requestedDto));
     }
+    @Test
+    void addAllEmployeesToProject() {
+        List<String> requestedDto = List.of("HRD-FE-TF-1008","HRD-FE-TF-1009");
+
+        String url = "/lnf/projects/" + projectId + "/active-employees";
+
+        doNothing().when(service).addAllActiveEmployeeToProject(any((UUID.class)));
+
+        try {
+            mockMvc.perform(MockMvcRequestBuilders.post(url)
+                            .contentType(APPLICATION_JSON)
+                            .content(asJsonString(requestedDto)))
+                    .andExpect(status().isCreated());
+        } catch (Exception e) {
+            fail("Unexpected exception: " + e.getMessage());
+        }
+        verify(service, times(1)).addAllActiveEmployeeToProject(any((UUID.class)));
+    }
 
     @Test
     void removeEmployeesFromProject() throws Exception {

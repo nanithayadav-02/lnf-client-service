@@ -1,8 +1,10 @@
 package com.technofacts.lnf.client.service;
 
 import com.technofacts.lnf.client.model.Project;
+import com.technofacts.lnf.client.model.ProjectEmployee;
 import com.technofacts.lnf.client.model.ProjectTaskEmployee;
 import com.technofacts.lnf.client.model.Task;
+import com.technofacts.lnf.client.repository.ProjectEmployeeRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.client.repository.ProjectTaskEmployeeRepository;
 import com.technofacts.lnf.client.repository.TaskRepository;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -29,6 +32,7 @@ public class ProjectTaskEmployeeService {
     private final ProjectTaskEmployeeRepository repository;
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectEmployeeRepository projectEmployeeRepository;
     private final EmployeeService employeeService;
 
     /**
@@ -154,4 +158,30 @@ public class ProjectTaskEmployeeService {
     }
 
 
+    public void addAllEmployeesToProjectAndTask(UUID projectId, UUID taskId) {
+
+        Project project = searchForProject(projectId);
+        Task task = searchForTask(taskId);
+
+        List<String> requiredIds = projectEmployeeRepository.findAllByProjectId(projectId).stream()
+                .map(ProjectEmployee::getEmployeeId)
+                .filter(employeeId -> !repository.findByTask(task).stream().map(ProjectTaskEmployee::getEmployeeId).collect(Collectors.toList()).contains(employeeId))
+                .toList();
+
+        requiredIds.forEach(employeeId -> {
+                EmployeeDto employeeDto = employeeService.findOne(employeeId);
+                if (employeeDto != null) {
+                    ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
+                    taskEmployee.setProject(project);
+                    taskEmployee.setTask(task);
+                    taskEmployee.setEmployeeId(employeeId);
+                    save(taskEmployee);
+                    log.log(Level.INFO, String.format("Successfully added the employee [%s] to the task [%s] of the project [%s]", employeeId, task.getName(), project.getCode()));
+
+                } else {
+                    log.log(Level.SEVERE, String.format("Failed to add the employee [%s] to the task [%s] of the project [%s]", employeeId, task.getName(), project.getCode()));
+                }
+
+        });
+    }
 }
