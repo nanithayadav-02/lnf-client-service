@@ -1,9 +1,8 @@
 package com.technofacts.lnf.client.model;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-
 import com.technofacts.lnf.model.AuditableEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
 import lombok.*;
 
 @ToString

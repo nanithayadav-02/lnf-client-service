@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lnf-client-service
+  namespace: lnf-develop
+  labels:
+    app: lnf-client-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lnf-client-service
+  template:
+    metadata:
+      labels:
+        app: lnf-client-service
+    spec:
+      containers:
+        - name: lnf-client-service
+          image: "docker.io/levernfulcrum/lnf-client-service:latest"
+          imagePullPolicy: Always
+          env:
+            - name: DATABASE_HOST
+              value: lnf-develop-db-postgresql
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: "client_db"
+            - name: DATABASE_USERNAME
+              value: "client_user"
+            - name: SPRING_PROFILES_ACTIVE
+              value: dev
+            - name: EMPLOYEE_SERVICE_URL
+              value: "http://lnf-employee-service:8085/api/v2"
+            - name: KEYCLOAK_HOST
+              value: keycloak:8080
+            - name: CLIENT-SECRET
+              value: "8449d301-fd64-4196-aded-212f24478c98"
+            - name: DATABASE_PASSWORD
+              value: "client@12345"
+          ports:
+            - name: http
+              containerPort: 8081
+          readinessProbe:
+            tcpSocket:
+              port: 8081

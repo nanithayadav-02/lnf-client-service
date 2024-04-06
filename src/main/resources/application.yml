@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: dev-ide
 
   application:
     name: lnf-client-service
@@ -8,11 +8,28 @@ spring:
 server:
   port: 8081
   servlet:
-    context-path: /api/v1
+    context-path: /api/v2
+
+aws:
+  s3:
+    bucket:
+      enabled: true
+      service: "/lnf/file"
+      folderName: "clients"
+
+application:
+  maxInMemorySize: 10485760
+
+connection:
+  timeout: 10000
 
 employee:
   service:
-    url: "http://localhost:8081/api/v1"
+    url: "http://localhost:8081/api/v2"
+
+file:
+  service:
+    url: "http://localhost:8081/api/v2"
 
 # Metrics Configuration
 management:
@@ -42,6 +59,7 @@ springdoc:
     path: /lnf-client
   swagger-ui:
     path: /lnf-client-api.html
+    enabled: true
 
 ---
 spring:
@@ -49,9 +67,9 @@ spring:
     activate:
       on-profile: test
   datasource:
-    url: jdbc:h2:mem:tsdb
-    username: tsuser
-    password: ts@12345
+    url: jdbc:h2:mem:client_db
+    username: client_user
+    password: client@12345
     driverClassName: org.h2.Driver
   h2:
     console:
@@ -62,11 +80,8 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: create
-      naming:
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
     properties:
-      javax:
+      jakarta:
         persistence:
           schema-generation:
             database:
@@ -80,6 +95,25 @@ spring:
               create-database-schemas: true
     open-in-view: false
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf/protocol/openid-connect/certs
+
+      client:
+        registration:
+          client-service:
+            client-id: lnf-client-api
+            client-secret: ${client-secret:lnf-client-api-secret}
+            scope: openid,profile,roles
+            authorization-grant-type: client_credentials
+            provider: keycloak
+        provider:
+          keycloak:
+            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+
 printStackTrace: true
 
 ---
@@ -89,7 +123,6 @@ spring:
       on-profile: dev
 
   datasource:
-#    url: jdbc:postgresql://${database.host:ec2-34-202-158-22.compute-1.amazonaws.com}:${database.port:5432}/${database.name:tsdb}
     url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
     username: ${database.username:client_user}
     password: ${database.password:client@12345}
@@ -112,29 +145,115 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: none
-      naming:
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
     show-sql: true
 
-printStackTrace: true
----
-
-spring:
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf/protocol/openid-connect/certs
       client:
         registration:
-          lnf-client-api:
+          client-service:
             client-id: lnf-client-api
-            client-secret: ${client-secret:76942b56-0dd1-4352-b130-e8fd772c1f9f}
-            scope: openid, profile, roles
+            client-secret: ${client-secret:lnf-client-api-secret}
+            scope: openid,profile,roles
             authorization-grant-type: client_credentials
             provider: keycloak
         provider:
           keycloak:
-            issuer-uri: http://${keycloak.host:ec2-34-204-0-170.compute-1.amazonaws.com}:${keycloak.port:8079}/auth/realms/lnf
+            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+
+printStackTrace: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
+    username: ${database.username:client_user}
+    password: ${database.password:client@12345}
+    data: classpath*:db/data.sql
+    driverClassName: ${database.drive:org.postgresql.Driver}
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      javax:
+        persistence:
+          schema-generation:
+            scripts:
+              action: drop-and-create
+              create-database-schemas: false
+              create-target: schema.sql
+              create-source: metadata
+              drop-target: drop-schema.sql
+              drop-source: metadata
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  security:
+    oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://${keycloak.host:ec2-34-204-0-170.compute-1.amazonaws.com}:${keycloak.port:8079}/auth/realms/lnf/protocol/openid-connect/certs
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf/protocol/openid-connect/certs
+      client:
+        registration:
+          client-service:
+            client-id: lnf-client-api
+            client-secret: ${client-secret:lnf-client-api-secret}
+            scope: openid,profile,roles
+            authorization-grant-type: client_credentials
+            provider: keycloak
+        provider:
+          keycloak:
+            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
 
+printStackTrace: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev-ide
+
+  datasource:
+    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
+    username: ${database.username:client_user}
+    password: ${database.password:client@12345}
+    data: classpath*:db/data.sql
+    driverClassName: ${database.drive:org.postgresql.Driver}
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      javax:
+        persistence:
+          schema-generation:
+            scripts:
+              action: drop-and-create
+              create-database-schemas: false
+              create-target: schema.sql
+              create-source: metadata
+              drop-target: drop-schema.sql
+              drop-source: metadata
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  autoconfigure:
+    exclude:
+      - org.keycloak.adapters.springboot.KeycloakAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+
+printStackTrace: true
+
+---

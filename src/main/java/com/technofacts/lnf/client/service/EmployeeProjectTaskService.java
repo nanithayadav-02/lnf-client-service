@@ -1,10 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.technofacts.lnf.client.converter.TaskConverter;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.model.ProjectTaskEmployee;
@@ -20,6 +15,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -39,14 +38,14 @@ public class EmployeeProjectTaskService {
      */
     public EmployeeProjectTaskDto findTasksByEmployeeIdAndProjectId(final String employeeId, final UUID projectId) {
 
-        EmployeeDto employeeDto = searchForEmployee(employeeId);
+        searchForEmployee(employeeId);
         Project project = searchForProject(projectId);
         List<ProjectTaskEmployee> projectTaskEmployees = search(project, employeeId);
-        List<Task> tasks = projectTaskEmployees.stream().map(ProjectTaskEmployee::getTask).collect(Collectors.toList());
+        List<Task> tasks = projectTaskEmployees.stream().map(ProjectTaskEmployee::getTask).toList();
         List<TaskDto> taskDtos = tasks.stream()
                 .map(TaskConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
         EmployeeProjectTaskDto employeeProjectTaskDto = new EmployeeProjectTaskDto();
         employeeProjectTaskDto.setEmployeeId(employeeId);
@@ -67,8 +66,7 @@ public class EmployeeProjectTaskService {
 
     private EmployeeDto searchForEmployee(String employeeId) {
         try {
-            EmployeeDto employeeDto = employeeService.findOne(employeeId);
-            return  employeeDto;
+            return employeeService.findOne(employeeId);
         } catch (RuntimeException ex) {
             throw new LnFEntityNotFoundException(String.format("Failed to find the employee [%s] ", employeeId));
         }

@@ -1,10 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.Lists;
 import com.technofacts.lnf.client.converter.TaskConverter;
 import com.technofacts.lnf.client.model.Project;
@@ -24,6 +19,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -32,6 +31,7 @@ public class TaskService {
 
     private final TaskRepository repository;
     private final ProjectRepository projectRepository;
+    private final ProjectTaskEmployeeService projectTaskEmployeeService;
 
     /**
      * Return requested page with list of TaskDto objects with requested size assigned to the project.
@@ -80,7 +80,7 @@ public class TaskService {
         searchForProject(projectId);
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Task> entities = Lists.newArrayList(repository.findByProjectId(projectId, sortInfo));
-        return entities.stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).toList();
     }
 
     /**
@@ -92,7 +92,7 @@ public class TaskService {
     public List<TaskDto> findAllByProjectId(final UUID projectId) {
         searchForProject(projectId);
         List<Task> entities = repository.findByProjectId(projectId);
-        return entities.stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).toList();
     }
 
     /**
@@ -159,11 +159,19 @@ public class TaskService {
     public void deleteByProjectId(UUID projectId) {
         searchForProject(projectId);
         List<Task> entities = repository.findByProjectId(projectId);
+        deleteTasks(projectId, entities);
+    }
+
+    private void deleteTasks(UUID projectId, List<Task> tasks) {
+        tasks.stream()
+                .filter(Objects::nonNull)
+                .forEach(projectTaskEmployeeService::deleteAllByTask);
+
         try {
-            repository.deleteAll(entities);
+            repository.deleteAll(tasks);
             log.info(() -> String.format("Tasks for project[%s] successfully deleted", projectId));
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete tasks(s) for project [%s]", projectId);
+            String errorMessage = String.format("Failed to delete tasks for project[%s]", projectId);
             throw new LnFException(errorMessage);
         }
     }
@@ -211,8 +219,6 @@ public class TaskService {
         return repository.findById(taskId).
                 orElseThrow(() -> new LnFEntityNotFoundException(String.format("Task with id [%s] does not exist", taskId)));
     }
-
-
-
 }
+
 

@@ -10,7 +10,7 @@ public class ContactConverter {
             return null;
         }
 
-        ContactDto dto = ContactDto.builder()
+        return ContactDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .department(entity.getDepartment())
@@ -18,8 +18,6 @@ public class ContactConverter {
                 .email(entity.getEmail())
                 .phoneNumber(entity.getPhoneNumber())
                 .build();
-
-        return dto;
     }
 
     public static ClientContact toEntityModel(ContactDto transport) {

@@ -11,7 +11,7 @@ public class AddressConverter {
             return null;
         }
 
-        AddressDto dto = AddressDto.builder()
+        return AddressDto.builder()
                 .id(entity.getId())
                 .addressText(entity.getAddressText())
                 .town(entity.getTown())
@@ -20,8 +20,6 @@ public class AddressConverter {
                 .country(entity.getCountry())
                 .postCode(entity.getPostCode())
                 .build();
-
-        return dto;
     }
 
     public static ClientAddress toEntityModel(AddressDto transport) {

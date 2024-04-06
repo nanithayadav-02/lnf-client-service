@@ -1,11 +1,11 @@
 package com.technofacts.lnf.client.model;
 
-import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.technofacts.lnf.model.AuditableEntity;
+import jakarta.persistence.*;
 import lombok.*;
 
 @ToString
@@ -24,10 +24,10 @@ public class Client extends AuditableEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "pan", nullable = false)
+    @Column(name = "pan")
     private String pan;
 
-    @Column(name = "tan", nullable = false)
+    @Column(name = "tan")
     private String tan;
 
     @Column(name = "status", nullable = false)
@@ -39,6 +39,9 @@ public class Client extends AuditableEntity {
     @Column(name = "agreement_expiry_date")
     private LocalDate agreementExpiryDate;
 
+    @Column(name = "service_type")
+    private String serviceType;
+
     @Column(name = "client_details", nullable = false)
     private String clientDetails;
 
@@ -47,26 +50,32 @@ public class Client extends AuditableEntity {
     private ClientAddress clientAddress;
 
     @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<ClientContact> clientContacts = new HashSet<>();
 
     @ToString.Exclude
-    @OneToOne(mappedBy = "client", cascade = CascadeType.ALL)
-    private Escalation escalation;
+    @Builder.Default
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private Set<Escalation> escalations = new HashSet<>();
 
     @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<Gst> gst = new HashSet<>();
 
     @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<ClientDocument> files = new HashSet<>();
 
     @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<Project> projects = new HashSet<>();
 
     @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<ClientNotes> notes = new HashSet<>();
 

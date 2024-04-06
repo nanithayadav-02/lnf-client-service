@@ -1,0 +1,44 @@
+{
+  "employeeId": "HRD-FE-TF-1009",
+  "projects": [
+    {
+      "id": "eb4032cf-5612-4ac9-9e38-ad47a93b8b1d",
+      "code": "PRJ-009",
+      "name": "Linux Admin",
+      "type": "IT",
+      "description": "Administration",
+      "purchaseOrder": "PO26032039",
+      "budgetTerms": "Variable",
+      "status": "Active",
+      "currency": "INR",
+      "budget": 9000000.00,
+      "hoursPerDay": 8,
+      "billingTerm": "Monthly",
+      "startDate": "2022-12-01",
+      "endDate": "2024-12-31",
+      "clientId": "d62ea65c-f85f-4003-b3c4-1762803727e7",
+      "clientName": "Accenture",
+      "clientCode": "ACT-001",
+      "tasks": [
+        {
+          "id": "50ec6a06-8625-41dc-b804-9c82693a6c92",
+          "name": "Testing",
+          "type": "QA",
+          "status": "Active",
+          "description": "Automation",
+          "startDate": "2022-11-01",
+          "endDate": "2024-12-31"
+        },
+        {
+          "id": "e7364422-9476-4fc4-a992-cf36f08af06e",
+          "name": "Linux",
+          "type": "Programming",
+          "status": "Active",
+          "description": "Administration",
+          "startDate": "2022-11-01",
+          "endDate": "2024-12-31"
+        }
+      ]
+    }
+  ]
+}

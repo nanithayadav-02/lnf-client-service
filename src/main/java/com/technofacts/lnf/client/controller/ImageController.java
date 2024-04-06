@@ -1,8 +1,5 @@
 package com.technofacts.lnf.client.controller;
 
-import java.io.IOException;
-import java.util.UUID;
-
 import com.technofacts.lnf.client.model.enums.DocumentType;
 import com.technofacts.lnf.client.service.DocumentService;
 import com.technofacts.lnf.dto.client.DocumentDto;
@@ -11,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.UUID;
 
 
 @RestController
@@ -34,23 +34,37 @@ public class ImageController {
     }
 
     /**
+     * Returns ResponseEntity with byte[] for the client agreement
+     *
+     * @param clientId Client Id
+     * @return ResponseEntity<byte []>
+     */
+    @GetMapping(value = "/clients/{clientId}/image/download")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<byte[]> findClientAgreement(@PathVariable("clientId") final UUID clientId, @RequestParam("fileName") String fileName) {
+        return service.findClientAgreement(clientId, DocumentType.image, fileName);
+    }
+
+    /**
      * Returns ResponseEntity with byte[] of the Client Agreement
      *
      * @param clientId Client Id
      * @param imageId  Image Id
      * @return ResponseEntity<byte [ ]>
      */
-    @GetMapping(value = "/clients/{clientId}/image/{imageId}")
+    @GetMapping(value = "/clients/{clientId}/image/{fileName}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<byte[]> findById(@PathVariable("clientId") final UUID clientId, @PathVariable("imageId") final UUID imageId) {
-        return service.findById(clientId, imageId);
+    public ResponseEntity<byte[]> findById(@PathVariable("clientId") final UUID clientId, @RequestParam(value = "imageId",required = false) final UUID imageId,
+                                           @PathVariable("fileName") String fileName) {
+
+        return service.findById(clientId, imageId ,DocumentType.image, fileName);
     }
 
     /**
      * Creates the image for the client
      *
      * @param clientId Client Id
-     * @param image    Client image in MutipartFile format
+     * @param image    Client image in MultipartFile format
      */
     @PostMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.CREATED)
@@ -66,11 +80,11 @@ public class ImageController {
      * @param image    image in MutipartFile format
      * @throws IOException IOException
      */
-    @PutMapping(value = "/clients/{clientId}/image/{imageId}")
+    @PutMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("clientId") final UUID clientId, @PathVariable("imageId") final UUID imageId,
+    public void update(@PathVariable("clientId") final UUID clientId, @RequestParam(value = "imageId", required = false) final UUID imageId,
                        @RequestParam MultipartFile image) throws IOException {
-        service.update(clientId, imageId, image);
+        service.update(clientId, imageId, DocumentType.image, image);
     }
 
     /**
@@ -80,8 +94,8 @@ public class ImageController {
      */
     @DeleteMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId) {
-        service.deleteByClientId(clientId, DocumentType.image);
+    public void delete(@PathVariable("clientId") final UUID clientId, @RequestParam("fileName") String fileName) {
+        service.deleteByClientId(clientId, DocumentType.image, fileName);
     }
 
     /**

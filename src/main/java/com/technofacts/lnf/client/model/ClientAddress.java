@@ -1,7 +1,6 @@
 package com.technofacts.lnf.client.model;
 
-import javax.persistence.*;
-
+import jakarta.persistence.*;
 import lombok.*;
 
 @ToString

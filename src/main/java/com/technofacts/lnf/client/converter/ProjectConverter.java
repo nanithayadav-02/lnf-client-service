@@ -31,13 +31,12 @@ public class ProjectConverter {
         dto.setClientId(entity.getClient() != null ? entity.getClient().getId() : null);
         dto.setClientCode(entity.getClient() != null ? entity.getClient().getCode() : null);
         dto.setClientName(entity.getClient() != null ? entity.getClient().getName() : null);
-        dto.getTasks().addAll(entity.getTasks().stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList()));
+        dto.getTasks().addAll(entity.getTasks().stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).toList());
         return dto;
     }
 
     public static Project toEntityModel(ProjectDto transport) {
-        Project entity = toEntityModel(transport, new Project());
-        return entity;
+        return toEntityModel(transport, new Project());
     }
 
     public static Project toEntityModel(ProjectDto transport, Project entity) {

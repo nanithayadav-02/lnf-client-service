@@ -1,26 +1,20 @@
 package com.technofacts.lnf.client.service;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.Lists;
 import com.technofacts.lnf.client.converter.ProjectConverter;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
-import com.technofacts.lnf.client.repository.specification.project.ProjectSpecificationBuilder;
 import com.technofacts.lnf.dto.client.ProjectDto;
+import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
+import com.technofacts.lnf.service.common.page.PaginatedAndSortedService;
+import com.technofacts.lnf.service.specification.GenericSpecificationBuilder;
 import com.technofacts.lnf.util.RestUtil;
+import com.technofacts.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
@@ -30,16 +24,21 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Function;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
 @Log
-public class ProjectService {
-
-    private static final String SEARCH_REGEX_PATTERN = "([\\w+?\\-_]+)(:|<|>)([\\w+?\\-_.@\\s]+),";
+public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
 
     private final ProjectRepository repository;
     private final ClientRepository clientRepository;
+    private final ProjectEmployeeService projectEmployeeService;
+    private final TaskService taskService;
 
     /**
      * Return requested page with list of ProjectDto objects with requested size. Raises LnFEntityNotFoundException
@@ -49,6 +48,7 @@ public class ProjectService {
      * @param size Requested size in the page
      * @return A Page object with projectDto
      */
+    @Override
     public Page<ProjectDto> findPaginated(final int page, final int size) {
         Page<Project> resultPage = repository.findAll(PageRequest.of(page, size));
         return validateAndGetPages(page, resultPage);
@@ -64,6 +64,7 @@ public class ProjectService {
      * @param sortOrder sort order ASC or DESC
      * @return A Page object with sorted projectDtos
      */
+    @Override
     public Page<ProjectDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         Page<Project> resultPage = repository.findAll(PageRequest.of(page, size, sortInfo));
@@ -77,10 +78,11 @@ public class ProjectService {
      * @param sortOrder sort order ASC or DESC
      * @return Sorted list of all ProjectDto objects.
      */
+    @Override
     public List<ProjectDto> findAllSorted(String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Project> entities = Lists.newArrayList(repository.findAll(sortInfo));
-        return entities.stream().map(ProjectConverter::toTransportModel).filter(Objects::nonNull).collect(Collectors.toList());
+        return entities.stream().map(ProjectConverter::toTransportModel).filter(Objects::nonNull).toList();
     }
 
     /**
@@ -88,11 +90,12 @@ public class ProjectService {
      *
      * @return List of all ProjectDto objects.
      */
+    @Override
     public List<ProjectDto> findAll() {
         List<Project> entities = repository.findAll();
         return entities.stream().map(ProjectConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -101,21 +104,28 @@ public class ProjectService {
      * @return List of all ProjectDto objects.
      */
     public List<ProjectDto> findAll(String search) {
-        ProjectSpecificationBuilder builder = new ProjectSpecificationBuilder();
-        Pattern pattern = Pattern.compile(SEARCH_REGEX_PATTERN, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(URLDecoder.decode(search, StandardCharsets.UTF_8) + ",");
-        while (matcher.find()) {
-            builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
-        }
-        Specification<Project> specification = builder.build();
+        Specification<Project> specification = buildProjectSpecification(search);
         List<Project> entities = repository.findAll(specification);
+        return convertToDtos(entities);
+    }
+    private List<ProjectDto> convertToDtos(List<Project> entities) {
         return entities.stream()
                 .map(ProjectConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    /**
+    private Specification<Project> buildProjectSpecification(String search) {
+        GenericSpecificationBuilder<Project> clientBuilder = new GenericSpecificationBuilder<>();
+        Function<String, Class<?>> fieldClassForProject = this::getFieldClassFromProject;
+        return SpecificationUtil.buildSpecification(search, clientBuilder, fieldClassForProject);
+    }
+
+    private Class<?> getFieldClassFromProject(String fieldName) {
+        return SpecificationUtil.getFieldClass(Project.class, fieldName);
+    }
+
+        /**
      * Returns projectDto from the projectId. Raises LnFEntityNotFoundException
      * if there is no project with the input projectId
      *
@@ -139,7 +149,26 @@ public class ProjectService {
         List<Project> projects = repository.findByClientId(clientId);
         return projects.stream().map(ProjectConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    /**
+     * Returns a list of EmployeeDto objects associated with the given clientId.
+     * Raises a LnFEntityNotFoundException if there is no client with the input clientId.
+     *
+     * @param clientId The UUID of the client.
+     * @return A list of EmployeeDto objects associated with the client.
+     */
+    public List<EmployeeDto> findEmployeesByClientId(UUID clientId) {
+        searchForClient(clientId);
+        List<Project> projects = repository.findByClientId(clientId);
+
+        return projects.stream()
+                .filter(Objects::nonNull)
+                .flatMap(project ->
+                        projectEmployeeService.findEmployeesByProjectId(project.getId())
+                                .getEmployees().stream())
+                .toList();
     }
 
     /**
@@ -187,6 +216,16 @@ public class ProjectService {
      */
     public void delete(UUID projectId) {
         Project entity = search(projectId);
+        deleteRelatedEntities(entity);
+        deleteProject(entity);
+    }
+
+    private void deleteRelatedEntities(Project project) {
+        projectEmployeeService.deleteProjectEmployeesByProject(project);
+        taskService.deleteByProjectId(project.getId());
+    }
+
+    private void deleteProject(Project entity) {
         try {
             repository.delete(entity);
             log.info(() -> String.format("Project[%s] successfully deleted", entity.getCode()));

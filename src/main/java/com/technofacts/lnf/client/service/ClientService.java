@@ -1,24 +1,20 @@
 package com.technofacts.lnf.client.service;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.Lists;
 import com.technofacts.lnf.client.converter.ClientConverter;
 import com.technofacts.lnf.client.model.Client;
+import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.repository.ClientRepository;
-import com.technofacts.lnf.client.repository.specification.client.ClientSpecificationBuilder;
 import com.technofacts.lnf.dto.client.ClientDto;
+import com.technofacts.lnf.dto.client.ProjectDto;
+import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
+import com.technofacts.lnf.service.common.page.PaginatedAndSortedService;
+import com.technofacts.lnf.service.specification.GenericSpecificationBuilder;
 import com.technofacts.lnf.util.RestUtil;
+import com.technofacts.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
@@ -28,15 +24,20 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Function;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
 @Log
-public class ClientService {
-
-    private static final String SEARCH_REGEX_PATTERN = "([\\w+?\\-_]+)(:|<|>)([\\w+?\\-_.@\\s]+),";
+public class ClientService implements PaginatedAndSortedService<ClientDto> {
 
     private final ClientRepository repository;
+    private final ProjectService projectService;
+
 
     /**
      * Return requested page with list of ClientDto objects with requested size. Raises LnFEntityNotFoundException
@@ -46,6 +47,7 @@ public class ClientService {
      * @param size Requested size in the page
      * @return A Page object with clientDtos
      */
+    @Override
     public Page<ClientDto> findPaginated(final int page, final int size) {
         Page<Client> resultPage = repository.findAll(PageRequest.of(page, size));
         return validateAndGetPages(page, resultPage);
@@ -61,6 +63,7 @@ public class ClientService {
      * @param sortOrder sort order ASC or DESC
      * @return A Page object with sorted clientDtos
      */
+    @Override
     public Page<ClientDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         Page<Client> resultPage = repository.findAll(PageRequest.of(page, size, sortInfo));
@@ -74,12 +77,13 @@ public class ClientService {
      * @param sortOrder sort order ASC or DESC
      * @return Sorted list of all ClientDto objects.
      */
+    @Override
     public List<ClientDto> findAllSorted(String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Client> entities = Lists.newArrayList(repository.findAll(sortInfo));
         return entities.stream().map(ClientConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -87,30 +91,12 @@ public class ClientService {
      *
      * @return List of all ClientDto objects.
      */
+    @Override
     public List<ClientDto> findAll() {
         List<Client> entities = repository.findAll();
         return entities.stream().map(ClientConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Return list of all ClientDto objects matching the search query.
-     *
-     * @return List of all ClientDto objects.
-     */
-    public List<ClientDto> findAll(String search) {
-        ClientSpecificationBuilder builder = new ClientSpecificationBuilder();
-        Pattern pattern = Pattern.compile(SEARCH_REGEX_PATTERN, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(URLDecoder.decode(search, StandardCharsets.UTF_8) + ",");
-        while (matcher.find()) {
-            builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
-        }
-        Specification<Client> specification = builder.build();
-        List<Client> entities = repository.findAll(specification);
-        return entities.stream().map(ClientConverter::toTransportModel)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -138,7 +124,6 @@ public class ClientService {
         log.info(() -> String.format("Client[%s] successfully created", entity.getCode()));
     }
 
-
     /**
      * Updates the client
      *
@@ -162,6 +147,8 @@ public class ClientService {
      */
     public void delete(UUID clientId) {
         Client entity = search(clientId);
+        List<ProjectDto> projectList = projectService.findProjectsByClientId(clientId);
+        projectList.forEach(project -> projectService.delete(project.getId()));
         try {
             repository.delete(entity);
             log.info(() -> String.format("Client[%s] successfully deleted", entity.getCode()));
@@ -203,5 +190,35 @@ public class ClientService {
         return repository.findById(clientId).
                 orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
     }
+
+
+    /**
+     * Return list of all ClientDto objects matching the search query.
+     *
+     * @return List of all ClientDto objects.
+     */
+    public List<ClientDto> findAll(String search) {
+        Specification<Client> specification = buildClientSpecification(search);
+        List<Client> entities = repository.findAll(specification);
+        return convertToDtos(entities);
+    }
+
+    private List<ClientDto> convertToDtos(List<Client> entities) {
+        return entities.stream()
+                .map(ClientConverter::toTransportModel)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private Specification<Client> buildClientSpecification(String search) {
+        GenericSpecificationBuilder<Client> clientBuilder = new GenericSpecificationBuilder<>();
+        Function<String, Class<?>> fieldClassForClient = this::getFieldClassFromClient;
+        return SpecificationUtil.buildSpecification(search, clientBuilder, fieldClassForClient);
+    }
+
+    private Class<?> getFieldClassFromClient(String fieldName) {
+        return SpecificationUtil.getFieldClass(Client.class, fieldName);
+    }
+
 }
 

@@ -1,14 +1,14 @@
 package com.technofacts.lnf.client.converter;
 
-import java.io.IOException;
-import java.util.UUID;
-
 import com.technofacts.lnf.client.model.ClientDocument;
 import com.technofacts.lnf.client.model.enums.DocumentType;
 import com.technofacts.lnf.dto.client.DocumentDto;
 import com.technofacts.lnf.exception.LnFException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.io.IOException;
+import java.util.UUID;
 
 public class DocumentConverter {
 
@@ -26,23 +26,25 @@ public class DocumentConverter {
         return dto;
     }
 
-    public static ClientDocument toEntityModel(MultipartFile transport) throws IOException {
+    public static ClientDocument toEntityModel(MultipartFile transport, boolean awsS3BucketEnabled)
+            throws IOException {
         if (transport == null) {
             return null;
         }
         ClientDocument entity = new ClientDocument();
-        return toEntityModel(transport, entity);
+        return toEntityModel(transport, entity,awsS3BucketEnabled);
 
     }
 
-    public static ClientDocument toEntityModel(MultipartFile transport, ClientDocument entity) throws IOException {
+    public static ClientDocument toEntityModel(MultipartFile transport, ClientDocument entity,
+                                               boolean awsS3BucketEnabled) throws IOException {
         if (transport == null || entity == null) {
             return null;
         }
         entity.setName(transport.getOriginalFilename() != null ? transport.getOriginalFilename() : transport.getName());
         entity.setContentType(transport.getContentType());
         entity.setSize(transport.getSize());
-        entity.setContent(transport.getBytes());
+        entity.setContent(awsS3BucketEnabled ? new byte[0] : transport.getBytes());
 
         return entity;
     }
@@ -55,7 +57,7 @@ public class DocumentConverter {
     }
 
 
-    private static String constructUrlFromType(UUID clientId, DocumentType type) {
+    public static String constructUrlFromType(UUID clientId, DocumentType type) {
         String url = "";
         if (type == DocumentType.agreement) {
             url = String.format("/lnf/clients/%s/agreement/", clientId);
@@ -64,7 +66,7 @@ public class DocumentConverter {
         } else if (type == DocumentType.others) {
             url = String.format("/lnf/clients/%s/others/", clientId);
         } else {
-            new LnFException("Unknown document type");
+            throw new LnFException("Unknown document type");
         }
         return url;
     }

@@ -16,12 +16,12 @@ public class EmployeeProjectController {
     /**
      * Get projects associated to the employee
      *
-     * @param employeeId Employee Id
+     * @param employeeId EmployeeId
      * @return ProjectEmployeeDto
      */
-    @GetMapping(value = "/employees/{employeeId}/projects")
+    @GetMapping(value = "/project")
     @ResponseStatus(HttpStatus.OK)
-    public EmployeeProjectDto findProjectsByEmployeeId(@PathVariable("employeeId") final String employeeId) {
+    public EmployeeProjectDto findProjectsByEmployeeId(@RequestParam("employeeId") final String employeeId) {
         return service.findProjectsByEmployeeId(employeeId);
     }
 

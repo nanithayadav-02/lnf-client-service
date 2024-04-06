@@ -1,9 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.technofacts.lnf.client.converter.ProjectConverter;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.model.ProjectEmployee;
@@ -17,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -35,13 +34,13 @@ public class EmployeeProjectService {
      */
     public EmployeeProjectDto findProjectsByEmployeeId(final String employeeId) {
 
-        EmployeeDto employeeDto = searchForEmployee(employeeId);
+        searchForEmployee(employeeId);
         List<ProjectEmployee> projectEmployees = searchForProjects(employeeId);
-        List<Project> projects = projectEmployees.stream().map(ProjectEmployee::getProject).collect(Collectors.toList());
+        List<Project> projects = projectEmployees.stream().map(ProjectEmployee::getProject).toList();
         List<ProjectDto> projectDtos = projects.stream()
                 .map(ProjectConverter::toTransportModel)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
         EmployeeProjectDto employeeProjectDto = new EmployeeProjectDto();
         employeeProjectDto.setEmployeeId(employeeId);
@@ -57,8 +56,7 @@ public class EmployeeProjectService {
 
     private EmployeeDto searchForEmployee(String employeeId) {
         try {
-            EmployeeDto employeeDto = employeeService.findOne(employeeId);
-            return  employeeDto;
+            return employeeService.findOne(employeeId);
         } catch (RuntimeException ex) {
             throw new LnFEntityNotFoundException(String.format("Failed to find the employee [%s] ", employeeId));
         }
