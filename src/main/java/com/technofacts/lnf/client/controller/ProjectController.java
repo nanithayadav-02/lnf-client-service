@@ -1,5 +1,6 @@
 package com.technofacts.lnf.client.controller;
 
+import com.technofacts.lnf.client.service.ProjectExportService;
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
@@ -7,9 +8,12 @@ import com.technofacts.lnf.service.common.page.PageableAsQueryParam;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +24,7 @@ public class ProjectController {
 
     private final ProjectService service;
     private final PaginationAndSortingHandler paginationAndSortingHandler;
+    private final ProjectExportService exportService;
 
     /**
      * Return requested page with list of ProjectDto objects with requested sortBy and sortOrder and size and page.  Raises LnFEntityNotFoundException
@@ -65,6 +70,12 @@ public class ProjectController {
     @ResponseStatus(HttpStatus.CREATED)
     public void create(@RequestBody final ProjectDto resource) {
         service.create(resource);
+    }
+
+    @PostMapping(value = "/projects/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+        exportService.uploadFile(file);
+        return ResponseEntity.ok("File uploaded successfully.");
     }
 
     /**
