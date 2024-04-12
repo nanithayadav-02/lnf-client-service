@@ -13,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -77,23 +79,21 @@ class ProjectEmployeeControllerTest extends BaseTestClass {
         verify(service, times(1)).addEmployeeToProject(any((UUID.class)), eq(requestedDto));
     }
     @Test
-    void addAllEmployeesToProject() {
-        List<String> requestedDto = List.of("HRD-FE-TF-1008","HRD-FE-TF-1009");
+    void addAllEmployeesToProject() throws Exception {
+        List<String> statuses = List.of("ACTIVE", "INACTIVE");
 
-        String url = "/lnf/projects/" + projectId + "/active-employees";
+        doNothing().when(service).addAllActiveEmployeeToProject(any(UUID.class), anyList());
 
-        doNothing().when(service).addAllActiveEmployeeToProject(any((UUID.class)));
+        mockMvc.perform(MockMvcRequestBuilders.post("/lnf/projects/"+ projectId +"/active-employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(statuses)))
+                .andExpect(status().isCreated());
 
-        try {
-            mockMvc.perform(MockMvcRequestBuilders.post(url)
-                            .contentType(APPLICATION_JSON)
-                            .content(asJsonString(requestedDto)))
-                    .andExpect(status().isCreated());
-        } catch (Exception e) {
-            fail("Unexpected exception: " + e.getMessage());
-        }
-        verify(service, times(1)).addAllActiveEmployeeToProject(any((UUID.class)));
+        verify(service, times(1)).addAllActiveEmployeeToProject(projectId, statuses);
     }
+
+
+
 
     @Test
     void removeEmployeesFromProject() throws Exception {

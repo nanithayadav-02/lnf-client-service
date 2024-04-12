@@ -42,8 +42,8 @@ public class ProjectEmployeeController {
 
     @PostMapping(value = "/projects/{projectId}/active-employees")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addAllActiveEmployeesToProject(@PathVariable("projectId") final String projectId) {
-        service.addAllActiveEmployeeToProject(UUID.fromString(projectId));
+    public void addAllActiveEmployeesToProject(@PathVariable("projectId") final String projectId,@RequestBody List<String> statuses) {
+        service.addAllActiveEmployeeToProject(UUID.fromString(projectId),statuses);
     }
 
     /**

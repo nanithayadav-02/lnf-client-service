@@ -3,12 +3,12 @@ package com.technofacts.lnf.client.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.technofacts.lnf.client.BaseTestClass;
+import com.technofacts.lnf.client.service.ClientExportService;
 import com.technofacts.lnf.client.service.ClientService;
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
-import com.technofacts.lnf.dto.employee.EducationDto;
 import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import org.junit.jupiter.api.Assertions;
@@ -51,6 +51,10 @@ class ClientControllerTest extends BaseTestClass {
     private ClientService service;
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private ClientExportService exportService;
+
     private UUID clientId;
 
     @Autowired
@@ -77,7 +81,7 @@ class ClientControllerTest extends BaseTestClass {
         when(service.findAllSorted("degree", "asc")).thenReturn(mockedList);
         when(service.findAll()).thenReturn(mockedList);
 
-        ClientController controller = new ClientController(service,projectService,paginationAndSortingHandler);
+        ClientController controller = new ClientController(service,projectService,paginationAndSortingHandler,exportService);
         // Test for paginated and sorted request
         ResponseEntity<?> response = controller.findAll(pageRequest);
         assertEquals(ResponseEntity.ok(mockedPage), response);

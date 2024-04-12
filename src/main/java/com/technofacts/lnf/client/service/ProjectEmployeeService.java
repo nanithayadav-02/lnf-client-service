@@ -141,9 +141,9 @@ public class ProjectEmployeeService {
         return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
     }
 
-    public void addAllActiveEmployeeToProject(UUID projectId) {
+    public void addAllActiveEmployeeToProject(UUID projectId,List<String> statuses) {
         Project project = searchForProject(projectId);
-        List<String> requiredIds = new ArrayList<>(employeeService.findAllActiveEmployeeIds());
+        List<String> requiredIds = new ArrayList<>(employeeService.findByStatuses(statuses));
         requiredIds.removeAll(repository.findAllByProjectId(projectId)
                 .stream().map(ProjectEmployee::getEmployeeId).toList());
 

@@ -105,7 +105,24 @@ public class EmployeeClientImpl extends BaseWebClientService  implements Employe
 
     @Override
     public List<String> findByStatuses(List<String> statuses) {
-        return Collections.emptyList();
+        List<String> employeeIds = new ArrayList<>();
+        try {
+            WebClient.RequestHeadersSpec<?> spec = webClient.post()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/lnf/employeeList/status")
+                            .build())
+                    .bodyValue(statuses)
+                    .accept(MediaType.APPLICATION_JSON);
+            addJwtToken(spec);
+            employeeIds = spec.retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                    .block();
+        } catch (LnFEntityNotFoundException ex) {
+            log.warning(String.format("Employee with active status does not exist"));
+        } catch (RuntimeException ex) {
+            log.log(Level.SEVERE, String.format("Error occurred fetching the details of the employee", ex));
+        }
+        return employeeIds;
     }
 
     @Override
@@ -121,27 +138,6 @@ public class EmployeeClientImpl extends BaseWebClientService  implements Employe
     @Override
     public void delete(String employeeId) {
         //To be implemented
-    }
-
-    @Override
-    public List<String> findAllActiveEmployeeIds() {
-        List<String> employeeIds = new ArrayList<>();
-        try {
-            WebClient.RequestHeadersSpec<?> spec = webClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/lnf/employees/active")
-                            .build())
-                    .accept(MediaType.APPLICATION_JSON);
-            addJwtToken(spec);
-            employeeIds = spec.retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
-                    .block();
-        } catch (LnFEntityNotFoundException ex) {
-            log.warning(String.format("Employee with active status does not exist"));
-        } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, String.format("Error occurred fetching the details of the employee", ex));
-        }
-        return employeeIds;
     }
 
     @Override
