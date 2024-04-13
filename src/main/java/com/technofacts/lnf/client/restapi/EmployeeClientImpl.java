@@ -83,25 +83,9 @@ public class EmployeeClientImpl extends BaseWebClientService  implements Employe
 
     @Override
     public List<EmployeeDto> findAll(String search) {
-        List<EmployeeDto> employeeDtos = new ArrayList<>();
-        try {
-            WebClient.RequestHeadersSpec<?> spec = webClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/lnf/employees")
-                            .queryParam("search", "status:" + search)
-                            .build())
-                    .accept(MediaType.APPLICATION_JSON);
-            addJwtToken(spec);
-            employeeDtos = spec.retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<EmployeeDto>>() {})
-                    .block();
-        } catch (LnFEntityNotFoundException ex) {
-            log.warning(String.format("Employee with active status does not exist"));
-        } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, String.format("Error occurred fetching the details of the employee", ex));
-        }
-        return employeeDtos;
+        return null;
     }
+
 
     @Override
     public List<String> findByStatuses(List<String> statuses) {

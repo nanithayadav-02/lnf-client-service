@@ -1,6 +1,6 @@
 package com.technofacts.lnf.client.controller;
 
-import com.technofacts.lnf.client.service.TaskExportService;
+import com.technofacts.lnf.client.service.DataExportService;
 import com.technofacts.lnf.client.service.TaskService;
 import com.technofacts.lnf.dto.client.TaskDto;
 import com.technofacts.lnf.util.QueryConstants;
@@ -22,7 +22,7 @@ import java.util.UUID;
 public class TaskController {
 
     private final TaskService service;
-    private final TaskExportService exportService;
+    private final DataExportService dataExportService;
     /**
      * Return requested page with list of TaskDto objects with requested size assigned to the project.
      * Raises LnFEntityNotFoundException if the requested page is more than the total number of pages or the
@@ -132,7 +132,7 @@ public class TaskController {
 
     @PostMapping(value = "/tasks/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
-        exportService.uploadFile(file);
+        dataExportService.uploadFile(file,TaskDto.class);
         return ResponseEntity.ok("File uploaded successfully.");
     }
     /**

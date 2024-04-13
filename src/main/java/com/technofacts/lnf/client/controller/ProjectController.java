@@ -1,6 +1,6 @@
 package com.technofacts.lnf.client.controller;
 
-import com.technofacts.lnf.client.service.ProjectExportService;
+import com.technofacts.lnf.client.service.DataExportService;
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
@@ -24,7 +24,7 @@ public class ProjectController {
 
     private final ProjectService service;
     private final PaginationAndSortingHandler paginationAndSortingHandler;
-    private final ProjectExportService exportService;
+    private final DataExportService dataExportService;
 
     /**
      * Return requested page with list of ProjectDto objects with requested sortBy and sortOrder and size and page.  Raises LnFEntityNotFoundException
@@ -74,7 +74,7 @@ public class ProjectController {
 
     @PostMapping(value = "/projects/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
-        exportService.uploadFile(file);
+        dataExportService.uploadFile(file,ProjectDto.class);
         return ResponseEntity.ok("File uploaded successfully.");
     }
 

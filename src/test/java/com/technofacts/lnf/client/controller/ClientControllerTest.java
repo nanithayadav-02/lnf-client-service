@@ -3,8 +3,8 @@ package com.technofacts.lnf.client.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.technofacts.lnf.client.BaseTestClass;
-import com.technofacts.lnf.client.service.ClientExportService;
 import com.technofacts.lnf.client.service.ClientService;
+import com.technofacts.lnf.client.service.DataExportService;
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
@@ -53,7 +53,7 @@ class ClientControllerTest extends BaseTestClass {
     private ProjectService projectService;
 
     @Autowired
-    private ClientExportService exportService;
+    private DataExportService dataExportService;
 
     private UUID clientId;
 
@@ -81,7 +81,7 @@ class ClientControllerTest extends BaseTestClass {
         when(service.findAllSorted("degree", "asc")).thenReturn(mockedList);
         when(service.findAll()).thenReturn(mockedList);
 
-        ClientController controller = new ClientController(service,projectService,paginationAndSortingHandler,exportService);
+        ClientController controller = new ClientController(service,projectService,paginationAndSortingHandler,dataExportService);
         // Test for paginated and sorted request
         ResponseEntity<?> response = controller.findAll(pageRequest);
         assertEquals(ResponseEntity.ok(mockedPage), response);
