@@ -1,15 +1,20 @@
 package com.technofacts.lnf.client.controller;
 
-import java.util.List;
-import java.util.UUID;
-
+import com.technofacts.lnf.client.service.DataExportService;
 import com.technofacts.lnf.client.service.TaskService;
 import com.technofacts.lnf.dto.client.TaskDto;
 import com.technofacts.lnf.util.QueryConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class TaskController {
 
     private final TaskService service;
-
+    private final DataExportService dataExportService;
     /**
      * Return requested page with list of TaskDto objects with requested size assigned to the project.
      * Raises LnFEntityNotFoundException if the requested page is more than the total number of pages or the
@@ -125,6 +130,11 @@ public class TaskController {
         service.create(projectId, resource);
     }
 
+    @PostMapping(value = "/tasks/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+        dataExportService.uploadFile(file,TaskDto.class);
+        return ResponseEntity.ok("File uploaded successfully.");
+    }
     /**
      * Updates the project
      *

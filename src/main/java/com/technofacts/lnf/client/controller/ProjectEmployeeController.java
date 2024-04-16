@@ -1,13 +1,13 @@
 package com.technofacts.lnf.client.controller;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.technofacts.lnf.client.service.ProjectEmployeeService;
 import com.technofacts.lnf.dto.client.ProjectEmployeeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,6 +38,12 @@ public class ProjectEmployeeController {
     @ResponseStatus(HttpStatus.CREATED)
     public void addEmployeesToProject(@PathVariable("projectId") final String projectId, @RequestBody List<String> employeeIds) {
         service.addEmployeeToProject(UUID.fromString(projectId), employeeIds);
+    }
+
+    @PostMapping(value = "/projects/{projectId}/active-employees")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addAllActiveEmployeesToProject(@PathVariable("projectId") final String projectId,@RequestBody List<String> statuses) {
+        service.addAllActiveEmployeeToProject(UUID.fromString(projectId),statuses);
     }
 
     /**

@@ -13,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -76,6 +78,22 @@ class ProjectEmployeeControllerTest extends BaseTestClass {
         }
         verify(service, times(1)).addEmployeeToProject(any((UUID.class)), eq(requestedDto));
     }
+    @Test
+    void addAllEmployeesToProject() throws Exception {
+        List<String> statuses = List.of("ACTIVE", "INACTIVE");
+
+        doNothing().when(service).addAllActiveEmployeeToProject(any(UUID.class), anyList());
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/lnf/projects/"+ projectId +"/active-employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(statuses)))
+                .andExpect(status().isCreated());
+
+        verify(service, times(1)).addAllActiveEmployeeToProject(projectId, statuses);
+    }
+
+
+
 
     @Test
     void removeEmployeesFromProject() throws Exception {

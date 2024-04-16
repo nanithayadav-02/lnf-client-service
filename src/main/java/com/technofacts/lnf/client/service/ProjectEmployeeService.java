@@ -14,6 +14,7 @@ import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -140,5 +141,19 @@ public class ProjectEmployeeService {
         return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
     }
 
+    public void addAllActiveEmployeeToProject(UUID projectId,List<String> statuses) {
+        Project project = searchForProject(projectId);
+        List<String> requiredIds = new ArrayList<>(employeeService.findByStatuses(statuses));
+        requiredIds.removeAll(repository.findAllByProjectId(projectId)
+                .stream().map(ProjectEmployee::getEmployeeId).toList());
 
+        requiredIds.parallelStream().forEach(employeeId -> {
+
+            ProjectEmployee projectEmployee = new ProjectEmployee();
+            projectEmployee.setProject(project);
+            projectEmployee.setEmployeeId(employeeId);
+            save(projectEmployee);
+            log.log(Level.INFO, String.format("Successfully added the employee [%s] to the project [%s]", employeeId, project.getCode()));
+        });
+    }
 }
