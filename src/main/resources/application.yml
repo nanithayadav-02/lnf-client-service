@@ -14,7 +14,7 @@ aws:
   s3:
     bucket:
       enabled: true
-      service: "/lnf/file"
+      service: "/lnf/files"
       folderName: "clients"
 
 application:
