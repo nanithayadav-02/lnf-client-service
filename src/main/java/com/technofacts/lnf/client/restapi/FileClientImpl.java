@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 @Service
 @Transactional
 @Slf4j
@@ -80,7 +79,7 @@ public class FileClientImpl extends BaseWebClientService implements FileService 
         List<String> files = new ArrayList<> ();
         try {
             WebClient.RequestHeadersSpec<?> spec = webClient.get()
-                    .uri("/lnf/files/folder?folderName={folderName}", folderName)
+                    .uri(s3Service + "/folder-name?folderName={folderName}", folderName)
                     .accept(MediaType.APPLICATION_JSON);
             // Conditionally add the JWT token to the request headers
             addJwtToken(spec);
@@ -114,21 +113,7 @@ public class FileClientImpl extends BaseWebClientService implements FileService 
     }
 
     public ResponseEntity<byte[]> findFile(String filePath) {
-        try {
-            WebClient.RequestHeadersSpec<?> spec = webClient.get()
-                    .uri(s3Service + "?filePath={filePath}", filePath)
-                    .accept(MediaType.APPLICATION_OCTET_STREAM);
-            addJwtToken(spec);
-            ResponseEntity<byte[]> response = spec
-                    .retrieve()
-                    .toEntity(byte[].class)
-                    .block();
-            log.info("file is retrieved");
-            return response;
-        } catch (Exception ex) {
-            log.error("File is not retrieved {}", ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        return null;
     }
 
     @Override

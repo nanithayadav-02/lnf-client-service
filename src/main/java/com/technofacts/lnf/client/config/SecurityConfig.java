@@ -1,5 +1,6 @@
 package com.technofacts.lnf.client.config;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,13 +26,25 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuerUri;
 
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
+
+    private String ACTUATOR_HEALTH_ENDPOINT_PATTERN;
+    private String ACTUATOR_INFO_ENDPOINT_PATTERN;
+
+    @PostConstruct
+    public void initialize() {
+        this.ACTUATOR_HEALTH_ENDPOINT_PATTERN = contextPath + "/actuator/health/**";
+        this.ACTUATOR_INFO_ENDPOINT_PATTERN = contextPath+ "/actuator/info";
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health/**", "/actuator/info").permitAll() // Allow health checks w/o authN
+                        .requestMatchers(ACTUATOR_HEALTH_ENDPOINT_PATTERN, ACTUATOR_INFO_ENDPOINT_PATTERN).permitAll() // Allow health checks w/o authN
                         .anyRequest().authenticated())
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

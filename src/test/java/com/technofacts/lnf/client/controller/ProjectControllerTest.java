@@ -3,6 +3,7 @@ package com.technofacts.lnf.client.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.technofacts.lnf.client.BaseTestClass;
+import com.technofacts.lnf.client.service.DataExportService;
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
@@ -41,9 +42,10 @@ class ProjectControllerTest extends BaseTestClass {
     private MockMvc mockMvc;
     @Autowired
     private ProjectService service;
-
     @Autowired
     private PaginationAndSortingHandler paginationAndSortingHandler;
+    @Autowired
+    private DataExportService dataExportService;
 
     @Test
     void findAll() {
@@ -56,7 +58,7 @@ class ProjectControllerTest extends BaseTestClass {
         when(service.findAllSorted("degree", "asc")).thenReturn(mockedList);
         when(service.findAll()).thenReturn(mockedList);
 
-        ProjectController controller = new ProjectController(service, paginationAndSortingHandler);
+        ProjectController controller = new ProjectController(service,paginationAndSortingHandler,dataExportService);
         // Test for paginated and sorted request
         ResponseEntity<?> response = controller.findAll(pageRequest);
         assertEquals(ResponseEntity.ok(mockedPage), response);
