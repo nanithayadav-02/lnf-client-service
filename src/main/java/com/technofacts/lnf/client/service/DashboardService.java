@@ -75,8 +75,7 @@ public class DashboardService {
 
     public List<ClientDto> findNewlyAddedClients(int daysAgo) {
         LocalDate localDate = LocalDate.now().minusDays(daysAgo);
-        Date fromDate = java.sql.Date.valueOf(localDate);
-        List<Client> clients = clientRepository.findByDateAfter(fromDate);
+        List<Client> clients = clientRepository.findByDateAfter(localDate);
 
         return clients.stream()
                 .map(ClientConverter::toTransportModel)
