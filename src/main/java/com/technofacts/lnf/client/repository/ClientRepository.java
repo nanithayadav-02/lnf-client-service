@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,6 @@ public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecif
             + " from client as c group by year, month order by year desc", nativeQuery = true)
     List<StatisticsSummary> clientsByYearAndMonth();
 
-    @Query("select e from Client e where e.createdTime >= :fromDate")
-    List<Client> findByDateAfter(@Param("fromDate") Date fromDate);
+    @Query("select e from Client e where e.workingFrom >= :fromDate")
+    List<Client> findByDateAfter(@Param("fromDate") LocalDate fromDate);
 }
