@@ -55,6 +55,34 @@ public class ProjectEmployeeService {
         return projectEmployeeDto;
     }
 
+    public ProjectEmployeeDto findEmployeesByProjectIdWithPaginated(final UUID projectId,int page,int size) {
+        // Search if the projectId exists otherwise throw LnFEntityNotFoundException
+        Project project = searchForProject(projectId);
+
+        // Get the list of employees associated with the project
+        List<ProjectEmployee> projectEmployees = repository.findByProject(project);
+        int totalEmployees = projectEmployees.size();
+
+        // Calculate pagination parameters
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, totalEmployees);
+
+        // Get the sublist of employees for the current page
+        List<ProjectEmployee> pagedEmployees = projectEmployees.subList(startIndex, endIndex);
+
+        // Get the list of employee details from the Employee microservice
+        List<String> employeeIds = pagedEmployees.stream().map(ProjectEmployee::getEmployeeId).toList();
+        List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(employeeIds);
+
+        // Return the ProjectEmployeeDtos with pagination information
+        ProjectEmployeeDto projectEmployeeDto = new ProjectEmployeeDto();
+        projectEmployeeDto.setProjectId(project.getId());
+        projectEmployeeDto.setProjectCode(project.getCode());
+        projectEmployeeDto.setEmployees(employeeDtos);
+
+        return projectEmployeeDto;
+    }
+
     /**
      * Add employees to the project
      *

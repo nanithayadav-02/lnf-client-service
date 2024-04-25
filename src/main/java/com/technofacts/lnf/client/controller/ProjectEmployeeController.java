@@ -24,9 +24,14 @@ public class ProjectEmployeeController {
      */
     @GetMapping(value = "/projects/{projectId}/employees")
     @ResponseStatus(HttpStatus.OK)
-    public ProjectEmployeeDto findEmployeesByProjectId(@PathVariable("projectId") final UUID projectId) {
-        return service.findEmployeesByProjectId(projectId);
+    public ProjectEmployeeDto findEmployeesByProjectIdWithPagination(
+            @PathVariable("projectId") final UUID projectId,
+            @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+            @RequestParam(name = "size", required = false, defaultValue = "2147483647") Integer size) {
+
+        return service.findEmployeesByProjectIdWithPaginated(projectId, page, size);
     }
+
 
     /**
      * Add employees to the project
