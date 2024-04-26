@@ -24,8 +24,12 @@ public class ProjectEmployeeController {
      */
     @GetMapping(value = "/projects/{projectId}/employees")
     @ResponseStatus(HttpStatus.OK)
-    public ProjectEmployeeDto findEmployeesByProjectId(@PathVariable("projectId") final UUID projectId) {
-        return service.findEmployeesByProjectId(projectId);
+    public ProjectEmployeeDto findEmployeesByProjectId(
+            @PathVariable("projectId") final UUID projectId,
+            @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+            @RequestParam(name = "size", required = false) Integer size) {
+
+        return service.findEmployeesByProjectIdWithPagination(projectId, page, size);
     }
 
     /**
