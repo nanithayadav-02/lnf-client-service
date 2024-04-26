@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -25,6 +26,14 @@ public class ProjectEmployeeController {
     @GetMapping(value = "/projects/{projectId}/employees")
     @ResponseStatus(HttpStatus.OK)
     public ProjectEmployeeDto findEmployeesByProjectId(
+            @PathVariable("projectId") final UUID projectId) {
+
+        return service.findEmployeesByProjectId(projectId);
+    }
+
+    @GetMapping(value = "/projects/{projectId}/assigned-employees")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, Object> findAssignedEmployeesByProjectId(
             @PathVariable("projectId") final UUID projectId,
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(name = "size", required = false) Integer size) {

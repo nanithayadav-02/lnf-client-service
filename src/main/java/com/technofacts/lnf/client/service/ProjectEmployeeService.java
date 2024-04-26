@@ -14,9 +14,7 @@ import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 @Service
@@ -40,13 +38,24 @@ public class ProjectEmployeeService {
         Project project = searchForProject(projectId);
 
         // Get the list of employees associated with the project
-        List<ProjectEmployee> projectEmployees = repository.findByProject(project);
+        List<ProjectEmployee> projectEmployees = findProjectEmployees(project);
         List<String> employeeIds = projectEmployees.stream().map(ProjectEmployee::getEmployeeId).toList();
 
         // Get the list of employee details from the Employee microservice
         List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(employeeIds);
 
-        // Return the ProjectEmployeeDtos
+        return createProjectEmployeeDto(project,employeeDtos);
+
+    }
+
+    private List<ProjectEmployee>  findProjectEmployees(Project project) {
+
+        List<ProjectEmployee> projectEmployees = repository.findByProject(project);
+        return projectEmployees;
+    }
+
+    private ProjectEmployeeDto createProjectEmployeeDto(Project project, List<EmployeeDto> employeeDtos) {
+
         ProjectEmployeeDto projectEmployeeDto = new ProjectEmployeeDto();
         projectEmployeeDto.setProjectId(project.getId());
         projectEmployeeDto.setProjectCode(project.getCode());
@@ -55,12 +64,13 @@ public class ProjectEmployeeService {
         return projectEmployeeDto;
     }
 
-    public ProjectEmployeeDto findEmployeesByProjectIdWithPagination(final UUID projectId,int page,Integer size) {
+    public Map<String,Object> findEmployeesByProjectIdWithPagination(final UUID projectId, int page, Integer size) {
         // Search if the projectId exists otherwise throw LnFEntityNotFoundException
         Project project = searchForProject(projectId);
 
         // Get the list of employees associated with the project
-        List<ProjectEmployee> projectEmployees = repository.findByProject(project);
+        List<ProjectEmployee> projectEmployees = findProjectEmployees(project);
+
         int totalEmployees = projectEmployees.size();
         if(size == null){
             size=totalEmployees;
@@ -76,16 +86,25 @@ public class ProjectEmployeeService {
         List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(employeeIds);
 
         // Return the ProjectEmployeeDtos with pagination information
-        ProjectEmployeeDto projectEmployeeDto = new ProjectEmployeeDto();
-        projectEmployeeDto.setProjectId(project.getId());
-        projectEmployeeDto.setProjectCode(project.getCode());
-        projectEmployeeDto.setEmployees(employeeDtos);
+        ProjectEmployeeDto projectEmployeeDto = createProjectEmployeeDto(project,employeeDtos);
 
-        return projectEmployeeDto;
+        return createPaginationContent(totalEmployees,size,projectEmployeeDto);
+
     }
 
+    private Map<String, Object> createPaginationContent(int totalEmployees, Integer size,
+                                                        ProjectEmployeeDto projectEmployeeDto) {
 
-        /**
+        int totalPages = totalEmployees / size != 0 ? (totalEmployees % size) + 1 : (totalEmployees % size);
+
+        Map<String,Object> result=new HashMap<>();
+        result.put("ProjectEmployees", projectEmployeeDto);
+        result.put("totalElements", totalEmployees);
+        result.put("totalPages", totalPages);
+        return result;
+    }
+
+    /**
          * Add employees to the project
          *
          * @param projectId   Project Id

@@ -50,21 +50,20 @@ class ProjectEmployeeControllerTest extends BaseTestClass {
     void findEmployeesByProjectIdWithPagination() throws Exception {
         // Mock data
         UUID projectId = UUID.randomUUID();
-        int page = 0;
-        int size = 10;
+
         ProjectEmployeeDto expectedDto = new ProjectEmployeeDto();
 
         // Mocking service method
-        given(service.findEmployeesByProjectIdWithPagination(any(UUID.class), anyInt(), anyInt())).willReturn(expectedDto);
+        given(service.findEmployeesByProjectId(any(UUID.class))).willReturn(expectedDto);
 
         // Perform the request and assert the response
-        mockMvc.perform(get("/lnf/projects/{projectId}/employees?page={page}&size={size}", projectId, page, size))
+        mockMvc.perform(get("/lnf/projects/{projectId}/employees", projectId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(expectedDto)));
 
         // Verify service method invocation
-        verify(service, times(1)).findEmployeesByProjectIdWithPagination(any(UUID.class), anyInt(), anyInt());
+        verify(service, times(1)).findEmployeesByProjectId(any(UUID.class));
     }
 
 
