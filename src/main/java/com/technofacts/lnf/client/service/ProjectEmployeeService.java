@@ -64,7 +64,7 @@ public class ProjectEmployeeService {
         return projectEmployeeDto;
     }
 
-    public Map<String,Object> findEmployeesByProjectIdWithPagination(final UUID projectId, int page, Integer size) {
+    public Map<String,Object> findAllAssignedEmployees(final UUID projectId, int page, Integer size) {
         // Search if the projectId exists otherwise throw LnFEntityNotFoundException
         Project project = searchForProject(projectId);
 

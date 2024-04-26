@@ -4,6 +4,7 @@ import com.technofacts.lnf.client.service.ProjectEmployeeService;
 import com.technofacts.lnf.dto.client.ProjectEmployeeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,12 +34,13 @@ public class ProjectEmployeeController {
 
     @GetMapping(value = "/projects/{projectId}/assigned-employees")
     @ResponseStatus(HttpStatus.OK)
-    public Map<String, Object> findAssignedEmployeesByProjectId(
+    public ResponseEntity<?> findAssignedEmployeesByProjectId(
             @PathVariable("projectId") final UUID projectId,
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(name = "size", required = false) Integer size) {
 
-        return service.findEmployeesByProjectIdWithPagination(projectId, page, size);
+        Map<String, Object> result = service.findAllAssignedEmployees(projectId, page, size);
+        return ResponseEntity.ok(result);
     }
 
     /**
