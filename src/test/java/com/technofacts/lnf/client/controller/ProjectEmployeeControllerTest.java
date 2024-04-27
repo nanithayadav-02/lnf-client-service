@@ -13,10 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.aspectj.bridge.MessageUtil.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,8 +29,10 @@ class ProjectEmployeeControllerTest extends BaseTestClass {
 
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ProjectEmployeeService service;
+
     private UUID projectId;
 
     @BeforeAll
@@ -48,52 +47,81 @@ class ProjectEmployeeControllerTest extends BaseTestClass {
 
     @Test
     void findEmployeesByProjectId() throws Exception {
+        // Mock data
+        UUID projectId = UUID.randomUUID();
         ProjectEmployeeDto expectedDto = new ProjectEmployeeDto();
 
+        // Mocking service method
         given(service.findEmployeesByProjectId(any(UUID.class))).willReturn(expectedDto);
 
+        // Perform the request and assert the response
         mockMvc.perform(get("/lnf/projects/{projectId}/employees", projectId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(expectedDto)));
 
-        verify(service, times(1)).findEmployeesByProjectId(any(UUID.class));
+        // Verify service method invocation
+        verify(service, times(1)).findEmployeesByProjectId(projectId);
     }
 
     @Test
+    void findAllAssignedEmployeesWithPagination() throws Exception {
+        // Mock data
+        UUID projectId = UUID.randomUUID();
+        Map<String, Object> expectedResponse = new HashMap<>();
+        expectedResponse.put("data", new ProjectEmployeeDto());
+        expectedResponse.put("totalSize", 100);
+        expectedResponse.put("pageSize", 10);
+
+        // Mocking service method
+        given(service.findAllAssignedEmployees(any(UUID.class), anyInt(), anyInt())).willReturn(expectedResponse);
+
+        // Perform the request with pagination and assert the response
+        int page = 1;
+        int size = 10;
+        mockMvc.perform(get("/lnf/projects/{projectId}/employees?page={page}&size={size}", projectId, page, size))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(expectedResponse)));
+
+        // Verify service method invocation
+        verify(service, times(1)).findAllAssignedEmployees(projectId, page, size);
+    }
+
+
+
+    @Test
     void addEmployeesToProject() {
-        List<String> requestedDto = List.of("HRD-FE-TF-1008","HRD-FE-TF-1009");
+        List<String> employeeIds = List.of("HRD-FE-TF-1008", "HRD-FE-TF-1009");
+        String url = "/lnf/projects/" + projectId + "/employees?type=specific";
 
-        String url = "/lnf/projects/" + projectId + "/employees";
-
-        doNothing().when(service).addEmployeeToProject(any((UUID.class)), eq(requestedDto));
+        doNothing().when(service).addEmployeeToProject(any(UUID.class), eq(employeeIds));
 
         try {
             mockMvc.perform(MockMvcRequestBuilders.post(url)
-                            .contentType(APPLICATION_JSON)
-                            .content(asJsonString(requestedDto)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJsonString(employeeIds)))
                     .andExpect(status().isCreated());
         } catch (Exception e) {
             fail("Unexpected exception: " + e.getMessage());
         }
-        verify(service, times(1)).addEmployeeToProject(any((UUID.class)), eq(requestedDto));
+        verify(service, times(1)).addEmployeeToProject(any(UUID.class), eq(employeeIds));
     }
+
     @Test
-    void addAllEmployeesToProject() throws Exception {
+    void addAllActiveEmployeesToProject() throws Exception {
         List<String> statuses = List.of("ACTIVE", "INACTIVE");
+        String url = "/lnf/projects/" + projectId + "/employees?type=active";
 
-        doNothing().when(service).addAllActiveEmployeeToProject(any(UUID.class), anyList());
+        doNothing().when(service).addAllActiveEmployeeToProject(any(UUID.class), eq(statuses));
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/lnf/projects/"+ projectId +"/active-employees")
+        mockMvc.perform(MockMvcRequestBuilders.post(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(statuses)))
                 .andExpect(status().isCreated());
 
-        verify(service, times(1)).addAllActiveEmployeeToProject(projectId, statuses);
+        verify(service, times(1)).addAllActiveEmployeeToProject(any(UUID.class), eq(statuses));
     }
-
-
-
 
     @Test
     void removeEmployeesFromProject() throws Exception {
