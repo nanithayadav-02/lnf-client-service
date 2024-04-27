@@ -34,28 +34,27 @@ public class ProjectEmployeeService {
      * @return ProjectEmployeeDto
      */
     public ProjectEmployeeDto findEmployeesByProjectId(final UUID projectId) {
-        // Search if the projectId exists otherwise throw LnFEntityNotFoundException
         Project project = searchForProject(projectId);
 
         // Get the list of employees associated with the project
-        List<ProjectEmployee> projectEmployees = findProjectEmployees(project);
-        List<String> employeeIds = projectEmployees.stream().map(ProjectEmployee::getEmployeeId).toList();
+        List<ProjectEmployee> employees = repository.findByProject(project);
+        List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(
+                employees.stream().map(ProjectEmployee::getEmployeeId).toList()
+        );
 
-        // Get the list of employee details from the Employee microservice
-        List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(employeeIds);
-
-        return createProjectEmployeeDto(project,employeeDtos);
-
+        return createProjectEmployeeDto(project ,employeeDtos);
     }
 
-    private List<ProjectEmployee>  findProjectEmployees(Project project) {
-
-        List<ProjectEmployee> projectEmployees = repository.findByProject(project);
-        return projectEmployees;
+    public Map<String, Object> findAllAssignedEmployees(final UUID projectId, int page, Integer size) {
+        Project project = searchForProject(projectId);
+        List<ProjectEmployee> employees = repository.findByProject(project);
+        size = (size == null || size <= 0) ? employees.size() : size;
+        List<EmployeeDto> employeeDtos = fetchEmployeeDetails(paginateEmployees(employees, page, size));
+        ProjectEmployeeDto dto = createProjectEmployeeDto(project, employeeDtos);
+        return createPaginationContent(employees.size(), size, dto);
     }
 
     private ProjectEmployeeDto createProjectEmployeeDto(Project project, List<EmployeeDto> employeeDtos) {
-
         ProjectEmployeeDto projectEmployeeDto = new ProjectEmployeeDto();
         projectEmployeeDto.setProjectId(project.getId());
         projectEmployeeDto.setProjectCode(project.getCode());
@@ -64,40 +63,24 @@ public class ProjectEmployeeService {
         return projectEmployeeDto;
     }
 
-    public Map<String,Object> findAllAssignedEmployees(final UUID projectId, int page, Integer size) {
-        // Search if the projectId exists otherwise throw LnFEntityNotFoundException
-        Project project = searchForProject(projectId);
+    private List<ProjectEmployee> paginateEmployees(List<ProjectEmployee> employees, int page, int size) {
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size, employees.size());
+        return employees.subList(fromIndex, toIndex);
+    }
 
-        // Get the list of employees associated with the project
-        List<ProjectEmployee> projectEmployees = findProjectEmployees(project);
-
-        int totalEmployees = projectEmployees.size();
-        if(size == null){
-            size=totalEmployees;
-        }
-        // Calculate pagination parameters
-        int startIndex = page * size;
-        int endIndex = Math.min(startIndex + size, totalEmployees);
-
-        List<ProjectEmployee> pagedEmployees = projectEmployees.subList(startIndex, endIndex);
-
-        // Get the list of employee details from the Employee microservice
-        List<String> employeeIds = pagedEmployees.stream().map(ProjectEmployee::getEmployeeId).toList();
-        List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(employeeIds);
-
-        // Return the ProjectEmployeeDtos with pagination information
-        ProjectEmployeeDto projectEmployeeDto = createProjectEmployeeDto(project,employeeDtos);
-
-        return createPaginationContent(totalEmployees,size,projectEmployeeDto);
-
+    private List<EmployeeDto> fetchEmployeeDetails(List<ProjectEmployee> pagedEmployees) {
+        List<String> employeeIds = pagedEmployees.stream()
+                .map(ProjectEmployee::getEmployeeId)
+                .toList();
+        return employeeService.findByEmployeeIds(employeeIds);
     }
 
     private Map<String, Object> createPaginationContent(int totalEmployees, Integer size,
                                                         ProjectEmployeeDto projectEmployeeDto) {
+        int totalPages = (totalEmployees + size - 1) / size;
 
-        int totalPages = totalEmployees / size != 0 ? (totalEmployees % size) + 1 : (totalEmployees % size);
-
-        Map<String,Object> result=new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
         result.put("ProjectEmployees", projectEmployeeDto);
         result.put("totalElements", totalEmployees);
         result.put("totalPages", totalPages);
