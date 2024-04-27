@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * This class is a REST controller that handles CRUD operations related to project employees.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/lnf")
@@ -44,6 +47,17 @@ public class ProjectEmployeeController {
         }
     }
 
+
+    /**
+     * Add employees to a project.
+     *
+     * @param projectId   The ID of the project.
+     * @param type        The type of employee addition. Default is "specific".
+     * @param identifiers The list of identifiers for the employees to be added. If 'type' is "active",
+     *                    treat the identifiers as statuses and add all active employees based on these
+     * statuses. If 'type' is not "active", treat the identifiers as employee IDs and add them to the project.
+     * @return A ResponseEntity representing the result of the operation.
+     */
     @PostMapping(value = "/projects/{projectId}/employees")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> addEmployeesToProject(
