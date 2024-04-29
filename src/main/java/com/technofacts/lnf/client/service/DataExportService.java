@@ -3,6 +3,10 @@ package com.technofacts.lnf.client.service;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
+import com.technofacts.lnf.client.model.Client;
+import com.technofacts.lnf.client.model.Project;
+import com.technofacts.lnf.client.repository.ClientRepository;
+import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.client.TaskDto;
@@ -38,7 +42,8 @@ public class DataExportService {
     private final ClientService clientService;
     private final ProjectService projectService;
     private final TaskService taskService;
-
+    private final ClientRepository clientRepository;
+    private final ProjectRepository projectRepository;
     public ResponseEntity<String> uploadFile(MultipartFile file, Class<?> dtoClass) throws IOException {
         List<?> data = handleFile(file, dtoClass);
         return ResponseEntity.ok("Data uploaded successfully!");
@@ -114,8 +119,9 @@ public class DataExportService {
         project.setBillingTerm(rowData[1]);
         project.setStartDate(LocalDate.parse(rowData[11], formatter));
         project.setEndDate(LocalDate.parse(rowData[7], formatter));
-        UUID clientId=UUID.fromString(rowData[14]);
-        project.setClientId(clientId);
+        //getting client id from the client table
+        Client client = clientRepository.findAll().get(0);
+        project.setClientId(client.getId());
         projectService.create(project);
         return project;
     }
@@ -131,7 +137,9 @@ public class DataExportService {
         task.setStartDate(LocalDate.parse(rowData[4],formatter));
         task.setStatus(rowData[5]);
         task.setType(rowData[6]);
-        task.setProjectId(UUID.fromString(rowData[7]));
+        //getting Project id from the project table
+        Project project =projectRepository.findAll().get(0);
+        task.setProjectId(project.getId());
         taskService.create(task.getProjectId(),task);
         return task;
     }
