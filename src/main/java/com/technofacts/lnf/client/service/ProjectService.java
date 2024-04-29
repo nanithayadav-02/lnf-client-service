@@ -8,7 +8,6 @@ import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
-import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
