@@ -4,6 +4,7 @@ import com.technofacts.lnf.client.service.ClientService;
 import com.technofacts.lnf.client.service.DataExportService;
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ClientDto;
+import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
 import com.technofacts.lnf.dto.employee.EmployeeDto;
@@ -96,7 +97,7 @@ public class ClientController {
      */
     @GetMapping(value = "/clients/{clientId}/employees")
     @ResponseStatus(HttpStatus.OK)
-    public List<EmployeeDto> findEmployeesByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<ClientEmployeeDto> findEmployeesByClientId(@PathVariable("clientId") final UUID clientId) {
         return projectService.findEmployeesByClientId(clientId);
     }
 

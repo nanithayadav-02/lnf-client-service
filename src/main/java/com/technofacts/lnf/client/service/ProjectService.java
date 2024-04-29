@@ -6,6 +6,7 @@ import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
+import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
@@ -159,7 +160,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
      * @param clientId The UUID of the client.
      * @return A list of EmployeeDto objects associated with the client.
      */
-    public List<EmployeeDto> findEmployeesByClientId(UUID clientId) {
+    public List<ClientEmployeeDto> findEmployeesByClientId(UUID clientId) {
         searchForClient(clientId);
         List<Project> projects = repository.findByClientId(clientId);
 

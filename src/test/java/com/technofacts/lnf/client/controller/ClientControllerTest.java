@@ -7,6 +7,7 @@ import com.technofacts.lnf.client.service.ClientService;
 import com.technofacts.lnf.client.service.DataExportService;
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ClientDto;
+import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
 import com.technofacts.lnf.dto.employee.EmployeeDto;
@@ -158,7 +159,7 @@ class ClientControllerTest extends BaseTestClass {
     void testFindEmployeesByClientId() throws Exception {
         UUID clientId = UUID.fromString("030508ae-1ba8-4d0b-bf38-f99d09b1fee3");
 
-        List<EmployeeDto> expectedDto = Arrays.asList(mockEmployee1(), mockEmployee2());
+        List<ClientEmployeeDto> expectedDto = Arrays.asList(mockEmployee1(), mockEmployee2());
 
         given(projectService.findEmployeesByClientId(any(UUID.class))).willReturn(expectedDto);
 
@@ -344,71 +345,39 @@ class ClientControllerTest extends BaseTestClass {
                 .andExpect(jsonPath("$.endDate").value(expectedDto.getEndDate().toString()));
     }
 
-    private EmployeeDto mockEmployee1() {
-        return createEmployee("011becae-fd68-46c3-a857-59153d98a1b8", "HRD-TE-TF-5030", "Vikrant", "kumar", "Thakur",
-                "male", "1990-01-01", "SINGLE", "Vicky@gmail.com", "vickythakur@gmail.com",
-                "9676099703", "ABCDE1234F", "ACTIVE", "IT",
-                "2020-01-01", "2022-05-01", "false", "HRD-CE-TF-3046", "CON003", "BA");
+    private ClientEmployeeDto mockEmployee1() {
+        return createEmployee("011becae-fd68-46c3-a857-59153d98a1b8", "HRD-TE-TF-5030", "Vikrant", "Vicky@gmail.com",
+                "9676099703", "ACTIVE", "BA");
     }
 
-    private EmployeeDto mockEmployee2() {
-        return createEmployee("f12b86f8-7dab-42c6-a2db-6cf82e7e9e33", "HRD-CE-TF-3033","Kushbu", "miyathri", "sharma",
-                "Female", "1985-07-15", "MARRIED", "Kushbu@gmail.com", "sharma@gmail.com",
-                "9876543210", "FGHIJ5678K", "TERMINATED", "HR",
-                "2018-03-10", "2022-09-30", "true", "HRD-CE-TF-3045", "CON004", "SE");
+    private ClientEmployeeDto mockEmployee2() {
+        return createEmployee("f12b86f8-7dab-42c6-a2db-6cf82e7e9e33", "HRD-CE-TF-3033","Kushbu",  "Kushbu@gmail.com",
+                "9876543210", "TERMINATED", "SE");
     }
 
     private void performAndVerifyGet(String url, ResultMatcher statusMatcher, String containsString,
-                                     EmployeeDto expectedDto) throws Exception {
+                                     ClientEmployeeDto expectedDto) throws Exception {
         mockMvc.perform(get(url))
                 .andExpect(statusMatcher)
                 .andExpect(content().string(containsString(containsString)))
-                .andExpect(jsonPath("$.id").value(expectedDto.getId().toString())) // Validate the ID
-                .andExpect(jsonPath("$.employeeId").value(expectedDto.getEmployeeId())) // Additional, more specific validation
-                .andExpect(jsonPath("$.firstName").value(expectedDto.getFirstName()))
-                .andExpect(jsonPath("$.middleName").value(expectedDto.getMiddleName()))
-                .andExpect(jsonPath("$.lastName").value(expectedDto.getLastName()))
-                .andExpect(jsonPath("$.gender").value(expectedDto.getGender()))
-                .andExpect(jsonPath("$.dateOfBirth").value(expectedDto.getDateOfBirth().toString()))
-                .andExpect(jsonPath("$.maritalStatus").value(expectedDto.getMaritalStatus()))
+                .andExpect(jsonPath("$.id").value(expectedDto.getId().toString()))
+                .andExpect(jsonPath("$.employeeId").value(expectedDto.getEmployeeId()))
+                .andExpect(jsonPath("$.fullName").value(expectedDto.getFullName()))
                 .andExpect(jsonPath("$.email").value(expectedDto.getEmail()))
-                .andExpect(jsonPath("$.secondaryEmail").value(expectedDto.getSecondaryEmail()))
                 .andExpect(jsonPath("$.mobileNumber").value(expectedDto.getMobileNumber()))
-                .andExpect(jsonPath("$.panNumber").value(expectedDto.getPanNumber()))
                 .andExpect(jsonPath("$.employmentStatus").value(expectedDto.getEmploymentStatus()))
-                .andExpect(jsonPath("$.startDate").value(expectedDto.getStartDate().toString()))
-                .andExpect(jsonPath("$.endDate").value(expectedDto.getEndDate().toString()))
-                .andExpect(jsonPath("$.resourceManager").value(expectedDto.isResourceManager()))
-                .andExpect(jsonPath("$.lineManager").value(expectedDto.getLineManager()))
-                .andExpect(jsonPath("$.contractType").value(expectedDto.getContractType()))
                 .andExpect(jsonPath("$.designation").value(expectedDto.getDesignation()));
     }
 
-    private EmployeeDto createEmployee(String id, String employeeId, String firstName, String middleName, String lastName,
-                                       String gender, String dateOfBirth, String maritalStatus,
-                                       String email, String secondaryEmail, String mobileNumber,
-                                       String panNumber, String employeeStatus, String departmentType,
-                                       String startDate, String endDate, String resourceManager, String lineManager,
-                                       String contractType, String designation) {
-        EmployeeDto dto = new EmployeeDto();
+    private ClientEmployeeDto createEmployee(String id, String employeeId, String fullName,
+                                             String email, String mobileNumber, String employeeStatus, String designation) {
+        ClientEmployeeDto dto = new ClientEmployeeDto();
         dto.setId(UUID.fromString(id));
         dto.setEmployeeId(employeeId);
-        dto.setFirstName(firstName);
-        dto.setMiddleName(middleName);
-        dto.setLastName(lastName);
-        dto.setGender(gender);
-        dto.setDateOfBirth(LocalDate.parse(dateOfBirth));
-        dto.setMaritalStatus(maritalStatus);
+        dto.setFullName(fullName);
         dto.setEmail(email);
-        dto.setSecondaryEmail(secondaryEmail);
         dto.setMobileNumber(mobileNumber);
-        dto.setPanNumber(panNumber);
         dto.setEmploymentStatus(employeeStatus);
-        dto.setStartDate(LocalDate.parse(startDate));
-        dto.setEndDate(LocalDate.parse(endDate));
-        dto.setResourceManager(Boolean.parseBoolean(resourceManager));
-        dto.setLineManager(lineManager);
-        dto.setContractType(contractType);
         dto.setDesignation(designation);
 
         return dto;

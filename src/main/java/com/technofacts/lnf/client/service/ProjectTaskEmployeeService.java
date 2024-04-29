@@ -1,5 +1,6 @@
 package com.technofacts.lnf.client.service;
 
+import com.technofacts.lnf.client.converter.ProjectConverter;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.model.ProjectEmployee;
 import com.technofacts.lnf.client.model.ProjectTaskEmployee;
@@ -8,6 +9,7 @@ import com.technofacts.lnf.client.repository.ProjectEmployeeRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.client.repository.ProjectTaskEmployeeRepository;
 import com.technofacts.lnf.client.repository.TaskRepository;
+import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectTaskEmployeeDto;
 import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
@@ -18,10 +20,7 @@ import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 @Service
@@ -47,10 +46,9 @@ public class ProjectTaskEmployeeService {
         Project project = searchForProject(projectId);
         Task task = searchForTask(taskId);
         List<ProjectTaskEmployee> projectTaskEmployees = repository.findByProjectAndTask(project, task);
-        List<String> employeeIds = projectTaskEmployees.stream().map(ProjectTaskEmployee::getEmployeeId).toList();
 
         // Get the list of employee details from the Employee microservice
-        List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(employeeIds);
+        List<ClientEmployeeDto> employeeDtos = fetchEmployeeDetails(projectTaskEmployees);
 
         return createProjectTaskEmployeeDto(taskId, project, task, employeeDtos);
     }
@@ -60,12 +58,12 @@ public class ProjectTaskEmployeeService {
         Task task = searchForTask(taskId);
         List<ProjectTaskEmployee> projectTaskEmployees = repository.findByProjectAndTask(project, task);
         size = (size == null || size <= 0) ? projectTaskEmployees.size() : size;
-        List<EmployeeDto> employeeDtos = fetchEmployeeDetails(paginateEmployees(projectTaskEmployees, page, size));
+        List<ClientEmployeeDto> employeeDtos = fetchEmployeeDetails(paginateEmployees(projectTaskEmployees, page, size));
         ProjectTaskEmployeeDto dto = createProjectTaskEmployeeDto(taskId, project, task, employeeDtos);
         return createPaginationContent(projectTaskEmployees.size(), size, dto);
     }
 
-    private ProjectTaskEmployeeDto createProjectTaskEmployeeDto(UUID taskId, Project project, Task task, List<EmployeeDto> employeeDtos) {
+    private ProjectTaskEmployeeDto createProjectTaskEmployeeDto(UUID taskId, Project project, Task task, List<ClientEmployeeDto> employeeDtos) {
         // Return the ProjectTaskEmployeeDtos
         ProjectTaskEmployeeDto projectTaskEmployeeDto = new ProjectTaskEmployeeDto();
         projectTaskEmployeeDto.setProjectId(project.getId());
@@ -83,11 +81,15 @@ public class ProjectTaskEmployeeService {
         return employees.subList(fromIndex, toIndex);
     }
 
-    private List<EmployeeDto> fetchEmployeeDetails(List<ProjectTaskEmployee> pagedEmployees) {
+    private List<ClientEmployeeDto> fetchEmployeeDetails(List<ProjectTaskEmployee> pagedEmployees) {
         List<String> employeeIds = pagedEmployees.stream()
                 .map(ProjectTaskEmployee::getEmployeeId)
                 .toList();
-        return employeeService.findByEmployeeIds(employeeIds);
+        return employeeService.findByEmployeeIds(employeeIds)
+                .stream()
+                .map(ProjectConverter:: mapToClientEmployee)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     private Map<String, Object> createPaginationContent(int totalEmployees, Integer size,
