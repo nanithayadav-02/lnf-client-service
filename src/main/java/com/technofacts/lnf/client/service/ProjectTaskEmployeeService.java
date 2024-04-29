@@ -18,10 +18,11 @@ import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -51,7 +52,21 @@ public class ProjectTaskEmployeeService {
         // Get the list of employee details from the Employee microservice
         List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(employeeIds);
 
-        // Return the ProjectEmployeeDtos
+        return createProjectTaskEmployeeDto(taskId, project, task, employeeDtos);
+    }
+
+    public Map<String, Object> findAllAssignedEmployees(final UUID projectId, final UUID taskId, int page, Integer size) {
+        Project project = searchForProject(projectId);
+        Task task = searchForTask(taskId);
+        List<ProjectTaskEmployee> projectTaskEmployees = repository.findByProjectAndTask(project, task);
+        size = (size == null || size <= 0) ? projectTaskEmployees.size() : size;
+        List<EmployeeDto> employeeDtos = fetchEmployeeDetails(paginateEmployees(projectTaskEmployees, page, size));
+        ProjectTaskEmployeeDto dto = createProjectTaskEmployeeDto(taskId, project, task, employeeDtos);
+        return createPaginationContent(projectTaskEmployees.size(), size, dto);
+    }
+
+    private ProjectTaskEmployeeDto createProjectTaskEmployeeDto(UUID taskId, Project project, Task task, List<EmployeeDto> employeeDtos) {
+        // Return the ProjectTaskEmployeeDtos
         ProjectTaskEmployeeDto projectTaskEmployeeDto = new ProjectTaskEmployeeDto();
         projectTaskEmployeeDto.setProjectId(project.getId());
         projectTaskEmployeeDto.setProjectCode(project.getCode());
@@ -60,6 +75,30 @@ public class ProjectTaskEmployeeService {
         projectTaskEmployeeDto.setEmployees(employeeDtos);
 
         return projectTaskEmployeeDto;
+    }
+
+    private List<ProjectTaskEmployee> paginateEmployees(List<ProjectTaskEmployee> employees, int page, int size) {
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size, employees.size());
+        return employees.subList(fromIndex, toIndex);
+    }
+
+    private List<EmployeeDto> fetchEmployeeDetails(List<ProjectTaskEmployee> pagedEmployees) {
+        List<String> employeeIds = pagedEmployees.stream()
+                .map(ProjectTaskEmployee::getEmployeeId)
+                .toList();
+        return employeeService.findByEmployeeIds(employeeIds);
+    }
+
+    private Map<String, Object> createPaginationContent(int totalEmployees, Integer size,
+                                                        ProjectTaskEmployeeDto projectTaskEmployeeDto) {
+        int totalPages = (totalEmployees + size - 1) / size;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("ProjectTaskEmployees", projectTaskEmployeeDto);
+        result.put("totalElements", totalEmployees);
+        result.put("totalPages", totalPages);
+        return result;
     }
 
     /**
@@ -165,7 +204,7 @@ public class ProjectTaskEmployeeService {
 
         List<String> requiredIds = projectEmployeeRepository.findAllByProjectId(projectId).stream()
                 .map(ProjectEmployee::getEmployeeId)
-                .filter(employeeId -> !repository.findByTask(task).stream().map(ProjectTaskEmployee::getEmployeeId).collect(Collectors.toList()).contains(employeeId))
+                .filter(employeeId -> !repository.findByTask(task).stream().map(ProjectTaskEmployee::getEmployeeId).toList().contains(employeeId))
                 .toList();
 
         requiredIds.forEach(employeeId -> {
