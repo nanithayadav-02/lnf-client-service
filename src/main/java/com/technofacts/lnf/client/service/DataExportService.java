@@ -22,12 +22,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -39,73 +38,91 @@ public class DataExportService {
     private final ProjectService projectService;
     private final TaskService taskService;
 
-    public ResponseEntity<String> uploadFile(MultipartFile file, Class<?> dtoClass,UUID id) throws IOException {
-        List<?> data = handleFile(file, dtoClass,id);
+    public ResponseEntity<String> uploadFile(MultipartFile file, Class<?> dtoClass, UUID id) throws IOException {
+        Optional<UUID> idOpt = Optional.ofNullable(id);
+        List<?> data = handleFile(file, dtoClass, idOpt);
         return ResponseEntity.ok("Data uploaded successfully!");
     }
 
-    public ResponseEntity<String> uploadFile(MultipartFile file, Class<?> dtoClass) throws IOException {
-        List<?> data = handleFile(file, dtoClass);
-        return ResponseEntity.ok("Data uploaded successfully!");
-    }
-
-    public List<?> handleFile(MultipartFile file, Class<?> dtoClass) throws IOException {
-        return handleFile(file, dtoClass, null);
-    }
-    public List<?> handleFile(MultipartFile file, Class<?> dtoClass,UUID id) throws IOException {
+    private List<?> handleFile(MultipartFile file, Class<?> dtoClass, Optional<UUID> idOpt) throws IOException {
         File csvFile = convertToCSV(file);
-        List<?> data;
-        try {
-            List<String[]> rawData = readCSV(csvFile);
-            if (!rawData.isEmpty()) {
-                rawData.remove(0);
-            }
-            data = rawData.stream().map(rowData -> toDto(rowData, dtoClass,id)).toList();
-        } catch (IOException e) {
-            log.info("Encountered an error while reading the file {}", e.getMessage());
-            throw new LnFException("Encountered an error while reading the file", e);
-        } catch (CsvException e) {
-            log.info("Encountered an error while parsing the CSV data {}", e.getMessage());
-            throw new LnFException("Encountered an error while parsing the CSV data", e);
-        } finally {
-            if (!csvFile.delete()) {
-                log.info("Could not delete the file {}", csvFile.getAbsolutePath());
-            }
-        }
-        return data;
+        String absoluteFilePath = csvFile.getAbsolutePath();
+
+        List<?> parsedData = parseDataFromCSVFile(csvFile, dtoClass, idOpt.orElse(null), absoluteFilePath);
+
+        deleteFile(absoluteFilePath, csvFile);
+
+        return parsedData;
     }
 
-    private Object toDto(String[] rowData, Class<?> dtoClass,UUID id) {
-        if (dtoClass.equals(ClientDto.class)) {
-            return mapToClientDto(rowData);
-        } else if (dtoClass.equals(ProjectDto.class)) {
-            return mapToProjectDto(rowData,id);
-        } else if (dtoClass.equals(TaskDto.class)) {
-            return mapToTaskDto(rowData,id);
-        } else {
-            throw new IllegalArgumentException("Unsupported DTO class");
+    private List<?> parseDataFromCSVFile(File csvFile, Class<?> dtoClass, UUID id, String absoluteFilePath) {
+        try {
+            // Read and convert data.
+            List<String[]> rawData = readCSV(csvFile);
+            rawData = removeHeader(rawData); // Remove header row
+            return convertToDtoList(rawData, dtoClass, id);
+        } catch (IOException | CsvException e) {
+            handleParsingError(e, absoluteFilePath);
+            return Collections.emptyList(); // Return empty list to handle gracefully.
+        } finally {
+            deleteFile(absoluteFilePath, csvFile); // Ensure cleanup happens.
         }
+    }
+
+    private List<String[]> removeHeader(List<String[]> rawData) {
+        if (!rawData.isEmpty()) {
+            rawData.remove(0);
+        }
+        return rawData;
+    }
+
+    private List<?> convertToDtoList(List<String[]> rawData, Class<?> dtoClass, UUID id) {
+        return rawData.stream().map(rowData -> toDto(rowData, dtoClass, id)).toList();
+    }
+
+    private void handleParsingError(Exception e, String absoluteFilePath) {
+        String message = e instanceof IOException
+                ? "Encountered an error while reading the file"
+                : "Encountered an error while parsing the CSV data";
+
+        log.error("{} in file {}: {}", message, absoluteFilePath, e.getMessage());
+        throw new LnFException(message, e);
+    }
+
+    private void deleteFile(String absoluteFilePath, File csvFile) {
+        try {
+            Files.deleteIfExists(Paths.get(absoluteFilePath));
+        } catch (IOException e) {
+            log.error("Could not delete file {}: {}", absoluteFilePath, e.getMessage());
+        }
+    }
+
+    private Object toDto(String[] rowData, Class<?> dtoClass, UUID id) {
+        return switch (dtoClass.getSimpleName()) {
+            case "ClientDto" -> mapToClientDto(rowData);
+            case "ProjectDto" -> mapToProjectDto(rowData, id);
+            case "TaskDto" -> mapToTaskDto(rowData, id);
+            default -> throw new IllegalArgumentException("Unsupported DTO class: " + dtoClass.getSimpleName());
+        };
     }
 
     private ClientDto mapToClientDto(String[] rowData) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
         ClientDto client = new ClientDto();
         client.setCode(rowData[1]);
         client.setName(rowData[2]);
         client.setPan(rowData[3]);
         client.setTan(rowData[4]);
-        client.setWorkingFrom(LocalDate.parse(rowData[6],formatter));
-        client.setAgreementExpiryDate(LocalDate.parse(rowData[7],formatter));
         client.setStatus(rowData[5]);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
+        client.setWorkingFrom(LocalDate.parse(rowData[6], formatter));
+        client.setAgreementExpiryDate(LocalDate.parse(rowData[7], formatter));
         client.setServiceType(rowData[8]);
         client.setClientDetails(rowData[9]);
         clientService.create(client);
         return client;
     }
 
-    private ProjectDto mapToProjectDto(String[] rowData,UUID id) {
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy");
+    private ProjectDto mapToProjectDto(String[] rowData, UUID id) {
         ProjectDto project = new ProjectDto();
         project.setCode(rowData[4]);
         project.setName(rowData[9]);
@@ -116,10 +133,9 @@ public class DataExportService {
         project.setStatus(rowData[12]);
         project.setCurrency(rowData[5]);
         project.setBudget(new BigDecimal(rowData[2]));
-        double hoursPerDayDouble = Double.parseDouble(rowData[8]);
-        int hoursPerDayInt = (int) hoursPerDayDouble;
-        project.setHoursPerDay(hoursPerDayInt);
+        project.setHoursPerDay((int) Double.parseDouble(rowData[8]));
         project.setBillingTerm(rowData[1]);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy");
         project.setStartDate(LocalDate.parse(rowData[11], formatter));
         project.setEndDate(LocalDate.parse(rowData[7], formatter));
         project.setClientId(id);
@@ -127,19 +143,17 @@ public class DataExportService {
         return project;
     }
 
-    private TaskDto mapToTaskDto(String[] rowData,UUID id) {
-
+    private TaskDto mapToTaskDto(String[] rowData, UUID id) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
-
         TaskDto task = new TaskDto();
         task.setDescription(rowData[1]);
-        task.setEndDate(LocalDate.parse(rowData[2],formatter));
+        task.setEndDate(LocalDate.parse(rowData[2], formatter));
         task.setName(rowData[3]);
-        task.setStartDate(LocalDate.parse(rowData[4],formatter));
+        task.setStartDate(LocalDate.parse(rowData[4], formatter));
         task.setStatus(rowData[5]);
         task.setType(rowData[6]);
         task.setProjectId(id);
-        taskService.create(task.getProjectId(),task);
+        taskService.create(task.getProjectId(), task);
         return task;
     }
 
@@ -195,4 +209,5 @@ public class DataExportService {
             });
         }
     }
+
 }

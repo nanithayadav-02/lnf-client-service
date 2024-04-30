@@ -130,9 +130,10 @@ public class TaskController {
         service.create(projectId, resource);
     }
 
-    @PostMapping(value = "/tasks/{projectId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadFile(@PathVariable("projectId") final UUID projectId,@RequestParam("file") MultipartFile file) throws IOException {
-        dataExportService.uploadFile(file,TaskDto.class,projectId);
+    @PostMapping(value = "/tasks/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadProjectTasksFile(@RequestParam("projectId") final UUID projectId,
+                                             @RequestParam("file") MultipartFile file) throws IOException {
+        dataExportService.uploadFile(file, TaskDto.class, projectId);
         return ResponseEntity.ok("File uploaded successfully.");
     }
     /**
