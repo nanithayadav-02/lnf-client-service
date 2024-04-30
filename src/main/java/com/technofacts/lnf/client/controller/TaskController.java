@@ -131,10 +131,12 @@ public class TaskController {
     }
 
     @PostMapping(value = "/tasks/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
-        dataExportService.uploadFile(file,TaskDto.class);
+    public ResponseEntity<String> uploadProjectTasksFile(@RequestParam("projectId") final UUID projectId,
+                                             @RequestParam("file") MultipartFile file) throws IOException {
+        dataExportService.uploadFile(file, TaskDto.class, projectId);
         return ResponseEntity.ok("File uploaded successfully.");
     }
+
     /**
      * Updates the project
      *
