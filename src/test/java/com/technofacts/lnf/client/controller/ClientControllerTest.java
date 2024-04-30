@@ -375,7 +375,6 @@ class ClientControllerTest extends BaseTestClass {
                 .andExpect(jsonPath("$.secondaryEmail").value(expectedDto.getSecondaryEmail()))
                 .andExpect(jsonPath("$.mobileNumber").value(expectedDto.getMobileNumber()))
                 .andExpect(jsonPath("$.panNumber").value(expectedDto.getPanNumber()))
-                .andExpect(jsonPath("$.departmentType").value(expectedDto.getDepartmentType()))
                 .andExpect(jsonPath("$.employmentStatus").value(expectedDto.getEmploymentStatus()))
                 .andExpect(jsonPath("$.startDate").value(expectedDto.getStartDate().toString()))
                 .andExpect(jsonPath("$.endDate").value(expectedDto.getEndDate().toString()))
@@ -404,7 +403,6 @@ class ClientControllerTest extends BaseTestClass {
         dto.setSecondaryEmail(secondaryEmail);
         dto.setMobileNumber(mobileNumber);
         dto.setPanNumber(panNumber);
-        dto.setDepartmentType(departmentType);
         dto.setEmploymentStatus(employeeStatus);
         dto.setStartDate(LocalDate.parse(startDate));
         dto.setEndDate(LocalDate.parse(endDate));

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.technofacts.lnf.client.BaseTestClass;
 import com.technofacts.lnf.client.service.ProjectTaskEmployeeService;
+import com.technofacts.lnf.dto.client.ProjectEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectTaskEmployeeDto;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.aspectj.bridge.MessageUtil.fail;
@@ -45,6 +48,31 @@ class ProjectTaskEmployeeControllerTest extends BaseTestClass {
     @BeforeEach
     void setUp() {
         // Common setup code if necessary
+    }
+
+    @Test
+    void findAllAssignedEmployeesWithPagination() throws Exception {
+        // Mock data
+        UUID projectId = UUID.randomUUID();
+        UUID taskId = UUID.randomUUID();
+        Map<String, Object> expectedResponse = new HashMap<>();
+        expectedResponse.put("data", new ProjectEmployeeDto());
+        expectedResponse.put("totalSize", 100);
+        expectedResponse.put("pageSize", 10);
+
+        // Mocking service method
+        given(service.findAllAssignedEmployees(any(UUID.class), any(UUID.class), anyInt(), anyInt())).willReturn(expectedResponse);
+
+        // Perform the request with pagination and assert the response
+        int page = 1;
+        int size = 10;
+        mockMvc.perform(get("/lnf/projects/{projectId}/tasks/{taskId}/employees?page={page}&size={size}", projectId, taskId, page, size))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(expectedResponse)));
+
+        // Verify service method invocation
+        verify(service, times(1)).findAllAssignedEmployees(projectId, taskId, page, size);
     }
 
     @Test

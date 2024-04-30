@@ -4,9 +4,11 @@ import com.technofacts.lnf.client.service.ProjectTaskEmployeeService;
 import com.technofacts.lnf.dto.client.ProjectTaskEmployeeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -25,15 +27,26 @@ public class ProjectTaskEmployeeController {
      */
     @GetMapping(value = "/projects/{projectId}/tasks/{taskId}/employees")
     @ResponseStatus(HttpStatus.OK)
-    public ProjectTaskEmployeeDto findEmployeesByProjectIdAndTaskId(@PathVariable("projectId") final UUID projectId, @PathVariable("taskId") final UUID taskId) {
-        return service.findEmployeesByProjectIdAndTaskId(projectId, taskId);
+    public ResponseEntity<?> findEmployees(@PathVariable("projectId") final UUID projectId,
+                                           @PathVariable("taskId") final UUID taskId,
+                                           @RequestParam(name = "page", required = false) Integer page,
+                                           @RequestParam(name = "size", required = false) Integer size) {
+        if (page != null && size != null) {
+            // Pagination parameters are provided, return paginated result of assigned employees
+            Map<String, Object> result = service.findAllAssignedEmployees(projectId, taskId, page, size);
+            return ResponseEntity.ok(result);
+        } else {
+            // No pagination parameters provided, return all employees assigned to the project and task
+            ProjectTaskEmployeeDto projectTaskEmployeeDto = service.findEmployeesByProjectIdAndTaskId(projectId, taskId);
+            return ResponseEntity.ok(projectTaskEmployeeDto);
+        }
     }
 
     /**
      * Add employees to the task
      *
      * @param projectId   Project Id
-     * @param taskId    Task Id
+     * @param taskId      Task Id
      * @param employeeIds List of Strings
      */
     @PostMapping(value = "/projects/{projectId}/tasks/{taskId}/employees")
