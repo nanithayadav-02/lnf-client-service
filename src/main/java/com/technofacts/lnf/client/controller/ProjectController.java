@@ -72,9 +72,9 @@ public class ProjectController {
         service.create(resource);
     }
 
-    @PostMapping(value = "/projects/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
-        dataExportService.uploadFile(file,ProjectDto.class);
+    @PostMapping(value = "/projects/{clientId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadFile(@PathVariable("clientId") final UUID clientId, @RequestParam("file") MultipartFile file) throws IOException {
+        dataExportService.uploadFile(file,ProjectDto.class,clientId);
         return ResponseEntity.ok("File uploaded successfully.");
     }
 

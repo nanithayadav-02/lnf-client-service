@@ -42,14 +42,21 @@ public class DataExportService {
     private final ClientService clientService;
     private final ProjectService projectService;
     private final TaskService taskService;
-    private final ClientRepository clientRepository;
-    private final ProjectRepository projectRepository;
+
+    public ResponseEntity<String> uploadFile(MultipartFile file, Class<?> dtoClass,UUID id) throws IOException {
+        List<?> data = handleFile(file, dtoClass,id);
+        return ResponseEntity.ok("Data uploaded successfully!");
+    }
+
     public ResponseEntity<String> uploadFile(MultipartFile file, Class<?> dtoClass) throws IOException {
         List<?> data = handleFile(file, dtoClass);
         return ResponseEntity.ok("Data uploaded successfully!");
     }
 
     public List<?> handleFile(MultipartFile file, Class<?> dtoClass) throws IOException {
+        return handleFile(file, dtoClass, null);
+    }
+    public List<?> handleFile(MultipartFile file, Class<?> dtoClass,UUID id) throws IOException {
         File csvFile = convertToCSV(file);
         List<?> data;
         try {
@@ -57,7 +64,7 @@ public class DataExportService {
             if (!rawData.isEmpty()) {
                 rawData.remove(0);
             }
-            data = rawData.stream().map(rowData -> toDto(rowData, dtoClass)).toList();
+            data = rawData.stream().map(rowData -> toDto(rowData, dtoClass,id)).toList();
         } catch (IOException e) {
             log.info("Encountered an error while reading the file {}", e.getMessage());
             throw new LnFException("Encountered an error while reading the file", e);
@@ -72,13 +79,13 @@ public class DataExportService {
         return data;
     }
 
-    private Object toDto(String[] rowData, Class<?> dtoClass) {
+    private Object toDto(String[] rowData, Class<?> dtoClass,UUID id) {
         if (dtoClass.equals(ClientDto.class)) {
             return mapToClientDto(rowData);
         } else if (dtoClass.equals(ProjectDto.class)) {
-            return mapToProjectDto(rowData);
+            return mapToProjectDto(rowData,id);
         } else if (dtoClass.equals(TaskDto.class)) {
-            return mapToTaskDto(rowData);
+            return mapToTaskDto(rowData,id);
         } else {
             throw new IllegalArgumentException("Unsupported DTO class");
         }
@@ -100,7 +107,7 @@ public class DataExportService {
         return client;
     }
 
-    private ProjectDto mapToProjectDto(String[] rowData) {
+    private ProjectDto mapToProjectDto(String[] rowData,UUID id) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy");
         ProjectDto project = new ProjectDto();
@@ -119,14 +126,12 @@ public class DataExportService {
         project.setBillingTerm(rowData[1]);
         project.setStartDate(LocalDate.parse(rowData[11], formatter));
         project.setEndDate(LocalDate.parse(rowData[7], formatter));
-        //getting client id from the client table
-        Client client = clientRepository.findAll().get(0);
-        project.setClientId(client.getId());
+        project.setClientId(id);
         projectService.create(project);
         return project;
     }
 
-    private TaskDto mapToTaskDto(String[] rowData) {
+    private TaskDto mapToTaskDto(String[] rowData,UUID id) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
 
@@ -137,9 +142,7 @@ public class DataExportService {
         task.setStartDate(LocalDate.parse(rowData[4],formatter));
         task.setStatus(rowData[5]);
         task.setType(rowData[6]);
-        //getting Project id from the project table
-        Project project =projectRepository.findAll().get(0);
-        task.setProjectId(project.getId());
+        task.setProjectId(id);
         taskService.create(task.getProjectId(),task);
         return task;
     }
