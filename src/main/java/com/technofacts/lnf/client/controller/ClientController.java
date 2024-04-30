@@ -114,7 +114,7 @@ public class ClientController {
 
     @PostMapping(value = "/clients/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
-        dataExportService.uploadFile(file, ClientDto.class);
+        dataExportService.uploadFile(file, ClientDto.class, null);
         return ResponseEntity.ok("File uploaded successfully.");
     }
 
