@@ -1,12 +1,12 @@
 package com.technofacts.lnf.client.converter;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
+import com.technofacts.lnf.dto.client.ProjectOverviewDto;
 import com.technofacts.lnf.dto.employee.EmployeeDto;
+
+import java.util.Objects;
 
 public class ProjectConverter {
 
@@ -37,6 +37,24 @@ public class ProjectConverter {
         dto.setClientCode(entity.getClient() != null ? entity.getClient().getCode() : null);
         dto.setClientName(entity.getClient() != null ? entity.getClient().getName() : null);
         dto.getTasks().addAll(entity.getTasks().stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).toList());
+        return dto;
+    }
+
+    public static ProjectOverviewDto toMiniTransportModel(Project entity) {
+
+        if (entity == null) {
+            return null;
+        }
+        ProjectOverviewDto dto = new ProjectOverviewDto();
+        dto.setId(entity.getId());
+        dto.setCode(entity.getCode());
+        dto.setName(entity.getName());
+        dto.setType(entity.getType());
+        dto.setBudgetTerms(entity.getBudgetTerms());
+        dto.setDescription(entity.getDescription());
+        dto.setPurchaseOrder(entity.getPurchaseOrder());
+        dto.setStatus(entity.getStatus());
+
         return dto;
     }
 

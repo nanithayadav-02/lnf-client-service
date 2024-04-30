@@ -6,6 +6,7 @@ import com.technofacts.lnf.client.BaseTestClass;
 import com.technofacts.lnf.client.service.DataExportService;
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ProjectDto;
+import com.technofacts.lnf.dto.client.ProjectOverviewDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import org.junit.jupiter.api.Assertions;
@@ -49,10 +50,10 @@ class ProjectControllerTest extends BaseTestClass {
 
     @Test
     void findAll() {
-        Page<ProjectDto> mockedPage = mock(Page.class);
+        Page<ProjectOverviewDto> mockedPage = mock(Page.class);
         PageRequestDto pageRequest = new PageRequestDto(0, 10, "degree", "asc");
 
-        List<ProjectDto> mockedList = List.of(mockProject1(), mockProject2());
+        List<ProjectOverviewDto> mockedList = List.of(mockProjectOverview());
         when(service.findPaginatedAndSorted(0, 10, "degree", "asc")).thenReturn(mockedPage);
         when(service.findPaginated(0, 10)).thenReturn(mockedPage);
         when(service.findAllSorted("degree", "asc")).thenReturn(mockedList);
@@ -186,6 +187,11 @@ class ProjectControllerTest extends BaseTestClass {
                 "2025-12-31");
     }
 
+    private ProjectOverviewDto mockProjectOverview() {
+        return createProjectOverview("cfe94b9f-c86f-4733-be96-a9b619f7bca7", "PRJ83", "GSTIN139302hk2", "Project04", "Project Description",
+                "PO26032021", "Fixed", "active");
+    }
+
     private ProjectDto createProject(String id, String code, String name, String type, String description, String purchaseOrder,
                                      String budgetTerms, String status, String currency, String budget, String hoursPerDay,
                                      String billingTerm, String startDate, String endDate) {
@@ -205,6 +211,21 @@ class ProjectControllerTest extends BaseTestClass {
         dto.setStartDate(LocalDate.parse(startDate));
         dto.setEndDate(LocalDate.parse(endDate));
 
+
+        return dto;
+    }
+
+    private ProjectOverviewDto createProjectOverview(String id, String code, String name, String type, String description, String purchaseOrder,
+                                     String budgetTerms, String status) {
+        ProjectOverviewDto dto = new ProjectOverviewDto();
+        dto.setId(UUID.fromString(id));
+        dto.setCode(code);
+        dto.setName(name);
+        dto.setType(type);
+        dto.setDescription(description);
+        dto.setPurchaseOrder(purchaseOrder);
+        dto.setBudgetTerms(budgetTerms);
+        dto.setStatus(status);
 
         return dto;
     }

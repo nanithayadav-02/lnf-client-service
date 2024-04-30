@@ -8,6 +8,7 @@ import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
+import com.technofacts.lnf.dto.client.ProjectOverviewDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
@@ -33,7 +34,7 @@ import java.util.function.Function;
 @Transactional
 @RequiredArgsConstructor
 @Log
-public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
+public class ProjectService implements PaginatedAndSortedService<ProjectOverviewDto> {
 
     private final ProjectRepository repository;
     private final ClientRepository clientRepository;
@@ -49,7 +50,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
      * @return A Page object with projectDto
      */
     @Override
-    public Page<ProjectDto> findPaginated(final int page, final int size) {
+    public Page<ProjectOverviewDto> findPaginated(final int page, final int size) {
         Page<Project> resultPage = repository.findAll(PageRequest.of(page, size));
         return validateAndGetPages(page, resultPage);
     }
@@ -65,7 +66,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
      * @return A Page object with sorted projectDtos
      */
     @Override
-    public Page<ProjectDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
+    public Page<ProjectOverviewDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         Page<Project> resultPage = repository.findAll(PageRequest.of(page, size, sortInfo));
         return validateAndGetPages(page, resultPage);
@@ -79,10 +80,10 @@ public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
      * @return Sorted list of all ProjectDto objects.
      */
     @Override
-    public List<ProjectDto> findAllSorted(String sortBy, String sortOrder) {
+    public List<ProjectOverviewDto> findAllSorted(String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Project> entities = Lists.newArrayList(repository.findAll(sortInfo));
-        return entities.stream().map(ProjectConverter::toTransportModel).filter(Objects::nonNull).toList();
+        return entities.stream().map(ProjectConverter::toMiniTransportModel).filter(Objects::nonNull).toList();
     }
 
     /**
@@ -91,9 +92,9 @@ public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
      * @return List of all ProjectDto objects.
      */
     @Override
-    public List<ProjectDto> findAll() {
+    public List<ProjectOverviewDto> findAll() {
         List<Project> entities = repository.findAll();
-        return entities.stream().map(ProjectConverter::toTransportModel)
+        return entities.stream().map(ProjectConverter::toMiniTransportModel)
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -235,11 +236,11 @@ public class ProjectService implements PaginatedAndSortedService<ProjectDto> {
         }
     }
 
-    private Page<ProjectDto> validateAndGetPages(int page, Page<Project> resultPage) {
+    private Page<ProjectOverviewDto> validateAndGetPages(int page, Page<Project> resultPage) {
         if (page > resultPage.getTotalPages()) {
             throw new LnFEntityNotFoundException(String.format("Total number of pages [%d], requested page [%d] does not exist", resultPage.getTotalPages(), page));
         }
-        return resultPage.map(ProjectConverter::toTransportModel);
+        return resultPage.map(ProjectConverter::toMiniTransportModel);
     }
 
     private void saveEntity(Project entity) {

@@ -8,9 +8,9 @@ import com.technofacts.lnf.client.service.DataExportService;
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ClientEmployeeDto;
+import com.technofacts.lnf.dto.client.ClientOverviewDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
-import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -52,12 +52,9 @@ class ClientControllerTest extends BaseTestClass {
     private ClientService service;
     @Autowired
     private ProjectService projectService;
-
     @Autowired
     private DataExportService dataExportService;
-
     private UUID clientId;
-
     @Autowired
     private PaginationAndSortingHandler paginationAndSortingHandler;
 
@@ -73,10 +70,10 @@ class ClientControllerTest extends BaseTestClass {
 
     @Test
     void findAll() {
-        Page<ClientDto> mockedPage = mock(Page.class);
+        Page<ClientOverviewDto> mockedPage = mock(Page.class);
         PageRequestDto pageRequest = new PageRequestDto(0, 10, "degree", "asc");
 
-        List<ClientDto> mockedList = List.of(createClient1(), createClient2());
+        List<ClientOverviewDto> mockedList = List.of(createClientOverview());
         when(service.findPaginatedAndSorted(0, 10, "degree", "asc")).thenReturn(mockedPage);
         when(service.findPaginated(0, 10)).thenReturn(mockedPage);
         when(service.findAllSorted("degree", "asc")).thenReturn(mockedList);
@@ -256,6 +253,11 @@ class ClientControllerTest extends BaseTestClass {
                 "ASWQ03028F", "On-Hold", "2024-02-01", "2025-12-31","Staffing", "Accenture");
     }
 
+    private ClientOverviewDto createClientOverview() {
+        return createClientOverviewDto("123e4567-e89b-12d3-a456-556642440000", "WXA-001778", "wexa", "PAN0065NUM",
+                "QRES03023F", "Completed", "2021-08-21", "2024-03-25");
+    }
+
     private ClientDto createClientDto(String id, String code, String name, String pan, String tan, String status, String workingFrom,
                                           String agreementExpiryDate, String serviceType, String clientDetails) {
         ClientDto dto = new ClientDto();
@@ -269,6 +271,21 @@ class ClientControllerTest extends BaseTestClass {
         dto.setAgreementExpiryDate(LocalDate.parse(agreementExpiryDate));
         dto.setServiceType(serviceType);
         dto.setClientDetails(clientDetails);
+
+        return dto;
+    }
+
+    private ClientOverviewDto createClientOverviewDto(String id, String code, String name, String pan, String tan, String status,
+                                      String workingFrom, String agreementExpiryDate) {
+        ClientOverviewDto dto = new ClientOverviewDto();
+        dto.setId(UUID.fromString(id));
+        dto.setCode(code);
+        dto.setName(name);
+        dto.setPan(pan);
+        dto.setTan(tan);
+        dto.setStatus(status);
+        dto.setWorkingFrom(LocalDate.parse(workingFrom));
+        dto.setAgreementExpiryDate(LocalDate.parse(agreementExpiryDate));
 
         return dto;
     }
