@@ -1,9 +1,11 @@
 package com.technofacts.lnf.client.service;
 
+import com.technofacts.lnf.client.converter.ProjectConverter;
 import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.model.ProjectEmployee;
 import com.technofacts.lnf.client.repository.ProjectEmployeeRepository;
 import com.technofacts.lnf.client.repository.ProjectRepository;
+import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectEmployeeDto;
 import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
@@ -38,9 +40,7 @@ public class ProjectEmployeeService {
 
         // Get the list of employees associated with the project
         List<ProjectEmployee> employees = repository.findByProject(project);
-        List<EmployeeDto> employeeDtos = employeeService.findByEmployeeIds(
-                employees.stream().map(ProjectEmployee::getEmployeeId).toList()
-        );
+        List<ClientEmployeeDto> employeeDtos = fetchEmployeeDetails(employees);
 
         return createProjectEmployeeDto(project ,employeeDtos);
     }
@@ -49,12 +49,12 @@ public class ProjectEmployeeService {
         Project project = searchForProject(projectId);
         List<ProjectEmployee> employees = repository.findByProject(project);
         size = (size == null || size <= 0) ? employees.size() : size;
-        List<EmployeeDto> employeeDtos = fetchEmployeeDetails(paginateEmployees(employees, page, size));
+        List<ClientEmployeeDto> employeeDtos = fetchEmployeeDetails(paginateEmployees(employees, page, size));
         ProjectEmployeeDto dto = createProjectEmployeeDto(project, employeeDtos);
         return createPaginationContent(employees.size(), size, dto);
     }
 
-    private ProjectEmployeeDto createProjectEmployeeDto(Project project, List<EmployeeDto> employeeDtos) {
+    private ProjectEmployeeDto createProjectEmployeeDto(Project project, List<ClientEmployeeDto> employeeDtos) {
         ProjectEmployeeDto projectEmployeeDto = new ProjectEmployeeDto();
         projectEmployeeDto.setProjectId(project.getId());
         projectEmployeeDto.setProjectCode(project.getCode());
@@ -69,11 +69,14 @@ public class ProjectEmployeeService {
         return employees.subList(fromIndex, toIndex);
     }
 
-    private List<EmployeeDto> fetchEmployeeDetails(List<ProjectEmployee> pagedEmployees) {
+    private List<ClientEmployeeDto> fetchEmployeeDetails(List<ProjectEmployee> pagedEmployees) {
         List<String> employeeIds = pagedEmployees.stream()
                 .map(ProjectEmployee::getEmployeeId)
                 .toList();
-        return employeeService.findByEmployeeIds(employeeIds);
+        return employeeService.findByEmployeeIds(employeeIds).stream()
+                .map(ProjectConverter:: mapToClientEmployee)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     private Map<String, Object> createPaginationContent(int totalEmployees, Integer size,

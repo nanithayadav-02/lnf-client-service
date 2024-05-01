@@ -3,11 +3,10 @@ package com.technofacts.lnf.client.service;
 import com.google.common.collect.Lists;
 import com.technofacts.lnf.client.converter.ClientConverter;
 import com.technofacts.lnf.client.model.Client;
-import com.technofacts.lnf.client.model.Project;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.dto.client.ClientDto;
+import com.technofacts.lnf.dto.client.ClientOverviewDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
-import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
@@ -33,7 +32,7 @@ import java.util.function.Function;
 @Transactional
 @RequiredArgsConstructor
 @Log
-public class ClientService implements PaginatedAndSortedService<ClientDto> {
+public class ClientService implements PaginatedAndSortedService<ClientOverviewDto> {
 
     private final ClientRepository repository;
     private final ProjectService projectService;
@@ -48,7 +47,7 @@ public class ClientService implements PaginatedAndSortedService<ClientDto> {
      * @return A Page object with clientDtos
      */
     @Override
-    public Page<ClientDto> findPaginated(final int page, final int size) {
+    public Page<ClientOverviewDto> findPaginated(final int page, final int size) {
         Page<Client> resultPage = repository.findAll(PageRequest.of(page, size));
         return validateAndGetPages(page, resultPage);
     }
@@ -64,7 +63,7 @@ public class ClientService implements PaginatedAndSortedService<ClientDto> {
      * @return A Page object with sorted clientDtos
      */
     @Override
-    public Page<ClientDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
+    public Page<ClientOverviewDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         Page<Client> resultPage = repository.findAll(PageRequest.of(page, size, sortInfo));
         return validateAndGetPages(page, resultPage);
@@ -78,10 +77,10 @@ public class ClientService implements PaginatedAndSortedService<ClientDto> {
      * @return Sorted list of all ClientDto objects.
      */
     @Override
-    public List<ClientDto> findAllSorted(String sortBy, String sortOrder) {
+    public List<ClientOverviewDto> findAllSorted(String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Client> entities = Lists.newArrayList(repository.findAll(sortInfo));
-        return entities.stream().map(ClientConverter::toTransportModel)
+        return entities.stream().map(ClientConverter::toMiniTransportModel)
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -92,9 +91,9 @@ public class ClientService implements PaginatedAndSortedService<ClientDto> {
      * @return List of all ClientDto objects.
      */
     @Override
-    public List<ClientDto> findAll() {
+    public List<ClientOverviewDto> findAll() {
         List<Client> entities = repository.findAll();
-        return entities.stream().map(ClientConverter::toTransportModel)
+        return entities.stream().map(ClientConverter::toMiniTransportModel)
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -158,12 +157,12 @@ public class ClientService implements PaginatedAndSortedService<ClientDto> {
         }
     }
 
-    private Page<ClientDto> validateAndGetPages(int page, Page<Client> resultPage) {
+    private Page<ClientOverviewDto> validateAndGetPages(int page, Page<Client> resultPage) {
         if (page > resultPage.getTotalPages()) {
             throw new LnFEntityNotFoundException(String.format("Total number of pages [%d], " +
                     "requested page [%d] does not exist", resultPage.getTotalPages(), page));
         }
-        return resultPage.map(ClientConverter::toTransportModel);
+        return resultPage.map(ClientConverter::toMiniTransportModel);
     }
 
     /**
