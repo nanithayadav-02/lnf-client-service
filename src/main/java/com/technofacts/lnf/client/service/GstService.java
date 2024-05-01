@@ -165,4 +165,5 @@ public class GstService {
         return repository.findById(gstId).
                 orElseThrow(() -> new LnFEntityNotFoundException(String.format("Gst with id [%s] does not exist", gstId)));
     }
+
 }

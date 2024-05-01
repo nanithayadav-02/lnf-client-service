@@ -1,15 +1,12 @@
 package com.technofacts.lnf.client.converter;
 
+import com.technofacts.lnf.client.model.*;
+import com.technofacts.lnf.dto.client.ClientDto;
+import com.technofacts.lnf.dto.client.ClientOverviewDto;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import com.technofacts.lnf.client.model.*;
-import com.technofacts.lnf.client.model.enums.DocumentType;
-import com.technofacts.lnf.dto.client.ClientDto;
-import com.technofacts.lnf.dto.client.DocumentDto;
 
 public class ClientConverter {
 
@@ -36,6 +33,24 @@ public class ClientConverter {
         dto.setNotes(new ArrayList<>());
         dto.getNotes().addAll(entity.getNotes().stream()
                 .map(ClientNotesConverter::toTransportModel).filter(Objects::nonNull).toList());
+
+        return dto;
+    }
+
+    public static ClientOverviewDto toMiniTransportModel(Client entity) {
+
+        if (entity == null) {
+            return null;
+        }
+        ClientOverviewDto dto = new ClientOverviewDto();
+        dto.setId(entity.getId());
+        dto.setCode(entity.getCode());
+        dto.setName(entity.getName());
+        dto.setPan(entity.getPan());
+        dto.setTan(entity.getTan());
+        dto.setStatus(entity.getStatus());
+        dto.setWorkingFrom(entity.getWorkingFrom());
+        dto.setAgreementExpiryDate(entity.getAgreementExpiryDate());
 
         return dto;
     }
