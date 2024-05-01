@@ -108,36 +108,36 @@ public class DataExportService {
 
     private ClientDto mapToClientDto(String[] rowData) {
         ClientDto client = new ClientDto();
-        client.setCode(rowData[1]);
-        client.setName(rowData[2]);
-        client.setPan(rowData[3]);
-        client.setTan(rowData[4]);
-        client.setStatus(rowData[5]);
+        client.setCode(rowData[0]);
+        client.setName(rowData[1]);
+        client.setPan(rowData[2]);
+        client.setTan(rowData[3]);
+        client.setStatus(rowData[4]);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
-        client.setWorkingFrom(LocalDate.parse(rowData[6], formatter));
-        client.setAgreementExpiryDate(LocalDate.parse(rowData[7], formatter));
-        client.setServiceType(rowData[8]);
-        client.setClientDetails(rowData[9]);
+        client.setWorkingFrom(LocalDate.parse(rowData[5], formatter));
+        client.setAgreementExpiryDate(LocalDate.parse(rowData[6], formatter));
+        client.setServiceType(rowData[7]);
+        client.setClientDetails(rowData[8]);
         clientService.create(client);
         return client;
     }
 
     private ProjectDto mapToProjectDto(String[] rowData, UUID id) {
         ProjectDto project = new ProjectDto();
-        project.setCode(rowData[4]);
-        project.setName(rowData[9]);
-        project.setType(rowData[13]);
-        project.setDescription(rowData[6]);
-        project.setPurchaseOrder(rowData[10]);
-        project.setBudgetTerms(rowData[3]);
-        project.setStatus(rowData[12]);
-        project.setCurrency(rowData[5]);
-        project.setBudget(new BigDecimal(rowData[2]));
-        project.setHoursPerDay((int) Double.parseDouble(rowData[8]));
-        project.setBillingTerm(rowData[1]);
+        project.setCode(rowData[3]);
+        project.setName(rowData[8]);
+        project.setType(rowData[12]);
+        project.setDescription(rowData[5]);
+        project.setPurchaseOrder(rowData[9]);
+        project.setBudgetTerms(rowData[2]);
+        project.setStatus(rowData[11]);
+        project.setCurrency(rowData[4]);
+        project.setBudget(new BigDecimal(rowData[1]));
+        project.setHoursPerDay((int) Double.parseDouble(rowData[7]));
+        project.setBillingTerm(rowData[0]);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy");
-        project.setStartDate(LocalDate.parse(rowData[11], formatter));
-        project.setEndDate(LocalDate.parse(rowData[7], formatter));
+        project.setStartDate(LocalDate.parse(rowData[10], formatter));
+        project.setEndDate(LocalDate.parse(rowData[6], formatter));
         project.setClientId(id);
         projectService.create(project);
         return project;
@@ -146,12 +146,12 @@ public class DataExportService {
     private TaskDto mapToTaskDto(String[] rowData, UUID id) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
         TaskDto task = new TaskDto();
-        task.setDescription(rowData[1]);
-        task.setEndDate(LocalDate.parse(rowData[2], formatter));
-        task.setName(rowData[3]);
-        task.setStartDate(LocalDate.parse(rowData[4], formatter));
-        task.setStatus(rowData[5]);
-        task.setType(rowData[6]);
+        task.setDescription(rowData[0]);
+        task.setEndDate(LocalDate.parse(rowData[1], formatter));
+        task.setName(rowData[2]);
+        task.setStartDate(LocalDate.parse(rowData[3], formatter));
+        task.setStatus(rowData[4]);
+        task.setType(rowData[5]);
         task.setProjectId(id);
         taskService.create(task.getProjectId(), task);
         return task;
