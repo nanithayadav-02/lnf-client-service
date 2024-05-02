@@ -51,6 +51,10 @@ public class ProjectConverter {
         dto.setName(entity.getName());
         dto.setType(entity.getType());
         dto.setBudgetTerms(entity.getBudgetTerms());
+        dto.setHoursPerDay(entity.getHoursPerDay());
+        dto.setBillingTerm(entity.getBillingTerm());
+        dto.setStartDate(entity.getStartDate());
+        dto.setClientName(entity.getClient().getName());
         dto.setDescription(entity.getDescription());
         dto.setPurchaseOrder(entity.getPurchaseOrder());
         dto.setStatus(entity.getStatus());
