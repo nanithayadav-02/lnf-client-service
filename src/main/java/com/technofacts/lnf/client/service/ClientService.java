@@ -16,6 +16,9 @@ import com.technofacts.lnf.util.RestUtil;
 import com.technofacts.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -36,7 +39,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
 
     private final ClientRepository repository;
     private final ProjectService projectService;
-
+    private final CacheManager cacheManager;
 
     /**
      * Return requested page with list of ClientDto objects with requested size. Raises LnFEntityNotFoundException
@@ -47,6 +50,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @return A Page object with clientDtos
      */
     @Override
+    @Cacheable(value = "clients")
     public Page<ClientOverviewDto> findPaginated(final int page, final int size) {
         Page<Client> resultPage = repository.findAll(PageRequest.of(page, size));
         return validateAndGetPages(page, resultPage);
@@ -63,6 +67,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @return A Page object with sorted clientDtos
      */
     @Override
+    @Cacheable(value = "clients")
     public Page<ClientOverviewDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         Page<Client> resultPage = repository.findAll(PageRequest.of(page, size, sortInfo));
@@ -77,6 +82,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @return Sorted list of all ClientDto objects.
      */
     @Override
+    @Cacheable(value = "clients")
     public List<ClientOverviewDto> findAllSorted(String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Client> entities = Lists.newArrayList(repository.findAll(sortInfo));
@@ -91,11 +97,19 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @return List of all ClientDto objects.
      */
     @Override
+    @Cacheable(value = "clients")
     public List<ClientOverviewDto> findAll() {
         List<Client> entities = repository.findAll();
         return entities.stream().map(ClientConverter::toMiniTransportModel)
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    @Cacheable(value = "clients")
+    public List<ClientDto> findAll(String search) {
+        Specification<Client> specification = buildClientSpecification(search);
+        List<Client> entities = repository.findAll(specification);
+        return convertToDtos(entities);
     }
 
     /**
@@ -115,6 +129,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      *
      * @param resource clientDto object
      */
+    @CacheEvict(value = "clients", allEntries = true)
     public void create(ClientDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
                 "Failed to create Client with null payload");
@@ -130,6 +145,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @param resource ClientDto
      */
     @Transactional
+    @CacheEvict(value = "clients", allEntries = true)
     public void update(UUID clientId, ClientDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
                 "Failed to update Client with null payload");
@@ -144,6 +160,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      *
      * @param clientId Client Id
      */
+    @CacheEvict(value = "clients", allEntries = true)
     public void delete(UUID clientId) {
         Client entity = search(clientId);
         List<ProjectDto> projectList = projectService.findProjectsByClientId(clientId);
@@ -155,6 +172,14 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
             String errorMessage = String.format("Failed to delete Client [%s]", entity.getCode());
             throw new LnFException(errorMessage, e);
         }
+    }
+
+    /**
+     * Clears the cache for clients.
+     */
+    public void clearClientsCache() {
+        Objects.requireNonNull(cacheManager.getCache("clients")).clear();
+        log.info("Clients cache cleared.");
     }
 
     private Page<ClientOverviewDto> validateAndGetPages(int page, Page<Client> resultPage) {
@@ -196,11 +221,6 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      *
      * @return List of all ClientDto objects.
      */
-    public List<ClientDto> findAll(String search) {
-        Specification<Client> specification = buildClientSpecification(search);
-        List<Client> entities = repository.findAll(specification);
-        return convertToDtos(entities);
-    }
 
     private List<ClientDto> convertToDtos(List<Client> entities) {
         return entities.stream()

@@ -17,6 +17,9 @@ import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.employee.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +37,7 @@ public class ProjectTaskEmployeeService {
     private final ProjectRepository projectRepository;
     private final ProjectEmployeeRepository projectEmployeeRepository;
     private final EmployeeService employeeService;
+    private final CacheManager cacheManager;
 
     /**
      * Get employees associated to the task
@@ -42,6 +46,7 @@ public class ProjectTaskEmployeeService {
      * @param taskId    Task Id
      * @return TaskEmployeeDto
      */
+    @Cacheable(value = "projectTaskEmployees")
     public ProjectTaskEmployeeDto findEmployeesByProjectIdAndTaskId(final UUID projectId, final UUID taskId) {
         Project project = searchForProject(projectId);
         Task task = searchForTask(taskId);
@@ -53,6 +58,7 @@ public class ProjectTaskEmployeeService {
         return createProjectTaskEmployeeDto(taskId, project, task, employeeDtos);
     }
 
+    @Cacheable(value = "projectTaskEmployees")
     public Map<String, Object> findAllAssignedEmployees(final UUID projectId, final UUID taskId, int page, Integer size) {
         Project project = searchForProject(projectId);
         Task task = searchForTask(taskId);
@@ -110,6 +116,7 @@ public class ProjectTaskEmployeeService {
      * @param taskId      Task Id
      * @param employeeIds List of Strings
      */
+    @CacheEvict(value = "projectTaskEmployees", allEntries = true)
     public void addEmployeesToProjectAndTask(UUID projectId, UUID taskId, List<String> employeeIds) {
         Project project = searchForProject(projectId);
         Task task = searchForTask(taskId);
@@ -143,6 +150,7 @@ public class ProjectTaskEmployeeService {
      * @param taskId      Task Id
      * @param employeeIds List of Strings
      */
+    @CacheEvict(value = "projectTaskEmployees", allEntries = true)
     public void removeEmployeesFromProjectAndTask(UUID projectId, UUID taskId, List<String> employeeIds) {
         Project project = searchForProject(projectId);
         Task task = searchForTask(taskId);
@@ -186,6 +194,14 @@ public class ProjectTaskEmployeeService {
         }
     }
 
+    /**
+     * Clears the cache for projectTaskEmployees.
+     */
+    public void clearProjectTaskEmployeesCache() {
+        Objects.requireNonNull(cacheManager.getCache("projectTaskEmployees")).clear();
+        log.info("ProjectTaskEmployees cache cleared.");
+    }
+
     private ProjectTaskEmployee search(Project project, Task task, String employeeId) {
         return repository.findByProjectAndTaskAndEmployeeId(project, task, employeeId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("TaskEmployee entity with project [%s], taskId [%s] and employeeId [%s] does not exist", project.getId(), task.getId(), employeeId)));
     }
@@ -198,7 +214,7 @@ public class ProjectTaskEmployeeService {
         return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
     }
 
-
+    @CacheEvict(value = "projectTaskEmployees", allEntries = true)
     public void addAllEmployeesToProjectAndTask(UUID projectId, UUID taskId) {
 
         Project project = searchForProject(projectId);
