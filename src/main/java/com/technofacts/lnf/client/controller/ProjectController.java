@@ -102,5 +102,11 @@ public class ProjectController {
         service.delete(projectId);
     }
 
+    @PostMapping("/projects/refresh")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void clearCaches() {
+        service.clearProjectsCache();
+    }
+
 }
 

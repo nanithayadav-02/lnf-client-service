@@ -91,4 +91,10 @@ public class ProjectEmployeeController {
         service.removeEmployeeFromProject(projectId, employeeIds);
     }
 
+    @PostMapping("/projectEmployees/refresh")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void clearCaches() {
+        service.clearProjectEmployeesCache();
+    }
+
 }

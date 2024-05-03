@@ -141,4 +141,10 @@ public class ClientController {
         service.delete(clientId);
     }
 
+    @PostMapping("/clients/refresh")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void clearCaches() {
+        service.clearClientsCache();
+    }
+
 }

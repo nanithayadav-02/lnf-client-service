@@ -13,6 +13,9 @@ import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.employee.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,7 @@ public class ProjectEmployeeService {
     private final ProjectEmployeeRepository repository;
     private final ProjectRepository projectRepository;
     private final EmployeeService employeeService;
+    private final CacheManager cacheManager;
 
     /**
      * Get employees associated to the project
@@ -35,6 +39,7 @@ public class ProjectEmployeeService {
      * @param projectId Project Id
      * @return ProjectEmployeeDto
      */
+    @Cacheable(value = "projectEmployees")
     public ProjectEmployeeDto findEmployeesByProjectId(final UUID projectId) {
         Project project = searchForProject(projectId);
 
@@ -45,6 +50,7 @@ public class ProjectEmployeeService {
         return createProjectEmployeeDto(project ,employeeDtos);
     }
 
+    @Cacheable(value = "projectEmployees")
     public Map<String, Object> findAllAssignedEmployees(final UUID projectId, int page, Integer size) {
         Project project = searchForProject(projectId);
         List<ProjectEmployee> employees = repository.findByProject(project);
@@ -96,6 +102,7 @@ public class ProjectEmployeeService {
          * @param projectId   Project Id
          * @param employeeIds List of Strings
          */
+    @CacheEvict(value = "projectEmployees", allEntries = true)
     public void addEmployeeToProject(UUID projectId, List<String> employeeIds) {
 
         Project project = searchForProject(projectId);
@@ -126,6 +133,7 @@ public class ProjectEmployeeService {
      * @param projectId   Project Id
      * @param employeeIds List of Strings
      */
+    @CacheEvict(value = "projectEmployees", allEntries = true)
     public void removeEmployeeFromProject(UUID projectId, List<String> employeeIds) {
         searchForProject(projectId);
         employeeIds.forEach(employeeId -> {
@@ -168,6 +176,14 @@ public class ProjectEmployeeService {
         }
     }
 
+    /**
+     * Clears the cache for projectEmployees.
+     */
+    public void clearProjectEmployeesCache() {
+        Objects.requireNonNull(cacheManager.getCache("projectEmployees")).clear();
+        log.info("ProjectEmployees cache cleared.");
+    }
+
     private ProjectEmployee search(UUID projectId, String employeeId) {
         return repository.findByProjectIdAndEmployeeId(projectId, employeeId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("ProjectEmployee entity with projectId [%s] and employeeId [%s] does not exist", projectId, employeeId)));
     }
@@ -176,6 +192,7 @@ public class ProjectEmployeeService {
         return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
     }
 
+    @CacheEvict(value = "projectEmployees", allEntries = true)
     public void addAllActiveEmployeeToProject(UUID projectId,List<String> statuses) {
         Project project = searchForProject(projectId);
         List<String> requiredIds = new ArrayList<>(employeeService.findByStatuses(statuses));
