@@ -3,6 +3,7 @@ package com.technofacts.lnf.client.service;
 import com.google.common.collect.Lists;
 import com.technofacts.lnf.client.converter.ClientConverter;
 import com.technofacts.lnf.client.model.Client;
+import com.technofacts.lnf.client.model.enums.DocumentType;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ClientOverviewDto;
@@ -40,6 +41,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
     private final ClientRepository repository;
     private final ProjectService projectService;
     private final CacheManager cacheManager;
+    private final DocumentService documentService;
 
     /**
      * Return requested page with list of ClientDto objects with requested size. Raises LnFEntityNotFoundException
@@ -119,9 +121,10 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @param clientId Client Id
      * @return ClientDto object
      */
+    @Cacheable(value = "clients")
     public ClientDto findByClientId(UUID clientId) {
         Client entity = search(clientId);
-        return ClientConverter.toTransportModel(entity);
+        return findClientWithDocument(entity);
     }
 
     /**
@@ -227,6 +230,14 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
                 .map(ClientConverter::toTransportModel)
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    private ClientDto findClientWithDocument(Client entity) {
+        ClientDto dto = ClientConverter.toTransportModel(entity);
+        if (dto != null) {
+            dto.setClientLogo(documentService.findByClientId(dto.getId(), DocumentType.image));
+        }
+        return dto;
     }
 
     private Specification<Client> buildClientSpecification(String search) {
