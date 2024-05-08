@@ -12,6 +12,11 @@ public class ClientNotesConverter {
         ClientNotesDto dto = new ClientNotesDto();
         dto.setId(entity.getId());
         dto.setDescription(entity.getDescription());
+        dto.setCreatedBy(entity.getCreatedBy());
+        dto.setCreatedTime(entity.getCreatedTime());
+        dto.setLastUpdatedBy(entity.getLastUpdatedBy());
+        dto.setLastUpdatedTime(entity.getLastUpdatedTime());
+
 
         return dto;
     }
