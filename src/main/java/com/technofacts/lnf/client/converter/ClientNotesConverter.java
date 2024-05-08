@@ -12,6 +12,11 @@ public class ClientNotesConverter {
         ClientNotesDto dto = new ClientNotesDto();
         dto.setId(entity.getId());
         dto.setDescription(entity.getDescription());
+        dto.setCreatedBy(entity.getCreatedBy());
+        dto.setCreatedTime(entity.getCreatedTime());
+        dto.setLastUpdatedBy(entity.getLastUpdatedBy());
+        dto.setLastUpdatedTime(entity.getLastUpdatedTime());
+
 
         return dto;
     }
@@ -26,6 +31,10 @@ public class ClientNotesConverter {
         }
         entity.setId(transport.getId());
         entity.setDescription(transport.getDescription());
+        entity.setCreatedBy(transport.getCreatedBy());
+        entity.setCreatedTime(transport.getCreatedTime());
+        entity.setLastUpdatedBy(transport.getLastUpdatedBy());
+        entity.setLastUpdatedTime(transport.getLastUpdatedTime());
 
         return entity;
     }
