@@ -31,6 +31,10 @@ public class ClientNotesConverter {
         }
         entity.setId(transport.getId());
         entity.setDescription(transport.getDescription());
+        entity.setCreatedBy(transport.getCreatedBy());
+        entity.setCreatedTime(transport.getCreatedTime());
+        entity.setLastUpdatedBy(transport.getLastUpdatedBy());
+        entity.setLastUpdatedTime(transport.getLastUpdatedTime());
 
         return entity;
     }
