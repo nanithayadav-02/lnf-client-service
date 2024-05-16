@@ -31,6 +31,10 @@ file:
   service:
     url: "http://localhost:8081/api/v3"
 
+timesheet:
+  service:
+    url: "http://localhost:8081/api/v3"
+
 # Metrics Configuration
 management:
   metrics:
