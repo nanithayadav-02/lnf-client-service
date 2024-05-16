@@ -4,6 +4,7 @@ import com.technofacts.lnf.client.service.DataExportService;
 import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
+import com.technofacts.lnf.dto.timesheet.TimesheetDto;
 import com.technofacts.lnf.service.common.page.PageableAsQueryParam;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
@@ -108,5 +109,11 @@ public class ProjectController {
         service.clearProjectsCache();
     }
 
-}
+    @GetMapping("/projects/clients/{clientId}")
+    public List<TimesheetDto> getTimeSheetsByClientId(@PathVariable("clientId") UUID clientId,
+                                                      @RequestParam(value = "projectId", required = false) UUID projectId) {
+        return service.getTimeSheetsByClientId(clientId, projectId);
+    }
 
+
+}

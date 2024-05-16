@@ -7,7 +7,6 @@ import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
-import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.service.common.page.PageableAsQueryParam;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;

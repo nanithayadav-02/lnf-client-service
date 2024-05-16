@@ -1,13 +1,13 @@
 package com.technofacts.lnf.client.repository;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.technofacts.lnf.client.model.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.UUID;
 
 
 public interface ProjectRepository extends JpaRepository<Project, UUID>, JpaSpecificationExecutor<Project> {
@@ -19,5 +19,13 @@ public interface ProjectRepository extends JpaRepository<Project, UUID>, JpaSpec
             " to_char(p.start_date, 'MON') as month, count(p.id) as count "
             + " from project as p group by year, month order by year desc", nativeQuery = true)
     List<StatisticsSummary> projectsByYearAndMonth();
+
+    @Query(value = "SELECT pe.employee_id FROM project_employee pe JOIN project p ON pe.project_id = p.id" +
+            " WHERE p.client_id = :clientId", nativeQuery = true)
+    List<String> findEmployeeIdsByClientId(@Param("clientId") UUID clientId);
+
+    @Query(value = "SELECT pe.project_id FROM project_employee pe JOIN project p ON pe.project_id = p.id" +
+            " WHERE p.client_id = :clientId", nativeQuery = true)
+    List<UUID> findProjectIdsByClientId(@Param("clientId") UUID clientId);
 
 }

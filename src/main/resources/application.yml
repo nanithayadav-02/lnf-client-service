@@ -29,6 +29,10 @@ employee:
 
 file:
   service:
+    url: "http://localhost:8088/api/v3"
+
+timesheet:
+  service:
     url: "http://localhost:8081/api/v3"
 
 # Metrics Configuration

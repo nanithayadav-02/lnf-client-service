@@ -9,11 +9,13 @@ import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.client.ProjectOverviewDto;
+import com.technofacts.lnf.dto.timesheet.TimesheetDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.common.page.PaginatedAndSortedService;
 import com.technofacts.lnf.service.specification.GenericSpecificationBuilder;
+import com.technofacts.lnf.service.timesheet.TimesheetService;
 import com.technofacts.lnf.util.RestUtil;
 import com.technofacts.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -44,6 +47,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
     private final ProjectEmployeeService projectEmployeeService;
     private final TaskService taskService;
     private final CacheManager cacheManager;
+    private final TimesheetService timesheetService;
 
     /**
      * Return requested page with list of ProjectDto objects with requested size. Raises LnFEntityNotFoundException
@@ -136,7 +140,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         return SpecificationUtil.getFieldClass(Project.class, fieldName);
     }
 
-        /**
+    /**
      * Returns projectDto from the projectId. Raises LnFEntityNotFoundException
      * if there is no project with the input projectId
      *
@@ -193,8 +197,8 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create Project with null payload");
         Project entity = ProjectConverter.toEntityModel(resource);
         if (resource.getClientId() != null) {
-           Client client = searchForClient(resource.getClientId());
-           entity.setClient(client);
+            Client client = searchForClient(resource.getClientId());
+            entity.setClient(client);
         }
         saveEntity(entity);
         log.info(() -> String.format("Project[%s] successfully created", entity.getCode()));
@@ -204,7 +208,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * Updates the project
      *
      * @param projectId Project Id
-     * @param resource ProjectDto
+     * @param resource  ProjectDto
      */
     @Transactional
     @CacheEvict(value = "projects", allEntries = true)
@@ -284,5 +288,21 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                 orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
     }
 
-}
+    public List<TimesheetDto> getTimeSheetsByClientId(UUID clientId, UUID projectId) {
 
+        //listing the employeeIds based on clientId
+        List<String> employeeIds = repository.findEmployeeIdsByClientId(clientId);
+
+        List<UUID> projectIds;
+
+        if (projectId != null) {
+            projectIds = Collections.singletonList(projectId);
+        } else {
+            //listing the projectIds based on clientId
+            projectIds = repository.findProjectIdsByClientId(clientId);
+        }
+        //Based on clientId we are passing employeeIds and projectIds for listing the timeSheets
+        return timesheetService.findTimeSheetsByEmployeeIds(employeeIds, projectIds);
+    }
+
+}
