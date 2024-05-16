@@ -363,12 +363,12 @@ class ClientControllerTest extends BaseTestClass {
     }
 
     private ClientEmployeeDto mockEmployee1() {
-        return createEmployee("011becae-fd68-46c3-a857-59153d98a1b8", "HRD-TE-TF-5030", "Vikrant", "Vicky@gmail.com",
+        return createEmployee("011becae-fd68-46c3-a857-59153d98a1b8", "HRD-TE-TF-5030", "Vikrant", "thakur", "Vicky@gmail.com",
                 "9676099703", "ACTIVE", "BA");
     }
 
     private ClientEmployeeDto mockEmployee2() {
-        return createEmployee("f12b86f8-7dab-42c6-a2db-6cf82e7e9e33", "HRD-CE-TF-3033","Kushbu",  "Kushbu@gmail.com",
+        return createEmployee("f12b86f8-7dab-42c6-a2db-6cf82e7e9e33", "HRD-CE-TF-3033","Kushbu",  "sharma", "Kushbu@gmail.com",
                 "9876543210", "TERMINATED", "SE");
     }
 
@@ -379,19 +379,21 @@ class ClientControllerTest extends BaseTestClass {
                 .andExpect(content().string(containsString(containsString)))
                 .andExpect(jsonPath("$.id").value(expectedDto.getId().toString()))
                 .andExpect(jsonPath("$.employeeId").value(expectedDto.getEmployeeId()))
-                .andExpect(jsonPath("$.fullName").value(expectedDto.getFullName()))
+                .andExpect(jsonPath("$.firstName").value(expectedDto.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(expectedDto.getLastName()))
                 .andExpect(jsonPath("$.email").value(expectedDto.getEmail()))
                 .andExpect(jsonPath("$.mobileNumber").value(expectedDto.getMobileNumber()))
                 .andExpect(jsonPath("$.employmentStatus").value(expectedDto.getEmploymentStatus()))
                 .andExpect(jsonPath("$.designation").value(expectedDto.getDesignation()));
     }
 
-    private ClientEmployeeDto createEmployee(String id, String employeeId, String fullName,
+    private ClientEmployeeDto createEmployee(String id, String employeeId, String firstName, String lastName,
                                              String email, String mobileNumber, String employeeStatus, String designation) {
         ClientEmployeeDto dto = new ClientEmployeeDto();
         dto.setId(UUID.fromString(id));
         dto.setEmployeeId(employeeId);
-        dto.setFullName(fullName);
+        dto.setFirstName(firstName);
+        dto.setLastName(lastName);
         dto.setEmail(email);
         dto.setMobileNumber(mobileNumber);
         dto.setEmploymentStatus(employeeStatus);

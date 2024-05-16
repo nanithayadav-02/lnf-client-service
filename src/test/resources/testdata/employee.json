@@ -2,7 +2,8 @@
   {
     "id": "011becae-fd68-46c3-a857-59153d98a1b8",
     "employeeId": "HRD-TE-TF-5030",
-    "fullName": "Vikrant",
+    "firstName": "Vikrant",
+    "lastName": "thakur",
     "email": "Vicky@gmail.com",
     "mobileNumber": "9676099703",
     "employmentStatus": "ACTIVE",
@@ -11,7 +12,8 @@
   {
     "id": "f12b86f8-7dab-42c6-a2db-6cf82e7e9e33",
     "employeeId": "HRD-CE-TF-3033",
-    "fullName": "Kushbu",
+    "firstName": "Kushbu",
+    "lastName": "sharma",
     "email": "Kushbu@gmail.com",
     "mobileNumber": "9876543210",
     "employmentStatus": "TERMINATED",
