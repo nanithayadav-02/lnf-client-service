@@ -58,7 +58,7 @@ public class ClientAgreementService {
     public ResponseEntity<byte[]> findById(UUID clientId, String fileName) {
         try {
             searchForFileName(fileName);
-            String filePath = String.format("%s/%s/%s/%s/", folderName, clientId, AGREEMENTS, fileName);
+            String filePath = String.format("%s/%s/%s/%s", folderName, clientId, AGREEMENTS, fileName);
             return fileService.findFileContent(filePath);
         } catch (RuntimeException e) {
             String errorMessage = String.format("file not found for agreement[%s]", clientId);
@@ -121,7 +121,7 @@ public class ClientAgreementService {
             String s3ObjectKey = String.format("%s/%s/%s/%s/", folderName, clientId, AGREEMENTS, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
-            log.info("S3 object deleted for sows file");
+            log.info("S3 object deleted for agreement file");
             repository.delete(entity);
             log.info(() -> String.format("file[%s] for agreement [%s] successfully deleted", fileName, clientId));
         } catch (RuntimeException e) {
