@@ -1,13 +1,13 @@
 package com.technofacts.lnf.client.model;
 
+import com.technofacts.lnf.model.AuditableEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-
-import com.technofacts.lnf.model.AuditableEntity;
-import jakarta.persistence.*;
-import lombok.*;
 
 @ToString
 @Entity
@@ -67,5 +67,10 @@ public class Project extends AuditableEntity {
     @Builder.Default
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
     private Set<Task> tasks = new HashSet<>();
+
+    @ToString.Exclude
+    @Builder.Default
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
+    private Set<StatementOfWork> statementOfWorks = new HashSet<>();
 
 }
