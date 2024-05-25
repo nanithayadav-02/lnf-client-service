@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -27,5 +28,8 @@ public interface ProjectRepository extends JpaRepository<Project, UUID>, JpaSpec
     @Query(value = "SELECT pe.project_id FROM project_employee pe JOIN project p ON pe.project_id = p.id" +
             " WHERE p.client_id = :clientId", nativeQuery = true)
     List<UUID> findProjectIdsByClientId(@Param("clientId") UUID clientId);
+
+    @Query(value = "select p from Project p where p.id = :id And p.client.id = :clientId")
+    Optional<Project> findByProjectIdAndClientId(@Param("id") UUID id, @Param("clientId") UUID clientId);
 
 }
