@@ -51,7 +51,7 @@ pipelines:
           # Build and push the image to the docker
           - export IMAGE_NAME=levernfulcrum/lnf-client-service
           - chmod +x lnf-deployment-pipeline/scripts/build-n-push/docker_image.sh
-          - lnf-deployment-pipeline/scripts/build-n-push/docker_image.sh "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD" "$IMAGE_NAME"
+          - lnf-deployment-pipeline/scripts/build-n-push/docker_image.sh "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD" "$IMAGE_NAME" "$LNF_TECHNOFACTS"
     - step:
         name: Build and push Docker image to AWS ECR
         services:
@@ -70,4 +70,4 @@ pipelines:
           # Build and push the image to the AWS ECR
           - export IMAGE_NAME=levernfulcrum/lnf-client-service
           - chmod +x lnf-deployment-pipeline/scripts/build-n-push/ecr_image.sh
-          - lnf-deployment-pipeline/scripts/build-n-push/ecr_image.sh "$AWS_DEFAULT_REGION" "$IMAGE_NAME"
+          - lnf-deployment-pipeline/scripts/build-n-push/ecr_image.sh "$AWS_DEFAULT_REGION" "$IMAGE_NAME" "$LNF_TECHNOFACTS"
