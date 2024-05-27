@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 @Service
 @Slf4j
@@ -42,24 +43,26 @@ public class DataExportService {
 
     public ResponseEntity<String> uploadFile(MultipartFile file, Class<?> dtoClass, UUID id) throws IOException {
         Optional<UUID> idOpt = Optional.ofNullable(id);
-        List<?> data = handleFile(file, dtoClass, idOpt);
+        List<?> data = processFile(file, dtoClass, idOpt);
         return ResponseEntity.ok("Data uploaded successfully!");
     }
 
-    private List<?> handleFile(MultipartFile file, Class<?> dtoClass, Optional<UUID> idOpt) throws IOException {
+    private List<?> processFile(MultipartFile file, Class<?> dtoClass, Optional<UUID> optionalId) throws IOException {
         File csvFile = convertToCSV(file);
         String absoluteFilePath = csvFile.getAbsolutePath();
-        List<?> parsedData = new ArrayList<>();
-
+        List<?> parsedData;
         try {
-            parsedData = parseDataFromCSVFile(csvFile, dtoClass, idOpt.orElse(null), absoluteFilePath);
+            parsedData = extractData(csvFile, dtoClass, optionalId.orElse(null), absoluteFilePath);
         } catch (Exception e) {
-            log.error("Error handling file {}: {}", absoluteFilePath, e.getMessage());
+            throw new IOException(String.format("Error processing file %s: %s", absoluteFilePath, e.getMessage()), e);
         } finally {
-            deleteFile(absoluteFilePath, csvFile); // Ensure cleanup happens.
+            deleteFile(absoluteFilePath, csvFile);
         }
-
         return parsedData;
+    }
+
+    private List<?> extractData(File csvFile, Class<?> dtoClass, UUID id, String absoluteFilePath) throws Exception {
+        return parseDataFromCSVFile(csvFile, dtoClass, id, absoluteFilePath);
     }
 
     private List<?> parseDataFromCSVFile(File csvFile, Class<?> dtoClass, UUID id, String absoluteFilePath) {
@@ -67,16 +70,22 @@ public class DataExportService {
         try (CSVReader reader = new CSVReaderBuilder(new FileReader(csvFile)).build()) {
             List<String[]> rawData = reader.readAll();
             rawData = removeHeader(rawData); // Remove header row
-            for (int i = 0; i < rawData.size(); i++) {
-                try {
-                    Object dto = toDto(rawData.get(i), dtoClass, id);
-                    parsedData.add(dto);
-                } catch (Exception e) {
-                    log.error("Error processing row {}: {}", i + 1, e.getMessage());
-                }
-            }
+            parsedData = convertRawDataToDtoList(rawData, dtoClass, id);
         } catch (IOException | CsvException e) {
             handleParsingError(e, absoluteFilePath);
+        }
+        return parsedData;
+    }
+
+    private List<Object> convertRawDataToDtoList(List<String[]> rawData, Class<?> dtoClass, UUID id) {
+        List<Object> parsedData = new ArrayList<>();
+        for (int i = 0; i < rawData.size(); i++) {
+            try {
+                Object dto = toDto(rawData.get(i), dtoClass, id);
+                parsedData.add(dto);
+            } catch (Exception e) {
+                log.error("Error processing row {}: {}", i + 1, e.getMessage());
+            }
         }
         return parsedData;
     }
@@ -86,10 +95,6 @@ public class DataExportService {
             rawData.remove(0);
         }
         return rawData;
-    }
-
-    private List<?> convertToDtoList(List<String[]> rawData, Class<?> dtoClass, UUID id) {
-        return rawData.stream().map(rowData -> toDto(rowData, dtoClass, id)).toList();
     }
 
     private void handleParsingError(Exception e, String absoluteFilePath) {
@@ -119,44 +124,51 @@ public class DataExportService {
     }
 
     private ClientDto mapToClientDto(String[] rowData) {
-        ClientDto client = new ClientDto();
+        ClientDto clientDto = new ClientDto();
         try {
-            client.setCode(StringUtils.trim(rowData[0]));
-            client.setName(StringUtils.trim(rowData[1]));
-            client.setPan(StringUtils.trim(rowData[2]));
-            client.setTan(StringUtils.trim(rowData[3]));
-            client.setStatus(StringUtils.trim(rowData[4]));
+            trimAndSet(rowData, clientDto, 0, ClientDto::setCode);
+            trimAndSet(rowData, clientDto, 1, ClientDto::setName);
+            trimAndSet(rowData, clientDto, 2, ClientDto::setPan);
+            trimAndSet(rowData, clientDto, 3, ClientDto::setTan);
+            trimAndSet(rowData, clientDto, 4, ClientDto::setStatus);
+
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
-            client.setWorkingFrom(LocalDate.parse(StringUtils.trim(rowData[5]), formatter));
-            client.setAgreementExpiryDate(LocalDate.parse(StringUtils.trim(rowData[6]), formatter));
-            client.setServiceType(StringUtils.trim(rowData[7]));
-            client.setClientDetails(StringUtils.trim(rowData[8]));
-            clientService.create(client);
+
+            trimAndSetDate(rowData, clientDto, 5, formatter, ClientDto::setWorkingFrom);
+            trimAndSetDate(rowData, clientDto, 6, formatter, ClientDto::setAgreementExpiryDate);
+
+            trimAndSet(rowData, clientDto, 7, ClientDto::setServiceType);
+            trimAndSet(rowData, clientDto, 8, ClientDto::setClientDetails);
+
+            clientService.create(clientDto);
         } catch (DataIntegrityViolationException e) {
             log.error("Duplicate key violation for client code {}: {}", rowData[0], e.getMessage());
         }
-        return client;
+        return clientDto;
     }
-
 
     private ProjectDto mapToProjectDto(String[] rowData, UUID id) {
         ProjectDto project = new ProjectDto();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+
         try {
-            project.setCode(StringUtils.trim(rowData[3]));
-            project.setName(StringUtils.trim(rowData[8]));
-            project.setType(StringUtils.trim(rowData[12]));
-            project.setDescription(StringUtils.trim(rowData[5]));
-            project.setPurchaseOrder(StringUtils.trim(rowData[9]));
-            project.setBudgetTerms(StringUtils.trim(rowData[2]));
-            project.setStatus(StringUtils.trim(rowData[11]));
-            project.setCurrency(StringUtils.trim(rowData[4]));
-            project.setBudget(new BigDecimal(StringUtils.trim(rowData[1])));
-            project.setHoursPerDay((int) Double.parseDouble(StringUtils.trim(rowData[7])));
-            project.setBillingTerm(StringUtils.trim(rowData[0]));
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy");
-            project.setStartDate(LocalDate.parse(StringUtils.trim(rowData[10]), formatter));
-            project.setEndDate(LocalDate.parse(StringUtils.trim(rowData[6]), formatter));
+            trimAndSet(rowData, project, 3, ProjectDto::setCode);
+            trimAndSet(rowData, project, 8, ProjectDto::setName);
+            trimAndSet(rowData, project, 12, ProjectDto::setType);
+            trimAndSet(rowData, project, 5, ProjectDto::setDescription);
+            trimAndSet(rowData, project, 9, ProjectDto::setPurchaseOrder);
+            trimAndSet(rowData, project, 2, ProjectDto::setBudgetTerms);
+            trimAndSet(rowData, project, 11, ProjectDto::setStatus);
+            trimAndSet(rowData, project, 4, ProjectDto::setCurrency);
+            trimAndSetBigDecimal(rowData, project, 1, ProjectDto::setBudget);
+            trimAndSetInteger(rowData, project, 7, ProjectDto::setHoursPerDay);
+            trimAndSet(rowData, project, 0, ProjectDto::setBillingTerm);
+
+            trimAndSetDate(rowData, project, 10, formatter, ProjectDto::setStartDate);
+            trimAndSetDate(rowData, project, 6, formatter, ProjectDto::setEndDate);
+
             project.setClientId(id);
+
             projectService.create(project);
         } catch (DataIntegrityViolationException e) {
             log.error("Duplicate key violation for project code {}: {}", rowData[3], e.getMessage());
@@ -168,18 +180,39 @@ public class DataExportService {
         TaskDto task = new TaskDto();
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
-            task.setDescription(StringUtils.trim(rowData[0]));
-            task.setEndDate(LocalDate.parse(StringUtils.trim(rowData[1]), formatter));
-            task.setName(StringUtils.trim(rowData[2]));
-            task.setStartDate(LocalDate.parse(StringUtils.trim(rowData[3]), formatter));
-            task.setStatus(StringUtils.trim(rowData[4]));
-            task.setType(StringUtils.trim(rowData[5]));
+            trimAndSet(rowData, task, 0, TaskDto::setDescription);
+            trimAndSetDate(rowData, task, 1, formatter, TaskDto::setEndDate);
+            trimAndSet(rowData, task, 2, TaskDto::setName);
+            trimAndSetDate(rowData, task, 3, formatter, TaskDto::setStartDate);
+            trimAndSet(rowData, task, 4, TaskDto::setStatus);
+            trimAndSet(rowData, task, 5, TaskDto::setType);
             task.setProjectId(id);
             taskService.create(task.getProjectId(), task);
         } catch (DataIntegrityViolationException e) {
             log.error("Duplicate key violation for task name {}: {}", rowData[2], e.getMessage());
         }
         return task;
+    }
+
+    private <T> void trimAndSet(String[] rowData, T object, int index, BiConsumer<T, String> setter) {
+        String value = StringUtils.trim(rowData[index]);
+        setter.accept(object, value);
+    }
+
+    private <T> void trimAndSetDate(String[] rowData, T object, int index, DateTimeFormatter formatter,
+                                    BiConsumer<T, LocalDate> setter) {
+        LocalDate date = LocalDate.parse(StringUtils.trim(rowData[index]), formatter);
+        setter.accept(object, date);
+    }
+
+    private <T> void trimAndSetBigDecimal(String[] rowData, T object, int index, BiConsumer<T, BigDecimal> setter) {
+        BigDecimal value = new BigDecimal(StringUtils.trim(rowData[index]));
+        setter.accept(object, value);
+    }
+
+    private <T> void trimAndSetInteger(String[] rowData, T object, int index, BiConsumer<T, Integer> setter) {
+        Integer value = (int)Double.parseDouble(StringUtils.trim(rowData[index]));
+        setter.accept(object, value);
     }
 
     private File convertToCSV(MultipartFile file) throws IOException {
