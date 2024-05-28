@@ -23,6 +23,9 @@ public class TaskConverter {
     }
 
     public static Task toEntityModel(TaskDto transport) {
+        if (transport == null) {
+            return null;
+        }
         return toEntityModel(transport, new Task());
     }
 

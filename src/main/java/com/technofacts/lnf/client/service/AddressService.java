@@ -1,8 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.util.Objects;
-import java.util.UUID;
-
 import com.technofacts.lnf.client.converter.AddressConverter;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.ClientAddress;
@@ -17,6 +14,11 @@ import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -27,16 +29,15 @@ public class AddressService {
     private final ClientRepository clientRepository;
 
     /**
-     * Returns AddressDto for the client address by clientId
+     * Returns List of AddressDtos for the client address by clientId
      *
      * @param clientId Client Id
-     * @return AddressDto of the client address
+     * @return List of AddressDtos of the client address
      */
-    public AddressDto findByClientId(UUID clientId) {
+    public List<AddressDto> findByClientId(UUID clientId) {
         searchForClient(clientId);
-        ClientAddress entity = repository.findByClientId(clientId)
-                .orElseThrow(() -> new LnFEntityNotFoundException(String.format("Address for client [%s] does not exist", clientId)));
-        return AddressConverter.toTransportModel(entity);
+        List<ClientAddress> entities = repository.findAddressByClientId(clientId);
+        return entities.stream().map(AddressConverter::toTransportModel).filter(Objects::nonNull).toList();
     }
 
     /**
@@ -49,6 +50,25 @@ public class AddressService {
     public AddressDto findById(UUID clientId, UUID addressId) {
         searchForClient(clientId);
         return AddressConverter.toTransportModel(searchForAddress(addressId));
+    }
+
+    /**
+     * Creates the list of addresses for the client
+     *
+     * @param clientId Client Id
+     * @param resource AddressDto
+     */
+    public void create(UUID clientId, List<AddressDto> resource) {
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create Addresses for client[%s] with null payload", clientId));
+        Client client = searchForClient(clientId);
+        List<ClientAddress> entities = new ArrayList<>();
+        resource.stream().filter(Objects::nonNull).forEach(addressDto -> {
+            ClientAddress entity = AddressConverter.toEntityModel(addressDto, new ClientAddress());
+            entity.setClient(client);
+            entities.add(entity);
+        });
+        save(entities);
+        log.info(() -> String.format("Address for Client[%s] successfully created", clientId));
     }
 
     /**
@@ -83,19 +103,18 @@ public class AddressService {
     }
 
     /**
-     * Deletes the client address by clientId
+     * Deletes the List of client addresses by clientId
      *
      * @param clientId Client Id
      */
     public void deleteByClientId(UUID clientId) {
         searchForClient(clientId);
-        ClientAddress entity = repository.findByClientId(clientId)
-                .orElseThrow(() -> new LnFEntityNotFoundException(String.format("Address for client [%s] does not exist", clientId)));
+        List<ClientAddress> entities = repository.findAddressByClientId(clientId);
         try {
-            repository.delete(entity);
-            log.info(() -> String.format("Address for Client[%s] successfully deleted", clientId));
+            repository.deleteAll(entities);
+            log.info(() -> String.format("Addresses for Client[%s] successfully deleted", clientId));
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete Address for client [%s]", clientId);
+            String errorMessage = String.format("Failed to delete Addresses for client [%s]", clientId);
             throw new LnFException(errorMessage);
         }
 
@@ -124,6 +143,15 @@ public class AddressService {
             repository.save(entity);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to save Address for client [%s]", entity.getClient().getId());
+            throw new LnFException(errorMessage);
+        }
+    }
+
+    private void save(List<ClientAddress> entities) {
+        try {
+            repository.saveAll(entities);
+        } catch (RuntimeException e) {
+            String errorMessage = String.format("Failed to save Address for client [%s]", entities.get(0).getId());
             throw new LnFException(errorMessage);
         }
     }

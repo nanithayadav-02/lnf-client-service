@@ -22,6 +22,10 @@ public class ClientNotesConverter {
     }
 
     public static ClientNotes toEntityModel(ClientNotesDto transport) {
+        if (transport == null) {
+            return null;
+        }
+
         return toEntityModel(transport, new ClientNotes());
     }
 

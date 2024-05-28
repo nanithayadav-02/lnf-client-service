@@ -18,6 +18,9 @@ public class GstConverter {
     }
 
     public static Gst toEntityModel(GstDto transport) {
+        if (transport == null) {
+            return null;
+        }
         return toEntityModel(transport, new Gst());
     }
 
