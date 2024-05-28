@@ -149,23 +149,21 @@ public class DataExportService {
 
     private ProjectDto mapToProjectDto(String[] rowData, UUID id) {
         ProjectDto project = new ProjectDto();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
         try {
-            trimAndSet(rowData, project, 3, ProjectDto::setCode);
-            trimAndSet(rowData, project, 8, ProjectDto::setName);
-            trimAndSet(rowData, project, 12, ProjectDto::setType);
-            trimAndSet(rowData, project, 5, ProjectDto::setDescription);
-            trimAndSet(rowData, project, 9, ProjectDto::setPurchaseOrder);
-            trimAndSet(rowData, project, 2, ProjectDto::setBudgetTerms);
-            trimAndSet(rowData, project, 11, ProjectDto::setStatus);
-            trimAndSet(rowData, project, 4, ProjectDto::setCurrency);
-            trimAndSetBigDecimal(rowData, project, 1, ProjectDto::setBudget);
-            trimAndSetInteger(rowData, project, 7, ProjectDto::setHoursPerDay);
             trimAndSet(rowData, project, 0, ProjectDto::setBillingTerm);
-
-            trimAndSetDate(rowData, project, 10, formatter, ProjectDto::setStartDate);
+            trimAndSetBigDecimal(rowData, project, 1, ProjectDto::setBudget);
+            trimAndSet(rowData, project, 2, ProjectDto::setBudgetTerms);
+            trimAndSet(rowData, project, 3, ProjectDto::setCode);
+            trimAndSet(rowData, project, 4, ProjectDto::setCurrency);
+            trimAndSet(rowData, project, 5, ProjectDto::setDescription);
             trimAndSetDate(rowData, project, 6, formatter, ProjectDto::setEndDate);
+            trimAndSetInteger(rowData, project, 7, ProjectDto::setHoursPerDay);
+            trimAndSet(rowData, project, 8, ProjectDto::setName);
+            trimAndSet(rowData, project, 9, ProjectDto::setPurchaseOrder);
+            trimAndSetDate(rowData, project, 10, formatter, ProjectDto::setStartDate);
+            trimAndSet(rowData, project, 11, ProjectDto::setStatus);
+            trimAndSet(rowData, project, 12, ProjectDto::setType);
 
             project.setClientId(id);
 
