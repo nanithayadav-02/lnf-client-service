@@ -1,12 +1,13 @@
 package com.technofacts.lnf.client.controller;
 
-import java.util.UUID;
-
 import com.technofacts.lnf.client.service.AddressService;
 import com.technofacts.lnf.dto.client.AddressDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,14 +17,14 @@ public class AddressController {
     private final AddressService service;
 
     /**
-     * Returns AddressDto for the client address by clientId
+     * Returns List of AddressDtos for the client address by clientId
      *
      * @param clientId Client Id
-     * @return AddressDto of the client address
+     * @return List of AddressDtos of the client address
      */
     @GetMapping(value = "/clients/{clientId}/address")
     @ResponseStatus(HttpStatus.OK)
-    public AddressDto findByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<AddressDto> findByClientId(@PathVariable("clientId") final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
@@ -87,4 +88,5 @@ public class AddressController {
     public void delete(@PathVariable("clientId") final UUID clientId, @PathVariable("addressId") final UUID addressId) {
         service.deleteById(clientId, addressId);
     }
+
 }

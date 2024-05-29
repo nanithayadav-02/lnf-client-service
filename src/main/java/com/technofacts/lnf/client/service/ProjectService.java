@@ -174,7 +174,6 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param clientId The UUID of the client.
      * @return A list of EmployeeDto objects associated with the client.
      */
-    @Cacheable(value = "clients")
     public List<ClientEmployeeDto> findEmployeesByClientId(UUID clientId) {
         searchForClient(clientId);
         List<Project> projects = repository.findByClientId(clientId);

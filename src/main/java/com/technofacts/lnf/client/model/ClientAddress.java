@@ -14,7 +14,7 @@ import lombok.*;
 public class ClientAddress extends Address {
 
     @ToString.Exclude
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name="client_id", referencedColumnName="id", nullable = false)
     private Client client;
 }
