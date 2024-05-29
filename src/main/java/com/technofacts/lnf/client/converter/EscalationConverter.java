@@ -21,6 +21,9 @@ public class EscalationConverter {
     }
 
     public static Escalation toEntityModel(EscalationDto transport) {
+        if (transport == null) {
+            return null;
+        }
         return toEntityModel(transport, new Escalation());
     }
 

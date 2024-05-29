@@ -21,6 +21,10 @@ public class ContactConverter {
     }
 
     public static ClientContact toEntityModel(ContactDto transport) {
+        if (transport == null) {
+            return null;
+        }
+
         return toEntityModel(transport, new ClientContact());
     }
 
