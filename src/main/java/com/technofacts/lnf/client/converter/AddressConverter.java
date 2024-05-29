@@ -3,7 +3,6 @@ package com.technofacts.lnf.client.converter;
 import com.technofacts.lnf.client.model.ClientAddress;
 import com.technofacts.lnf.dto.client.AddressDto;
 
-
 public class AddressConverter {
 
     public static AddressDto toTransportModel(ClientAddress entity) {
@@ -23,6 +22,10 @@ public class AddressConverter {
     }
 
     public static ClientAddress toEntityModel(AddressDto transport) {
+        if (transport == null) {
+            return null;
+        }
+
         return toEntityModel(transport, new ClientAddress());
     }
 

@@ -1,6 +1,7 @@
 package com.technofacts.lnf.client.repository;
 
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,5 +14,8 @@ public interface ClientAddressRepository extends JpaRepository<ClientAddress, UU
 
     @Query("SELECT ad FROM ClientAddress ad WHERE ad.client.id = :client_id")
     Optional<ClientAddress> findByClientId(@Param("client_id") UUID client_id);
+
+    @Query("SELECT ad FROM ClientAddress ad WHERE ad.client.id = :client_id")
+    List<ClientAddress> findAddressByClientId(@Param("client_id") UUID client_id);
 
 }

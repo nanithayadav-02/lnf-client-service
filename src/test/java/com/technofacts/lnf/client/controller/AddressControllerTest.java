@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.aspectj.bridge.MessageUtil.fail;
@@ -47,7 +48,7 @@ class AddressControllerTest extends BaseTestClass {
     @Test
     void testFindByClientId() throws Exception {
 
-        AddressDto expectedDto = mockAddress1();
+        List<AddressDto> expectedDto = List.of(mockAddress1());
 
         given(service.findByClientId(any(UUID.class))).willReturn(expectedDto);
 
@@ -134,7 +135,7 @@ class AddressControllerTest extends BaseTestClass {
     }
 
     @Test
-    void testDeleteByClientIdAnd() throws Exception {
+    void testDeleteByClientIdAndId() throws Exception {
         UUID id = UUID.randomUUID();
         String urlTemplate = String.format("/lnf/clients/%s/address/%s", clientId, id);
 
