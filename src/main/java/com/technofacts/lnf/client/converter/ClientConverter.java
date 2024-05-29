@@ -26,13 +26,14 @@ public class ClientConverter {
         dto.setAgreementExpiryDate(entity.getAgreementExpiryDate());
         dto.setServiceType(entity.getServiceType());
         dto.setClientDetails(entity.getClientDetails());
-        dto.getContacts().addAll(entity.getClientContacts ().stream ().map (ContactConverter::toTransportModel).filter (Objects::nonNull).toList ());
-        dto.getEscalations().addAll (entity.getEscalations ().stream ().map (EscalationConverter::toTransportModel).filter (Objects::nonNull).toList ());
-        dto.setAddress(entity.getClientAddress() != null ? AddressConverter.toTransportModel(entity.getClientAddress()) : null);
-        dto.getGst().addAll(entity.getGst ().stream ().map (GstConverter::toTransportModel).filter (Objects::nonNull).toList ());
+        dto.getContacts().addAll(entity.getClientContacts().stream().map(ContactConverter::toTransportModel).filter(Objects::nonNull).toList());
+        dto.getEscalations().addAll(entity.getEscalations().stream().map(EscalationConverter::toTransportModel).filter(Objects::nonNull).toList());
+        dto.getGst().addAll(entity.getGst().stream().map(GstConverter::toTransportModel).filter(Objects::nonNull).toList());
         dto.setNotes(new ArrayList<>());
+        dto.setAddresses(new ArrayList<>());
         dto.getNotes().addAll(entity.getNotes().stream()
                 .map(ClientNotesConverter::toTransportModel).filter(Objects::nonNull).toList());
+        dto.getAddresses().addAll(entity.getClientAddresses().stream().map(AddressConverter::toTransportModel).filter(Objects::nonNull).toList());
 
         return dto;
     }
@@ -56,12 +57,17 @@ public class ClientConverter {
     }
 
     public static Client toEntityModel(ClientDto transport) {
+
+        if (transport == null) {
+            return null;
+        }
+
         Client entity = toEntityModel(transport, new Client());
         addContactsToEntityModel(transport, entity);
         addEscalationToEntityModel(transport, entity);
-        addAddressToEntityModel(transport, entity);
         addGstToEntityModel(transport, entity);
         addClientNotesToEntityModel(transport, entity);
+        addAddressesToEntityModel(transport, entity);
 
         return entity;
     }
@@ -86,6 +92,16 @@ public class ClientConverter {
         return entity;
     }
 
+    private static void addAddressesToEntityModel(ClientDto transport, Client client) {
+        List<ClientAddress> clientAddressList = new ArrayList<>();
+        transport.getAddresses().stream().filter(Objects::nonNull).forEach(dto -> {
+            ClientAddress entity = AddressConverter.toEntityModel(dto);
+            entity.setClient(client);
+            clientAddressList.add(entity);
+        });
+        client.getClientAddresses().addAll(clientAddressList);
+    }
+
     private static void addContactsToEntityModel(ClientDto transport, Client client) {
         List<ClientContact> contactList = new ArrayList<>();
         transport.getContacts().stream().filter(Objects::nonNull).forEach(dto -> {
@@ -98,20 +114,12 @@ public class ClientConverter {
 
     private static void addEscalationToEntityModel(ClientDto transport, Client client) {
         List<Escalation> escalationList = new ArrayList<>();
-        transport.getEscalations ().stream().filter(Objects::nonNull).forEach(dto -> {
+        transport.getEscalations().stream().filter(Objects::nonNull).forEach(dto -> {
             Escalation escalation = EscalationConverter.toEntityModel(dto);
             escalation.setClient(client);
             escalationList.add(escalation);
         });
         client.getEscalations().addAll(escalationList);
-    }
-
-    private static void addAddressToEntityModel(ClientDto transport, Client client) {
-        if (transport.getAddress() != null) {
-            ClientAddress address = AddressConverter.toEntityModel(transport.getAddress());
-            address.setClient(client);
-            client.setClientAddress(address);
-        }
     }
 
     private static void addGstToEntityModel(ClientDto transport, Client client) {

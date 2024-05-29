@@ -9,9 +9,11 @@ import com.technofacts.lnf.dto.client.TaskDto;
 import com.technofacts.lnf.exception.LnFException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 @Service
 @Slf4j
@@ -40,33 +43,51 @@ public class DataExportService {
 
     public ResponseEntity<String> uploadFile(MultipartFile file, Class<?> dtoClass, UUID id) throws IOException {
         Optional<UUID> idOpt = Optional.ofNullable(id);
-        List<?> data = handleFile(file, dtoClass, idOpt);
+        List<?> data = processFile(file, dtoClass, idOpt);
         return ResponseEntity.ok("Data uploaded successfully!");
     }
 
-    private List<?> handleFile(MultipartFile file, Class<?> dtoClass, Optional<UUID> idOpt) throws IOException {
+    private List<?> processFile(MultipartFile file, Class<?> dtoClass, Optional<UUID> optionalId) throws IOException {
         File csvFile = convertToCSV(file);
         String absoluteFilePath = csvFile.getAbsolutePath();
-
-        List<?> parsedData = parseDataFromCSVFile(csvFile, dtoClass, idOpt.orElse(null), absoluteFilePath);
-
-        deleteFile(absoluteFilePath, csvFile);
-
+        List<?> parsedData;
+        try {
+            parsedData = extractData(csvFile, dtoClass, optionalId.orElse(null), absoluteFilePath);
+        } catch (Exception e) {
+            throw new IOException(String.format("Error processing file %s: %s", absoluteFilePath, e.getMessage()), e);
+        } finally {
+            deleteFile(absoluteFilePath, csvFile);
+        }
         return parsedData;
     }
 
+    private List<?> extractData(File csvFile, Class<?> dtoClass, UUID id, String absoluteFilePath) throws Exception {
+        return parseDataFromCSVFile(csvFile, dtoClass, id, absoluteFilePath);
+    }
+
     private List<?> parseDataFromCSVFile(File csvFile, Class<?> dtoClass, UUID id, String absoluteFilePath) {
-        try {
-            // Read and convert data.
-            List<String[]> rawData = readCSV(csvFile);
+        List<Object> parsedData = new ArrayList<>();
+        try (CSVReader reader = new CSVReaderBuilder(new FileReader(csvFile)).build()) {
+            List<String[]> rawData = reader.readAll();
             rawData = removeHeader(rawData); // Remove header row
-            return convertToDtoList(rawData, dtoClass, id);
+            parsedData = convertRawDataToDtoList(rawData, dtoClass, id);
         } catch (IOException | CsvException e) {
             handleParsingError(e, absoluteFilePath);
-            return Collections.emptyList(); // Return empty list to handle gracefully.
-        } finally {
-            deleteFile(absoluteFilePath, csvFile); // Ensure cleanup happens.
         }
+        return parsedData;
+    }
+
+    private List<Object> convertRawDataToDtoList(List<String[]> rawData, Class<?> dtoClass, UUID id) {
+        List<Object> parsedData = new ArrayList<>();
+        for (int i = 0; i < rawData.size(); i++) {
+            try {
+                Object dto = toDto(rawData.get(i), dtoClass, id);
+                parsedData.add(dto);
+            } catch (Exception e) {
+                log.error("Error processing row {}: {}", i + 1, e.getMessage());
+            }
+        }
+        return parsedData;
     }
 
     private List<String[]> removeHeader(List<String[]> rawData) {
@@ -74,10 +95,6 @@ public class DataExportService {
             rawData.remove(0);
         }
         return rawData;
-    }
-
-    private List<?> convertToDtoList(List<String[]> rawData, Class<?> dtoClass, UUID id) {
-        return rawData.stream().map(rowData -> toDto(rowData, dtoClass, id)).toList();
     }
 
     private void handleParsingError(Exception e, String absoluteFilePath) {
@@ -107,54 +124,93 @@ public class DataExportService {
     }
 
     private ClientDto mapToClientDto(String[] rowData) {
-        ClientDto client = new ClientDto();
-        client.setCode(rowData[0]);
-        client.setName(rowData[1]);
-        client.setPan(rowData[2]);
-        client.setTan(rowData[3]);
-        client.setStatus(rowData[4]);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
-        client.setWorkingFrom(LocalDate.parse(rowData[5], formatter));
-        client.setAgreementExpiryDate(LocalDate.parse(rowData[6], formatter));
-        client.setServiceType(rowData[7]);
-        client.setClientDetails(rowData[8]);
-        clientService.create(client);
-        return client;
+        ClientDto clientDto = new ClientDto();
+        try {
+            trimAndSet(rowData, clientDto, 0, ClientDto::setCode);
+            trimAndSet(rowData, clientDto, 1, ClientDto::setName);
+            trimAndSet(rowData, clientDto, 2, ClientDto::setPan);
+            trimAndSet(rowData, clientDto, 3, ClientDto::setTan);
+            trimAndSet(rowData, clientDto, 4, ClientDto::setStatus);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
+
+            trimAndSetDate(rowData, clientDto, 5, formatter, ClientDto::setWorkingFrom);
+            trimAndSetDate(rowData, clientDto, 6, formatter, ClientDto::setAgreementExpiryDate);
+
+            trimAndSet(rowData, clientDto, 7, ClientDto::setServiceType);
+            trimAndSet(rowData, clientDto, 8, ClientDto::setClientDetails);
+
+            clientService.create(clientDto);
+        } catch (DataIntegrityViolationException e) {
+            log.error("Duplicate key violation for client code {}: {}", rowData[0], e.getMessage());
+        }
+        return clientDto;
     }
 
     private ProjectDto mapToProjectDto(String[] rowData, UUID id) {
         ProjectDto project = new ProjectDto();
-        project.setCode(rowData[3]);
-        project.setName(rowData[8]);
-        project.setType(rowData[12]);
-        project.setDescription(rowData[5]);
-        project.setPurchaseOrder(rowData[9]);
-        project.setBudgetTerms(rowData[2]);
-        project.setStatus(rowData[11]);
-        project.setCurrency(rowData[4]);
-        project.setBudget(new BigDecimal(rowData[1]));
-        project.setHoursPerDay((int) Double.parseDouble(rowData[7]));
-        project.setBillingTerm(rowData[0]);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy");
-        project.setStartDate(LocalDate.parse(rowData[10], formatter));
-        project.setEndDate(LocalDate.parse(rowData[6], formatter));
-        project.setClientId(id);
-        projectService.create(project);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
+        try {
+            trimAndSet(rowData, project, 0, ProjectDto::setBillingTerm);
+            trimAndSetBigDecimal(rowData, project, 1, ProjectDto::setBudget);
+            trimAndSet(rowData, project, 2, ProjectDto::setBudgetTerms);
+            trimAndSet(rowData, project, 3, ProjectDto::setCode);
+            trimAndSet(rowData, project, 4, ProjectDto::setCurrency);
+            trimAndSet(rowData, project, 5, ProjectDto::setDescription);
+            trimAndSetDate(rowData, project, 6, formatter, ProjectDto::setEndDate);
+            trimAndSetInteger(rowData, project, 7, ProjectDto::setHoursPerDay);
+            trimAndSet(rowData, project, 8, ProjectDto::setName);
+            trimAndSet(rowData, project, 9, ProjectDto::setPurchaseOrder);
+            trimAndSetDate(rowData, project, 10, formatter, ProjectDto::setStartDate);
+            trimAndSet(rowData, project, 11, ProjectDto::setStatus);
+            trimAndSet(rowData, project, 12, ProjectDto::setType);
+
+            project.setClientId(id);
+
+            projectService.create(project);
+        } catch (DataIntegrityViolationException e) {
+            log.error("Duplicate key violation for project code {}: {}", rowData[3], e.getMessage());
+        }
         return project;
     }
 
     private TaskDto mapToTaskDto(String[] rowData, UUID id) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
         TaskDto task = new TaskDto();
-        task.setDescription(rowData[0]);
-        task.setEndDate(LocalDate.parse(rowData[1], formatter));
-        task.setName(rowData[2]);
-        task.setStartDate(LocalDate.parse(rowData[3], formatter));
-        task.setStatus(rowData[4]);
-        task.setType(rowData[5]);
-        task.setProjectId(id);
-        taskService.create(task.getProjectId(), task);
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
+            trimAndSet(rowData, task, 0, TaskDto::setDescription);
+            trimAndSetDate(rowData, task, 1, formatter, TaskDto::setEndDate);
+            trimAndSet(rowData, task, 2, TaskDto::setName);
+            trimAndSetDate(rowData, task, 3, formatter, TaskDto::setStartDate);
+            trimAndSet(rowData, task, 4, TaskDto::setStatus);
+            trimAndSet(rowData, task, 5, TaskDto::setType);
+            task.setProjectId(id);
+            taskService.create(task.getProjectId(), task);
+        } catch (DataIntegrityViolationException e) {
+            log.error("Duplicate key violation for task name {}: {}", rowData[2], e.getMessage());
+        }
         return task;
+    }
+
+    private <T> void trimAndSet(String[] rowData, T object, int index, BiConsumer<T, String> setter) {
+        String value = StringUtils.trim(rowData[index]);
+        setter.accept(object, value);
+    }
+
+    private <T> void trimAndSetDate(String[] rowData, T object, int index, DateTimeFormatter formatter,
+                                    BiConsumer<T, LocalDate> setter) {
+        LocalDate date = LocalDate.parse(StringUtils.trim(rowData[index]), formatter);
+        setter.accept(object, date);
+    }
+
+    private <T> void trimAndSetBigDecimal(String[] rowData, T object, int index, BiConsumer<T, BigDecimal> setter) {
+        BigDecimal value = new BigDecimal(StringUtils.trim(rowData[index]));
+        setter.accept(object, value);
+    }
+
+    private <T> void trimAndSetInteger(String[] rowData, T object, int index, BiConsumer<T, Integer> setter) {
+        Integer value = (int)Double.parseDouble(StringUtils.trim(rowData[index]));
+        setter.accept(object, value);
     }
 
     private File convertToCSV(MultipartFile file) throws IOException {
