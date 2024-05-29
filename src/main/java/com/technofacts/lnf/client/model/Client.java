@@ -46,8 +46,8 @@ public class Client extends AuditableEntity {
     private String clientDetails;
 
     @ToString.Exclude
-    @OneToOne(mappedBy = "client", cascade = CascadeType.ALL)
-    private ClientAddress clientAddress;
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private Set<ClientAddress> clientAddresses = new HashSet<>();
 
     @ToString.Exclude
     @Builder.Default

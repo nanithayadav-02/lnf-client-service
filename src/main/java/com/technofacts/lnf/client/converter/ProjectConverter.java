@@ -64,6 +64,9 @@ public class ProjectConverter {
     }
 
     public static ClientEmployeeDto mapToClientEmployee(EmployeeDto employeeDto) {
+        if (employeeDto == null) {
+            return null;
+        }
         return ClientEmployeeDto.builder()
                 .id(employeeDto.getId())
                 .employeeId(employeeDto.getEmployeeId())
@@ -78,6 +81,9 @@ public class ProjectConverter {
     }
 
     public static Project toEntityModel(ProjectDto transport) {
+        if (transport == null) {
+            return null;
+        }
         return toEntityModel(transport, new Project());
     }
 
