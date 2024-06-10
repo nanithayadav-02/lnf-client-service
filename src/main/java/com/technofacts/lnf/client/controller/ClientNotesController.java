@@ -36,7 +36,7 @@ public class ClientNotesController {
     }
 
     @GetMapping(value = "/clients/{clientId}/notes")
-    public List<ClientNotesDto> findById(@PathVariable("clientId") final UUID clientId) {
+    public List<ClientNotesDto> findByClientId(@PathVariable("clientId") final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
