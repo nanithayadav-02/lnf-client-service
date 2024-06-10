@@ -30,7 +30,7 @@ public class ImageController {
     @GetMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.OK)
     public DocumentDto findByClientId(@PathVariable("clientId") final UUID clientId) throws IOException {
-        return service.findByClientId(clientId, DocumentType.image);
+        return service.findByClientId(clientId, DocumentType.image.getLabel());
     }
 
     /**
