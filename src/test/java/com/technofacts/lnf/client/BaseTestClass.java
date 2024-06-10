@@ -1,7 +1,9 @@
 package com.technofacts.lnf.client;
 
 import com.technofacts.lnf.client.service.*;
+import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import org.junit.jupiter.api.TestInstance;
+import org.mockito.InjectMocks;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -54,5 +56,8 @@ public abstract class BaseTestClass {
 
     @MockBean
     public TaskService taskService;
+
+    @InjectMocks
+    private PaginationAndSortingHandler paginationAndSortingHandler;
 
 }
