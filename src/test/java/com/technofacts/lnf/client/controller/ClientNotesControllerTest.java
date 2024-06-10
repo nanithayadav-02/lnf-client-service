@@ -5,13 +5,17 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.technofacts.lnf.client.BaseTestClass;
 import com.technofacts.lnf.client.service.ClientNotesService;
 import com.technofacts.lnf.dto.client.ClientNotesDto;
+import com.technofacts.lnf.dto.common.PageRequestDto;
+import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 
@@ -38,6 +42,8 @@ class ClientNotesControllerTest extends BaseTestClass {
     private MockMvc mockMvc;
     @Autowired
     private ClientNotesService service;
+    @Autowired
+    private PaginationAndSortingHandler paginationAndSortingHandler;
     private UUID clientId;
 
     @BeforeAll
@@ -48,6 +54,40 @@ class ClientNotesControllerTest extends BaseTestClass {
     @BeforeEach
     void setUp() {
         // Common setup code if necessary
+    }
+
+    @Test
+    void findAll() {
+        String searchQuery = "description:the product is launching";
+        Page<ClientNotesDto> mockedPage = mock(Page.class);
+        PageRequestDto pageRequest = new PageRequestDto(0, 10, "description", "asc");
+
+        List<ClientNotesDto> mockedList = List.of(mockNotes1(), mockNotes2());
+        when(service.findPaginatedAndSorted(0, 10, "description", "asc")).thenReturn(mockedPage);
+        when(service.findPaginated(0, 10)).thenReturn(mockedPage);
+        when(service.findAllSorted("description", "asc")).thenReturn(mockedList);
+        when(service.findAll()).thenReturn(mockedList);
+        when(service.findingAllWithPagination(searchQuery, pageRequest)).thenReturn(mockedPage);
+
+        ClientNotesController controller = new ClientNotesController(service, paginationAndSortingHandler);
+        // Test for paginated and sorted request
+        ResponseEntity<?> response = controller.findAll(searchQuery, pageRequest);
+        assertEquals(ResponseEntity.ok(mockedPage), response);
+
+        // Pagination with  sortBy and sortOrder
+        pageRequest = new PageRequestDto(0, 10, null, null);
+        response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
+        assertEquals(ResponseEntity.ok(mockedPage), response);
+
+        // Pagination with sortBy and sortOrder
+        pageRequest = new PageRequestDto(null, null, "description", "asc");
+        response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
+        assertEquals(ResponseEntity.ok(mockedList), response);
+
+        //find All
+        pageRequest = new PageRequestDto();
+        response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
+        assertEquals(ResponseEntity.ok(mockedList), response);
     }
 
     @Test
@@ -123,8 +163,8 @@ class ClientNotesControllerTest extends BaseTestClass {
     @Test
     void update() {
         // Arrange
-        UUID notesId = UUID.fromString ("cfe94b9f-c86f-4733-be96-a9b619f7bca7");
-        ClientNotesDto updatedNotes = mockNotes1 ();
+        UUID notesId = UUID.fromString("cfe94b9f-c86f-4733-be96-a9b619f7bca7");
+        ClientNotesDto updatedNotes = mockNotes1();
         updatedNotes.setId(notesId);
 
         Mockito.doNothing().when(service).update(Mockito.eq(clientId), Mockito.eq(notesId), Mockito.any(ClientNotesDto.class));
@@ -146,7 +186,7 @@ class ClientNotesControllerTest extends BaseTestClass {
         ClientNotesDto actualNotes = captor.getValue();
 
         assertEquals(updatedNotes.getId(), actualNotes.getId(), "Notes IDs should match");
-        assertEquals(updatedNotes.getDescription (), actualNotes.getDescription (), "description  should match");
+        assertEquals(updatedNotes.getDescription(), actualNotes.getDescription(), "description  should match");
     }
 
     @Test

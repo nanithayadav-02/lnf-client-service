@@ -1,13 +1,17 @@
 package com.technofacts.lnf.client.controller;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.technofacts.lnf.client.service.ClientNotesService;
 import com.technofacts.lnf.dto.client.ClientNotesDto;
+import com.technofacts.lnf.dto.common.PageRequestDto;
+import com.technofacts.lnf.service.common.page.PageableAsQueryParam;
+import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,9 +19,24 @@ import org.springframework.web.bind.annotation.*;
 public class ClientNotesController {
 
     private final ClientNotesService service;
+    private final PaginationAndSortingHandler paginationAndSortingHandler;
+
+    @GetMapping(value = "/clients/notes")
+    public ResponseEntity<?> findAll(@RequestParam(value = "search", required = false) String search,
+                                     @PageableAsQueryParam PageRequestDto pageRequest) {
+        if (search != null && !search.isEmpty()) {
+            if (pageRequest != null && pageRequest.getPage() != null) {
+                return ResponseEntity.ok(service.findingAllWithPagination(search, pageRequest));
+            } else {
+                return ResponseEntity.ok(service.findAll(search));
+            }
+        } else {
+            return paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
+        }
+    }
 
     @GetMapping(value = "/clients/{clientId}/notes")
-    public List<ClientNotesDto> findByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<ClientNotesDto> findById(@PathVariable("clientId") final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
@@ -25,13 +44,6 @@ public class ClientNotesController {
     public ClientNotesDto findById(@PathVariable("clientId") final UUID clientId, @PathVariable("notesId") final UUID notesId) {
         return service.findById(clientId, notesId);
     }
-
-    @GetMapping(value = "/clients/notes")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ClientNotesDto> findAll() {
-        return service.findAll();
-    }
-
 
     @PostMapping(value = "/clients/{clientId}/notes")
     @ResponseStatus(HttpStatus.CREATED)
