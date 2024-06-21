@@ -6,9 +6,11 @@ import com.technofacts.lnf.client.model.StatementOfWork;
 import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.client.repository.StatementOfWorkRepository;
 import com.technofacts.lnf.dto.client.StatementOfWorkDto;
+import com.technofacts.lnf.dto.file.FileDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
+import com.technofacts.lnf.service.file.FileFolderService;
 import com.technofacts.lnf.service.file.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -35,26 +37,34 @@ public class StatementOfWorkService {
     private final StatementOfWorkRepository repository;
     private final ProjectRepository projectRepository;
     private final FileService fileService;
+    private final FileFolderService fileFolderService;
 
     @Value("${aws.s3.bucket.folderName}")
     private String folderName;
 
     public List<StatementOfWorkDto> findByProjectIdAndClientId( UUID clientId, UUID projectId) {
         String filePath =  String.format(S_S_S_S_S, folderName, clientId, PROJECT, projectId, SOW);
-        List<String> files = fileService.findFilesInFolder(filePath);
+        List<FileDto> files = fileFolderService.findFiles(filePath);
         List<StatementOfWorkDto> statementOfWorkDtos = new ArrayList<>();
         files.forEach(file -> {
-            String fileName = StringUtils.substringAfterLast(file, "/");
+            String fileName = StringUtils.substringAfterLast(file.getFileName(), "/");
             String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path(String.format("/lnf/clients/%s/project/%s/%s/%s", clientId, projectId, SOW, fileName))
                     .toUriString();
-            StatementOfWork entity = searchForFileName(fileName);
-            StatementOfWorkDto statementOfWorkDto = StatementOfWorkConverter.toTransportModel(entity);
-            statementOfWorkDto.setFileName(fileName);
-            statementOfWorkDto.setUrl(downloadURL);
-            statementOfWorkDtos.add(statementOfWorkDto);
+            setStatementOfWork(statementOfWorkDtos, file, fileName, downloadURL);
         });
         return statementOfWorkDtos;
+    }
+
+    private void setStatementOfWork(List<StatementOfWorkDto> statementOfWorkDtos, FileDto file, String fileName,
+                                    String downloadURL) {
+        StatementOfWork entity = searchForFileName(fileName);
+        StatementOfWorkDto statementOfWorkDto = StatementOfWorkConverter.toTransportModel(entity);
+        statementOfWorkDto.setFileName(fileName);
+        statementOfWorkDto.setUrl(downloadURL);
+        statementOfWorkDto.setSize(file.getFileSize());
+        statementOfWorkDto.setLastModified(file.getLastModified());
+        statementOfWorkDtos.add(statementOfWorkDto);
     }
 
     public ResponseEntity<byte[]> findById(UUID clientId, UUID projectId, String fileName) {
