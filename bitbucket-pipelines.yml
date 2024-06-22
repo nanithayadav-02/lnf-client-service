@@ -33,41 +33,263 @@ pipelines:
         script:
           # Run a security scan for sensitive data.
           - pipe: atlassian/git-secrets-scan:0.5.1
-    - step:
-        name: Build and push Docker image
-        services:
-          - docker
-        script:
-          # Start ssh-agent
-          - eval "$(ssh-agent -s)"
+  branches:
+    "feature/*":
+      - step:
+          name: Build and Test
+          caches:
+            - maven-cache
+          script:
+            # Start ssh-agent
+            - eval "$(ssh-agent -s)"
 
-          # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
-          # and adding it to the agent
-          - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+            # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
+            # and adding it to the agent
+            - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
 
-          # Clone the scripts repository
-          - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+            # Clone the scripts repository
+            - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
 
-          # Build and push the image to the docker
-          - export IMAGE_NAME=levernfulcrum/lnf-client-service
-          - chmod +x lnf-deployment-pipeline/scripts/build-n-push/docker_image.sh
-          - lnf-deployment-pipeline/scripts/build-n-push/docker_image.sh "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD" "$IMAGE_NAME"
-    - step:
-        name: Build and push Docker image to AWS ECR
-        services:
-          - docker
-        script:
-          # Start ssh-agent
-          - eval "$(ssh-agent -s)"
+            # Authenticate with AWS CodeArtifact and run Maven build
+            - bash lnf-deployment-pipeline/scripts/build-n-push/authenticate.sh $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY
 
-          # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
-          # and adding it to the agent
-          - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+          artifacts:
+            - target/**
+      - step:
+          name: Security Scan
+          image: atlassian/default-image:latest
+          script:
+            # Run a security scan for sensitive data.
+            - pipe: atlassian/git-secrets-scan:0.5.1
+    develop:
+      - step:
+          name: Build and Test
+          caches:
+            - maven-cache
+          script:
+            # Start ssh-agent
+            - eval "$(ssh-agent -s)"
 
-          # Clone the scripts repository
-          - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+            # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
+            # and adding it to the agent
+            - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
 
-          # Build and push the image to the AWS ECR
-          - export IMAGE_NAME=levernfulcrum/lnf-client-service
-          - chmod +x lnf-deployment-pipeline/scripts/build-n-push/ecr_image.sh
-          - lnf-deployment-pipeline/scripts/build-n-push/ecr_image.sh "$AWS_DEFAULT_REGION" "$IMAGE_NAME"
+            # Clone the scripts repository
+            - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+
+            # Authenticate with AWS CodeArtifact and run Maven build
+            - bash lnf-deployment-pipeline/scripts/build-n-push/authenticate.sh $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY
+
+          artifacts:
+            - target/**
+      - step:
+          name: Security Scan
+          image: atlassian/default-image:latest
+          script:
+            # Run a security scan for sensitive data.
+            - pipe: atlassian/git-secrets-scan:0.5.1
+      - step:
+          name: Build and push Docker image
+          services:
+            - docker
+          script:
+            # Start ssh-agent
+            - eval "$(ssh-agent -s)"
+
+            # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
+            # and adding it to the agent
+            - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+
+            # Clone the scripts repository
+            - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+
+            # Build and push the image to the docker
+            - export IMAGE_NAME=levernfulcrum/lnf-client-service
+            - chmod +x lnf-deployment-pipeline/scripts/build-n-push/docker_image.sh
+            - lnf-deployment-pipeline/scripts/build-n-push/docker_image.sh "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD" "$IMAGE_NAME"
+    "bugfix/*":
+      - step:
+          name: Build and Test
+          caches:
+            - maven-cache
+          script:
+            # Start ssh-agent
+            - eval "$(ssh-agent -s)"
+
+            # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
+            # and adding it to the agent
+            - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+
+            # Clone the scripts repository
+            - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+
+            # Authenticate with AWS CodeArtifact and run Maven build
+            - bash lnf-deployment-pipeline/scripts/build-n-push/authenticate.sh $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY
+
+          artifacts:
+            - target/**
+      - step:
+          name: Security Scan
+          image: atlassian/default-image:latest
+          script:
+            # Run a security scan for sensitive data.
+            - pipe: atlassian/git-secrets-scan:0.5.1
+    "master":
+      - step:
+          name: Build and Test
+          caches:
+            - maven-cache
+          script:
+            # Start ssh-agent
+            - eval "$(ssh-agent -s)"
+
+            # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
+            # and adding it to the agent
+            - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+
+            # Clone the scripts repository
+            - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+
+            # Authenticate with AWS CodeArtifact and run Maven build
+            - bash lnf-deployment-pipeline/scripts/build-n-push/authenticate.sh $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY
+
+          artifacts:
+            - target/**
+      - step:
+          name: Security Scan
+          image: atlassian/default-image:latest
+          script:
+            # Run a security scan for sensitive data.
+            - pipe: atlassian/git-secrets-scan:0.5.1
+    "release/*":
+      - step:
+          name: Build and Test
+          caches:
+            - maven-cache
+          script:
+            # Start ssh-agent
+            - eval "$(ssh-agent -s)"
+
+            # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
+            # and adding it to the agent
+            - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+
+            # Clone the scripts repository
+            - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+
+            # Authenticate with AWS CodeArtifact and run Maven build
+            - bash lnf-deployment-pipeline/scripts/build-n-push/authenticate.sh $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY
+
+          artifacts:
+            - target/**
+      - step:
+          name: Security Scan
+          image: atlassian/default-image:latest
+          script:
+            # Run a security scan for sensitive data.
+            - pipe: atlassian/git-secrets-scan:0.5.1
+      - step:
+          name: Build and push Docker image
+          services:
+            - docker
+          script:
+            # Start ssh-agent
+            - eval "$(ssh-agent -s)"
+
+            # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
+            # and adding it to the agent
+            - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+
+            # Clone the scripts repository
+            - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+
+            # Build and push the image to the docker
+            - export IMAGE_NAME=levernfulcrum/lnf-client-service
+            - chmod +x lnf-deployment-pipeline/scripts/build-n-push/docker_image.sh
+            - lnf-deployment-pipeline/scripts/build-n-push/docker_image.sh "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD" "$IMAGE_NAME"
+      - step:
+          name: Build and push Docker image to AWS ECR
+          services:
+            - docker
+          script:
+            # Start ssh-agent
+            - eval "$(ssh-agent -s)"
+
+            # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
+            # and adding it to the agent
+            - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+
+            # Clone the scripts repository
+            - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+
+            # Build and push the image to the AWS ECR
+            - export IMAGE_NAME=levernfulcrum/lnf-client-service
+            # - export PUSH_TO_ECR=true
+            - chmod +x lnf-deployment-pipeline/scripts/build-n-push/ecr_image.sh
+            - lnf-deployment-pipeline/scripts/build-n-push/ecr_image.sh "$AWS_DEFAULT_REGION" "$IMAGE_NAME"
+    "hotfix/*":
+      - step:
+          name: Build and Test
+          caches:
+            - maven-cache
+          script:
+            # Start ssh-agent
+            - eval "$(ssh-agent -s)"
+
+            # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
+            # and adding it to the agent
+            - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+
+            # Clone the scripts repository
+            - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+
+            # Authenticate with AWS CodeArtifact and run Maven build
+            - bash lnf-deployment-pipeline/scripts/build-n-push/authenticate.sh $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY
+
+          artifacts:
+            - target/**
+      - step:
+          name: Security Scan
+          image: atlassian/default-image:latest
+          script:
+            # Run a security scan for sensitive data.
+            - pipe: atlassian/git-secrets-scan:0.5.1
+      - step:
+          name: Build and push Docker image
+          services:
+            - docker
+          script:
+            # Start ssh-agent
+            - eval "$(ssh-agent -s)"
+
+            # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
+            # and adding it to the agent
+            - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+
+            # Clone the scripts repository
+            - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+
+            # Build and push the image to the docker
+            - export IMAGE_NAME=levernfulcrum/lnf-client-service
+            - chmod +x lnf-deployment-pipeline/scripts/build-n-push/docker_image.sh
+            - lnf-deployment-pipeline/scripts/build-n-push/docker_image.sh "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD" "$IMAGE_NAME"
+      - step:
+          name: Build and push Docker image to AWS ECR
+          services:
+            - docker
+          script:
+            # Start ssh-agent
+            - eval "$(ssh-agent -s)"
+
+            # Decode the Base64-encoded SSH private key, ensuring it's correctly formatted
+            # and adding it to the agent
+            - echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add -
+
+            # Clone the scripts repository
+            - git clone git@bitbucket.org:technofacts/lnf-deployment-pipeline.git
+
+            # Build and push the image to the AWS ECR
+            - export IMAGE_NAME=levernfulcrum/lnf-client-service
+            # - export PUSH_TO_ECR=true
+            - chmod +x lnf-deployment-pipeline/scripts/build-n-push/ecr_image.sh
+            - lnf-deployment-pipeline/scripts/build-n-push/ecr_image.sh "$AWS_DEFAULT_REGION" "$IMAGE_NAME"
