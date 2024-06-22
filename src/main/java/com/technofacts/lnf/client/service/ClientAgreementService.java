@@ -6,9 +6,11 @@ import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.repository.ClientAgreementRepository;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.dto.client.AgreementDto;
+import com.technofacts.lnf.dto.file.FileDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
+import com.technofacts.lnf.service.file.FileFolderService;
 import com.technofacts.lnf.service.file.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -34,25 +36,32 @@ public class ClientAgreementService {
     private final ClientAgreementRepository repository;
     private final ClientRepository clientRepository;
     private final FileService fileService;
+    private final FileFolderService fileFolderService;
     @Value("${aws.s3.bucket.folderName}")
     private String folderName;
 
     public List<AgreementDto> findByClientId(UUID clientId) {
         String filePath =  String.format(S_S_S, folderName, clientId, AGREEMENTS);
-        List<String> files = fileService.findFilesInFolder(filePath);
+        List<FileDto> files = fileFolderService.findFiles(filePath);
         List<AgreementDto> agreementDtos = new ArrayList<>();
         files.forEach(file -> {
-            String fileName = StringUtils.substringAfterLast(file, "/");
+            String fileName = StringUtils.substringAfterLast(file.getFileName(), "/");
             String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path(String.format("/lnf/clients/%s/agreements/%s", clientId, fileName))
                     .toUriString();
-            Agreement entity = searchForFileName(fileName);
-            AgreementDto agreementDto = ClientAgreementConverter.toTransportModel(entity);
-            agreementDto.setFileName(fileName);
-            agreementDto.setUrl(downloadURL);
-            agreementDtos.add(agreementDto);
+            setClientAgreement(agreementDtos, file, fileName, downloadURL);
         });
         return agreementDtos;
+    }
+
+    private void setClientAgreement(List<AgreementDto> agreementDtos, FileDto file, String fileName, String downloadURL) {
+        Agreement entity = searchForFileName(fileName);
+        AgreementDto agreementDto = ClientAgreementConverter.toTransportModel(entity);
+        agreementDto.setFileName(fileName);
+        agreementDto.setUrl(downloadURL);
+        agreementDto.setSize(file.getFileSize());
+        agreementDto.setLastModified(file.getLastModified());
+        agreementDtos.add(agreementDto);
     }
 
     public ResponseEntity<byte[]> findById(UUID clientId, String fileName) {

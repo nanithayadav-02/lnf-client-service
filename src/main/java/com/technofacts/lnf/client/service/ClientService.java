@@ -235,7 +235,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
     private ClientDto findClientWithDocument(Client entity) {
         ClientDto dto = ClientConverter.toTransportModel(entity);
         if (dto != null) {
-            dto.setClientLogo(documentService.findByClientId(dto.getId(), DocumentType.image));
+            dto.setClientLogo(documentService.findByClientId(dto.getId(), DocumentType.image.name()));
         }
         return dto;
     }

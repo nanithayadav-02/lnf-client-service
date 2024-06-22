@@ -1,7 +1,9 @@
 package com.technofacts.lnf.client.restapi;
 
+import com.technofacts.lnf.dto.file.FileDto;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
+import com.technofacts.lnf.service.file.FileFolderService;
 import com.technofacts.lnf.service.file.FileService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +29,7 @@ import java.util.List;
 @Service
 @Transactional
 @Slf4j
-public class FileClientImpl extends BaseWebClientService implements FileService {
+public class FileClientImpl extends BaseWebClientService implements FileService, FileFolderService {
 
     private final WebClient webClient;
 
@@ -132,6 +134,26 @@ public class FileClientImpl extends BaseWebClientService implements FileService 
             log.error("File is not retrieved {}", ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    @Override
+    public List<FileDto> findFiles(String folderName) {
+        List<FileDto> files = new ArrayList<> ();
+        try {
+            WebClient.RequestHeadersSpec<?> spec = webClient.get()
+                    .uri(s3Service + "/folder-names?folderName={folderName}", folderName)
+                    .accept(MediaType.APPLICATION_JSON);
+            // Conditionally add the JWT token to the request headers
+            addJwtToken(spec);
+            // Execute the request and block to get the response, consider using subscribe for a non-blocking approach
+            files = spec.retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<FileDto>> () {})
+                    .block();
+
+        } catch (LnFEntityNotFoundException ex) {
+            log.error("Failed to get the files in the folder");
+        }
+        return files;
     }
 
 }

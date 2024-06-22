@@ -25,7 +25,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.technofacts.lnf.client.converter.DocumentConverter.constructUrlFromType;
 
@@ -54,7 +53,7 @@ public class DocumentService {
      * @param type     enum DocumentType
      * @return DocumentDto
      */
-    public DocumentDto findByClientId(UUID clientId, DocumentType type) {
+    public DocumentDto findByClientId(UUID clientId, String type) {
         try {
             if (awsS3BucketEnabled) {
                 var filePath = String.format("%s/%s/%s/", folderName, clientId, type);
@@ -65,7 +64,7 @@ public class DocumentService {
                 }
                 var fileName = Paths.get(filePaths.get(0)).getFileName().toString();
                 String url = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path(constructUrlFromType(clientId, type))
+                        .path(constructUrlFromType(clientId, DocumentType.valueOf(type)))
                         .path(fileName)
                         .toUriString();
 
@@ -76,9 +75,9 @@ public class DocumentService {
                 return documentDto;
             } else {
                 searchForClient(clientId);
-                ClientDocument entity = searchForDocument(clientId, type);
+                ClientDocument entity = searchForDocument(clientId, DocumentType.valueOf(type));
                 DocumentDto documentDto = DocumentConverter.toTransportModel(entity);
-                documentDto.setUrl(DocumentConverter.getDocumentUrl(clientId, documentDto.getId(), type));
+                documentDto.setUrl(DocumentConverter.getDocumentUrl(clientId, documentDto.getId(), DocumentType.valueOf(type)));
                 return documentDto;
             }
         } catch (Exception e) {
