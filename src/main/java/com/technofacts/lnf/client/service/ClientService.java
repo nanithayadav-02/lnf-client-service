@@ -8,6 +8,7 @@ import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ClientOverviewDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
+import com.technofacts.lnf.dto.common.PageRequestDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
@@ -22,6 +23,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -125,6 +127,14 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
     public ClientDto findByClientId(UUID clientId) {
         Client entity = search(clientId);
         return findClientWithDocument(entity);
+    }
+
+    public Page<ClientDto> findingAllWithPagination(String search, PageRequestDto pageRequestDto) {
+        Pageable pageable = PageRequest.of(pageRequestDto.getPage(), pageRequestDto.getSize(),
+                RestUtil.constructSort(pageRequestDto.getSortBy(), pageRequestDto.getSortOrder()));
+        Specification<Client> specification = buildClientSpecification(search);
+        Page<Client> resultPage = repository.findAll(specification, pageable);
+        return resultPage.map(ClientConverter::toTransportModel);
     }
 
     /**

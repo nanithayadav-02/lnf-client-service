@@ -30,7 +30,6 @@ public class ProjectController {
     /**
      * Return requested page with list of ProjectDto objects with requested sortBy and sortOrder and size and page.  Raises LnFEntityNotFoundException
      * if the requested page is more than the total number of pages.
-     *
      */
     @GetMapping(value = "/projects")
     @ResponseStatus(HttpStatus.OK)
@@ -45,8 +44,17 @@ public class ProjectController {
      */
     @GetMapping(value = "/projects", params = {"search"})
     @ResponseStatus(HttpStatus.OK)
-    public List<ProjectDto> search(@RequestParam(value = "search") String search) {
-        return service.findAll(search);
+    public ResponseEntity<?> search(@RequestParam(value = "search", required = false) String search,
+                                    @PageableAsQueryParam PageRequestDto pageRequest) {
+        if (search != null && !search.isEmpty()) {
+            if (pageRequest != null && pageRequest.getPage() != null) {
+                return ResponseEntity.ok(service.findingAllWithPagination(search, pageRequest));
+            } else {
+                return ResponseEntity.ok(service.findAll(search));
+            }
+        } else {
+            return paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
+        }
     }
 
     /**
@@ -84,7 +92,7 @@ public class ProjectController {
      * Updates the project
      *
      * @param projectId Project Id
-     * @param resource ProjectDto
+     * @param resource  ProjectDto
      */
     @PutMapping(value = "/projects/{projectId}")
     @ResponseStatus(HttpStatus.OK)

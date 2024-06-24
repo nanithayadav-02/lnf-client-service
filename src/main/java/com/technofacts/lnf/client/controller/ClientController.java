@@ -59,8 +59,17 @@ public class ClientController {
      */
     @GetMapping(value = "/clients", params = {"search"})
     @ResponseStatus(HttpStatus.OK)
-    public List<ClientDto> search(@RequestParam(value = "search") String search) {
-        return service.findAll(search);
+    public ResponseEntity<?> search(@RequestParam(value = "search", required = false) String search,
+                                    @PageableAsQueryParam PageRequestDto pageRequest) {
+        if (search != null && !search.isEmpty()) {
+            if (pageRequest != null && pageRequest.getPage() != null) {
+                return ResponseEntity.ok(service.findingAllWithPagination(search, pageRequest));
+            } else {
+                return ResponseEntity.ok(service.findAll(search));
+            }
+        } else {
+            return paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
+        }
     }
 
     /**
@@ -91,6 +100,7 @@ public class ClientController {
     /**
      * Returns List of employeeDto associated with the given clientId.
      * Raises LnFEntityNotFoundException if there is no client with the input clientId
+     *
      * @param clientId Client Id
      * @return List of all employeeDto objects.
      */
