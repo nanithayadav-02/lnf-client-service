@@ -127,7 +127,7 @@ public class ClientAgreementService {
         searchForClientId(clientId);
         Agreement entity = searchForFileName(fileName);
         try {
-            String s3ObjectKey = String.format("%s/%s/%s/%s/", folderName, clientId, AGREEMENTS, fileName);
+            String s3ObjectKey = String.format("%s/%s/%s/%s", folderName, clientId, AGREEMENTS, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
             log.info("S3 object deleted for agreement file");

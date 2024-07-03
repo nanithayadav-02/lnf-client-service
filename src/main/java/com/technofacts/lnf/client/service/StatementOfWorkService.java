@@ -109,7 +109,7 @@ public class StatementOfWorkService {
             StatementOfWork entity = searchForFileName(fileName);
             StatementOfWork updatedEntity = StatementOfWorkConverter.toEntityModel(resource, entity);
             save(updatedEntity);
-            String s3ObjectKey = String.format("%s/%s/%s/%s/%s/%s/", folderName, clientId, PROJECT, projectId, SOW, fileName);
+            String s3ObjectKey = String.format("%s/%s/%s/%s/%s/%s", folderName, clientId, PROJECT, projectId, SOW, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
             log.info("S3 object deleted for sows file");
@@ -130,7 +130,7 @@ public class StatementOfWorkService {
         searchForProjectIdAndClientId(projectId, clientId);
         StatementOfWork entity = searchForFileName(fileName);
         try {
-            String s3ObjectKey = String.format("%s/%s/%s/%s/%s/%s/", folderName, clientId, PROJECT, projectId, SOW, fileName);
+            String s3ObjectKey = String.format("%s/%s/%s/%s/%s/%s", folderName, clientId, PROJECT, projectId, SOW, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
             log.info("S3 object deleted for sows file");
