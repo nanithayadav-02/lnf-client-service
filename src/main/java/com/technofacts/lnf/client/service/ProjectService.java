@@ -9,6 +9,7 @@ import com.technofacts.lnf.client.repository.ProjectRepository;
 import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.client.ProjectOverviewDto;
+import com.technofacts.lnf.dto.common.PageRequestDto;
 import com.technofacts.lnf.dto.timesheet.TimesheetDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
@@ -25,6 +26,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -121,6 +123,14 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         Specification<Project> specification = buildProjectSpecification(search);
         List<Project> entities = repository.findAll(specification);
         return convertToDtos(entities);
+    }
+
+    public Page<ProjectDto> findingAllWithPagination(String search, PageRequestDto pageRequestDto) {
+        Pageable pageable = PageRequest.of(pageRequestDto.getPage(), pageRequestDto.getSize(),
+                RestUtil.constructSort(pageRequestDto.getSortBy(), pageRequestDto.getSortOrder()));
+        Specification<Project> specification = buildProjectSpecification(search);
+        Page<Project> resultPage = repository.findAll(specification, pageable);
+        return resultPage.map(ProjectConverter::toTransportModel);
     }
 
     private List<ProjectDto> convertToDtos(List<Project> entities) {
