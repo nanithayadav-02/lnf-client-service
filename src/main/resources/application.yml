@@ -132,6 +132,12 @@ spring:
     password: ${database.password:client@12345}
     data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 60000
+      max-lifetime: 1800000
+      connection-timeout: 30000
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -183,6 +189,12 @@ spring:
     password: ${database.password:client@12345}
     data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 60000
+      max-lifetime: 1800000
+      connection-timeout: 30000
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -234,6 +246,12 @@ spring:
     password: ${database.password:client@12345}
     data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 60000
+      max-lifetime: 1800000
+      connection-timeout: 30000
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
