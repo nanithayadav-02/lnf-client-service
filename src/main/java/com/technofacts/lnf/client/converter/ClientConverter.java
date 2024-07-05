@@ -17,6 +17,7 @@ public class ClientConverter {
         }
         ClientDto dto = new ClientDto();
         dto.setId(entity.getId());
+        dto.setOpeningBalance(entity.getOpeningBalance());
         dto.setCode(entity.getCode());
         dto.setName(entity.getName());
         dto.setPan(entity.getPan());
@@ -80,6 +81,7 @@ public class ClientConverter {
 
         entity.setId(transport.getId());
         entity.setCode(transport.getCode());
+        entity.setOpeningBalance(transport.getOpeningBalance());
         entity.setName(transport.getName());
         entity.setPan(transport.getPan());
         entity.setTan(transport.getTan());
