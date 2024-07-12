@@ -123,7 +123,6 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @param clientId Client Id
      * @return ClientDto object
      */
-    @Cacheable(value = "clients")
     public ClientDto findByClientId(UUID clientId) {
         Client entity = search(clientId);
         return findClientWithDocument(entity);
