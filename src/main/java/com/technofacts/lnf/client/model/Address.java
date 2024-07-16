@@ -1,7 +1,10 @@
 package com.technofacts.lnf.client.model;
 
+import com.technofacts.lnf.client.model.enums.AddressType;
 import com.technofacts.lnf.model.AuditableEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 import lombok.*;
 
@@ -31,4 +34,7 @@ public class Address extends AuditableEntity {
     @Column(nullable = false, name = "country")
     private String country;
 
+    @Column(nullable = false,name = "addressType")
+    @Enumerated(EnumType.STRING)
+    private AddressType addressType;
 }
