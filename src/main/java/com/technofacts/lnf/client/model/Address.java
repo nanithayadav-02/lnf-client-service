@@ -34,7 +34,7 @@ public class Address extends AuditableEntity {
     @Column(nullable = false, name = "country")
     private String country;
 
-    @Column(name = "addressType")
+    @Column(nullable = false,name = "addressType")
     @Enumerated(EnumType.STRING)
     private AddressType addressType;
 }
