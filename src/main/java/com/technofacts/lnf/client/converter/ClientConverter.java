@@ -1,6 +1,7 @@
 package com.technofacts.lnf.client.converter;
 
 import com.technofacts.lnf.client.model.*;
+import com.technofacts.lnf.client.model.enums.AddressType;
 import com.technofacts.lnf.dto.client.AddressDto;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ClientOverviewDto;
@@ -42,7 +43,7 @@ public class ClientConverter {
                 .map(AddressConverter::toTransportModel)
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparingInt(address ->
-                        address.getAddressType() != null && address.getAddressType().equals("Primary") ? 0 : 1))
+                        address.getAddressType() != null && address.getAddressType().equals(AddressType.Primary.name()) ? 0 : 1))
                 .collect(Collectors.toList());
 
         dto.getAddresses().addAll(sortedAddresses);

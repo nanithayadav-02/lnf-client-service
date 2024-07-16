@@ -78,9 +78,7 @@ public class AddressService {
      * @param clientId Client Id
      * @param resource AddressDto
      */
-    public void create(UUID clientId, AddressDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create Address for client[%s] with null payload", clientId));
-        Client clientEntity = searchForClient(clientId);
+    private void checkForPrimaryAddress(UUID clientId, Client clientEntity, AddressDto resource) {
         if (resource.getAddressType() != null && resource.getAddressType().equals("Primary")) {
             boolean primaryExists = clientEntity.getClientAddresses().stream()
                     .anyMatch(address -> address.getAddressType() == AddressType.Primary);
@@ -88,6 +86,12 @@ public class AddressService {
                 throw new LnFBadRequestException(String.format("Client[%s] already has a Primary address", clientId));
             }
         }
+    }
+
+    public void create(UUID clientId, AddressDto resource) {
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create Address for client[%s] with null payload", clientId));
+        Client clientEntity = searchForClient(clientId);
+        checkForPrimaryAddress(clientId, clientEntity, resource);
         ClientAddress entity = AddressConverter.toEntityModel(resource);
         entity.setClient(clientEntity);
         save(entity);
@@ -105,16 +109,10 @@ public class AddressService {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to update Address for client[%s] with null payload", clientId));
         Client clientEntity = searchForClient(clientId);
         ClientAddress entity = searchForAddress(addressId);
-        if (resource.getAddressType() != null && resource.getAddressType().equals("Primary")) {
-            boolean primaryExists = clientEntity.getClientAddresses().stream()
-                    .anyMatch(address -> address.getAddressType() == AddressType.Primary);
-            if (primaryExists) {
-                throw new LnFBadRequestException(String.format("Client[%s] already has a Primary address", clientId));
-            }
-        }
+        checkForPrimaryAddress(clientId, clientEntity, resource);
         ClientAddress updatedEntity = AddressConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.info(() -> String.format("Address for Client[%s] successfully created", clientId));
+        log.info(() -> String.format("Address for Client[%s] successfully updated", clientId));
     }
 
     /**
