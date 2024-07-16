@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class ClientConverter {
 
@@ -44,7 +43,7 @@ public class ClientConverter {
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparingInt(address ->
                         address.getAddressType() != null && address.getAddressType().equals(AddressType.Primary.name()) ? 0 : 1))
-                .collect(Collectors.toList());
+                .toList();
 
         dto.getAddresses().addAll(sortedAddresses);
 
