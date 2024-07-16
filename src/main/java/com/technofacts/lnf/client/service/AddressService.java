@@ -79,7 +79,7 @@ public class AddressService {
      * @param resource AddressDto
      */
     private void checkForPrimaryAddress(UUID clientId, Client clientEntity, AddressDto resource) {
-        if (resource.getAddressType() != null && resource.getAddressType().equals("Primary")) {
+        if (resource.getAddressType() != null && resource.getAddressType().equals(AddressType.Primary.name())) {
             boolean primaryExists = clientEntity.getClientAddresses().stream()
                     .anyMatch(address -> address.getAddressType() == AddressType.Primary);
             if (primaryExists) {
