@@ -108,7 +108,7 @@ public class ProjectEmployeeService {
         employeeIds.forEach(employeeId -> {
             try {
                 search(projectId, employeeId);
-                log.error("Employee {} is already associated to the projectId {} ", employeeId, projectId);
+                log.debug("Employee {} is already associated to the projectId {}", employeeId, projectId);
 
             } catch (LnFEntityNotFoundException ex) {
                 EmployeeDto employeeDto = employeeService.findOne(employeeId);
@@ -117,9 +117,9 @@ public class ProjectEmployeeService {
                     projectEmployee.setProject(project);
                     projectEmployee.setEmployeeId(employeeId);
                     save(projectEmployee);
-                    log.error("Successfully added the employee {} to the project {} ", employeeId, project.getCode());
+                    log.debug("Successfully added the employee {} to the project {}", employeeId, project.getCode());
                 } else {
-                    log.error("Failed to add the employee {} to the project {} ", employeeId, project.getCode());
+                    log.error("Failed to add the employee {} to the project {}", employeeId, project.getCode());
                 }
             }
         });
@@ -140,7 +140,7 @@ public class ProjectEmployeeService {
                 ProjectEmployee projectEmployee = search(projectId, employeeId);
                 repository.delete(projectEmployee);
             } catch (LnFEntityNotFoundException ex) {
-                log.error(ex.getMessage());
+                log.warn(ex.getMessage());
             }
         });
     }
@@ -158,7 +158,7 @@ public class ProjectEmployeeService {
         List<ProjectEmployee> projectEmployees = repository.findByProject(project);
         try {
             repository.deleteAll(projectEmployees);
-            log.error("projectEmployees is successfully removed from the Project {} ", project.getId());
+            log.debug("projectEmployees is successfully removed from the Project {}", project.getId());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to remove projectEmployees from the Project[%s]", project.getId());
             throw new LnFException(errorMessage, e);
@@ -168,7 +168,7 @@ public class ProjectEmployeeService {
     public void delete(ProjectEmployee entity) {
         try {
             repository.delete(entity);
-            log.error("Employee {} is successfully removed from the Project {} ", entity.getEmployeeId(), entity.getProject().getCode());
+            log.debug("Employee {} is successfully removed from the Project {}", entity.getEmployeeId(), entity.getProject().getCode());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to remove Employee [%s] from the Project[%s]", entity.getEmployeeId(), entity.getProject().getCode());
             throw new LnFException(errorMessage, e);
@@ -180,7 +180,7 @@ public class ProjectEmployeeService {
      */
     public void clearProjectEmployeesCache() {
         Objects.requireNonNull(cacheManager.getCache("projectEmployees")).clear();
-        log.error("ProjectEmployees cache cleared.");
+        log.debug("ProjectEmployees cache cleared.");
     }
 
     private ProjectEmployee search(UUID projectId, String employeeId) {
@@ -204,7 +204,7 @@ public class ProjectEmployeeService {
             projectEmployee.setProject(project);
             projectEmployee.setEmployeeId(employeeId);
             save(projectEmployee);
-            log.error("Successfully added the employee {} to the project {} ", employeeId, project.getCode());
+            log.debug("Successfully added the employee {} to the project {}", employeeId, project.getCode());
         });
     }
 }

@@ -17,6 +17,7 @@ import com.technofacts.lnf.service.specification.GenericSpecificationBuilder;
 import com.technofacts.lnf.util.RestUtil;
 import com.technofacts.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -148,7 +149,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
                 "Failed to create Client with null payload");
         Client entity = ClientConverter.toEntityModel(resource);
         saveEntity(entity);
-        log.error("Client {} successfully created", entity.getCode());
+        log.debug("Client {} successfully created", entity.getCode());
     }
 
     /**
@@ -165,7 +166,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
         Client entity = search(clientId);
         Client updatedEntity = ClientConverter.toEntityModel(resource, entity);
         saveEntity(updatedEntity);
-        log.error("Client {} successfully updated", clientId);
+        log.debug("Client {} successfully updated", clientId);
     }
 
     /**
@@ -180,7 +181,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
         projectList.forEach(project -> projectService.delete(project.getId()));
         try {
             repository.delete(entity);
-            log.error("Client {} successfully deleted", entity.getCode());
+            log.debug("Client {} successfully deleted", entity.getCode());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Client [%s]", entity.getCode());
             throw new LnFException(errorMessage, e);
@@ -192,7 +193,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      */
     public void clearClientsCache() {
         Objects.requireNonNull(cacheManager.getCache("clients")).clear();
-        log.error("Clients cache cleared.");
+        log.debug("Clients cache cleared.");
     }
 
     private Page<ClientOverviewDto> validateAndGetPages(int page, Page<Client> resultPage) {

@@ -69,7 +69,7 @@ public class AddressService {
             entities.add(entity);
         });
         save(entities);
-        log.error("Address for Client {} successfully created", clientId);
+        log.debug("Address for Client {} successfully created", clientId);
     }
 
     /**
@@ -100,7 +100,7 @@ public class AddressService {
         ClientAddress entity = AddressConverter.toEntityModel(resource);
         entity.setClient(clientEntity);
         save(entity);
-        log.error("Address for Client {} successfully created", clientId);
+        log.debug("Address for Client {} successfully created", clientId);
     }
 
     /**
@@ -117,7 +117,7 @@ public class AddressService {
         checkIfPrimaryAddressExists(clientId, clientEntity, resource);
         ClientAddress updatedEntity = AddressConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.error("Address for Client {} successfully updated", clientId);
+        log.debug("Address for Client {} successfully updated", clientId);
     }
 
     /**
@@ -130,7 +130,7 @@ public class AddressService {
         List<ClientAddress> entities = repository.findAddressByClientId(clientId);
         try {
             repository.deleteAll(entities);
-            log.error("Addresses for Client {} successfully deleted", clientId);
+            log.debug("Addresses for Client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Addresses for client [%s]", clientId);
             throw new LnFException(errorMessage);
@@ -149,7 +149,7 @@ public class AddressService {
         ClientAddress entity = searchForAddress(addressId);
         try {
             repository.delete(entity);
-            log.error("Address {} for client {} successfully deleted", addressId, clientId);
+            log.debug("Address {} for client {} successfully deleted", addressId, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Address[[%s] for client [%s]", addressId, clientId);
             throw new LnFException(errorMessage);

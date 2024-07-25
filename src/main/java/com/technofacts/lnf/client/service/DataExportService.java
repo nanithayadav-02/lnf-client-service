@@ -209,7 +209,7 @@ public class DataExportService {
     }
 
     private <T> void trimAndSetInteger(String[] rowData, T object, int index, BiConsumer<T, Integer> setter) {
-        Integer value = (int) Double.parseDouble(StringUtils.trim(rowData[index]));
+        Integer value = (int)Double.parseDouble(StringUtils.trim(rowData[index]));
         setter.accept(object, value);
     }
 

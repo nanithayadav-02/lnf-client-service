@@ -211,7 +211,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
             entity.setClient(client);
         }
         saveEntity(entity);
-        log.error("Project {} successfully created", entity.getCode());
+        log.debug("Project {} successfully created", entity.getCode());
     }
 
     /**
@@ -234,7 +234,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
             updatedEntity.setClient(null);
         }
         saveEntity(updatedEntity);
-        log.error("Project {} successfully updated", projectId);
+        log.debug("Project {} successfully updated", projectId);
     }
 
     /**
@@ -257,7 +257,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
     private void deleteProject(Project entity) {
         try {
             repository.delete(entity);
-            log.error("Project {} successfully deleted", entity.getCode());
+            log.debug("Project {} successfully deleted", entity.getCode());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Project [%s]", entity.getCode());
             throw new LnFException(errorMessage, e);
@@ -269,7 +269,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      */
     public void clearProjectsCache() {
         Objects.requireNonNull(cacheManager.getCache("projects")).clear();
-        log.error("Projects cache cleared.");
+        log.debug("Projects cache cleared.");
     }
 
     private Page<ProjectOverviewDto> validateAndGetPages(int page, Page<Project> resultPage) {

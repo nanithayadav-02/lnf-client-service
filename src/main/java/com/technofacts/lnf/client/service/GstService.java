@@ -68,7 +68,7 @@ public class GstService {
             entities.add(entity);
         });
         save(entities);
-        log.error("Gst for client {} successfully created", clientId);
+        log.debug("Gst for client {} successfully created", clientId);
     }
 
     /**
@@ -83,7 +83,7 @@ public class GstService {
         Gst entity = GstConverter.toEntityModel(resource);
         entity.setClient(clientEntity);
         save(entity);
-        log.error("Gst for client {} successfully created", clientId);
+        log.debug("Gst for client {} successfully created", clientId);
     }
 
     /**
@@ -99,7 +99,7 @@ public class GstService {
         Gst entity = searchForGst(gstId);
         Gst updatedEntity = GstConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.error("Gst for client {} successfully updated", clientId);
+        log.debug("Gst for client {} successfully updated", clientId);
     }
 
     /**
@@ -112,7 +112,7 @@ public class GstService {
         List<Gst> entities = repository.findByClientId(clientId);
         try {
             repository.deleteAll(entities);
-            log.error("Gsts for client {} successfully deleted", clientId);
+            log.debug("Gsts for client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete gsts for client [%s]", clientId);
             throw new LnFException(errorMessage);
@@ -130,7 +130,7 @@ public class GstService {
         Gst entity = searchForGst(gstId);
         try {
             repository.delete(entity);
-            log.error("Gst {} for client {} successfully deleted", gstId, clientId);
+            log.debug("Gst {} for client {} successfully deleted", gstId, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete gst[%s] for client [%s]", gstId, clientId);
             throw new LnFException(errorMessage);

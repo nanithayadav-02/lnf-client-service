@@ -59,7 +59,7 @@ public class DocumentService {
                 var filePath = String.format("%s/%s/%s/", folderName, clientId, type);
                 List<String> filePaths = fileService.findFilesInFolder(filePath);
                 if (filePaths == null || filePaths.isEmpty()) {
-                    log.error("Document not found for client {}", clientId);
+                    log.error("Document not found for client {} ", clientId);
                     return null;
                 }
                 var fileName = Paths.get(filePaths.get(0)).getFileName().toString();
@@ -148,7 +148,7 @@ public class DocumentService {
             if (awsS3BucketEnabled) {
                 var folder = String.format("%s/%s/%s/", folderName, clientId, type);
                 String filePath = uploadFile(folder, file);
-                log.error("File uploaded successfully to S3 bucket: " + filePath);
+                log.debug("File uploaded successfully to S3 bucket: " + filePath);
             } else {
                 Client client = searchForClient(clientId);
                 UUID documentId = null;
@@ -164,7 +164,7 @@ public class DocumentService {
                 entity.setClient(client);
                 entity.setType(type);
                 save(entity);
-                log.error("Document {} for Client {} successfully created", file.getOriginalFilename(), clientId);
+                log.debug("Document {} for Client {} successfully created", file.getOriginalFilename(), clientId);
             }
         } catch (RuntimeException | IOException e) {
 
@@ -186,7 +186,7 @@ public class DocumentService {
             if (awsS3BucketEnabled) {
                 var folder = String.format("%s/%s/%s/", folderName, clientId, type);
                 String filePath = uploadFile(folder, file);
-                log.error("File {} for client  successfully updated in S3", filePath);
+                log.debug("File {} for client  successfully updated in S3", filePath);
             } else {
                 searchForClient(clientId);
                 ClientDocument entity = searchForDocument(documentId);
@@ -197,7 +197,7 @@ public class DocumentService {
             String errorMessage = String.format("Failed to update document[%s] for client [%s]", documentId, clientId);
             throw new LnFException(errorMessage, e);
         }
-        log.error("Document {} for Client {} successfully updated", documentId, clientId);
+        log.debug("Document {} for Client {} successfully updated", documentId, clientId);
     }
 
     /**
@@ -211,7 +211,7 @@ public class DocumentService {
             var filePath = String.format(S_S_S_S, folderName, clientId, type, fileName);
             List<String> filePaths = Collections.singletonList(filePath);
             fileService.delete(filePaths);
-            log.error("S3 object deleted for client");
+            log.debug("S3 object deleted for client");
         } else {
             searchForClient(clientId);
             ClientDocument entity = searchForDocument(clientId, type);
@@ -235,7 +235,7 @@ public class DocumentService {
         ClientDocument entity = searchForDocument(documentId);
         try {
             repository.delete(entity);
-            log.error("Document {} for client {} successfully deleted", documentId, clientId);
+            log.debug("Document {} for client {} successfully deleted", documentId, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Document[[%s] for client [%s]", documentId, clientId);
             throw new LnFException(errorMessage);

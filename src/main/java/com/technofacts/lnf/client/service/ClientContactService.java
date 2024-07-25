@@ -62,7 +62,7 @@ public class ClientContactService {
             entities.add(entity);
         });
         save(entities);
-        log.error("Contact for client {} successfully created", clientId);
+        log.debug("Contact for client {} successfully created", clientId);
     }
 
     /**
@@ -77,7 +77,7 @@ public class ClientContactService {
         ClientContact entity = ContactConverter.toEntityModel(resource);
         entity.setClient(clientEntity);
         save(entity);
-        log.error("Contact for client {} successfully created", clientId);
+        log.debug("Contact for client {} successfully created", clientId);
     }
 
     /**
@@ -93,7 +93,7 @@ public class ClientContactService {
         ClientContact entity = searchForContact(contactId);
         ClientContact updatedEntity = ContactConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.error("Contact for client {} successfully updated", clientId);
+        log.debug("Contact for client {} successfully updated", clientId);
     }
 
     /**
@@ -106,7 +106,7 @@ public class ClientContactService {
         List<ClientContact> entities = repository.findByClientId(clientId);
         try {
             repository.deleteAll(entities);
-            log.error("Contacts for client {} successfully deleted", clientId);
+            log.debug("Contacts for client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete contacts for client [%s]", clientId);
             throw new LnFException(errorMessage);
@@ -124,7 +124,7 @@ public class ClientContactService {
         ClientContact entity = searchForContact(contactId);
         try {
             repository.delete(entity);
-            log.error("Contact {} for client {} successfully deleted", contactId, clientId);
+            log.debug("Contact {} for client {} successfully deleted", contactId, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete contact[%s] for client [%s]", contactId, clientId);
             throw new LnFException(errorMessage);

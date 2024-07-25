@@ -122,7 +122,7 @@ public class ProjectTaskEmployeeService {
         employeeIds.forEach(employeeId -> {
             try {
                 search(project, task, employeeId);
-                log.error("Employee {} is already associated to the Task {} ", employeeId, task.getId());
+                log.debug("Employee {} is already associated to the Task {}", employeeId, task.getId());
 
             } catch (LnFEntityNotFoundException ex) {
                 EmployeeDto employeeDto = employeeService.findOne(employeeId);
@@ -132,10 +132,10 @@ public class ProjectTaskEmployeeService {
                     taskEmployee.setTask(task);
                     taskEmployee.setEmployeeId(employeeId);
                     save(taskEmployee);
-                    log.error("Successfully added the employee {} to the task {} of the project {} ", employeeId, task.getName(), project.getCode());
+                    log.debug("Successfully added the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
 
                 } else {
-                    log.error("Failed to add the employee {} to the task {} of the project {} ", employeeId, task.getName(), project.getCode());
+                    log.error("Failed to add the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
                 }
             }
         });
@@ -158,7 +158,7 @@ public class ProjectTaskEmployeeService {
                 ProjectTaskEmployee taskEmployee = search(project, task, employeeId);
                 repository.delete(taskEmployee);
             } catch (LnFEntityNotFoundException ex) {
-                log.error(ex.getMessage());
+                log.warn(ex.getMessage());
             }
         });
     }
@@ -176,7 +176,7 @@ public class ProjectTaskEmployeeService {
         List<ProjectTaskEmployee> projectTaskEmployees = repository.findByTask(task);
         try {
             repository.deleteAll(projectTaskEmployees);
-            log.error("projectTaskEmployees is successfully removed from the Task {} ", task.getId());
+            log.debug("projectTaskEmployees is successfully removed from the Task {}", task.getId());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to remove projectTaskEmployees from the Task[%s]", task.getId());
             throw new LnFException(errorMessage, e);
@@ -186,7 +186,7 @@ public class ProjectTaskEmployeeService {
     public void delete(ProjectTaskEmployee entity) {
         try {
             repository.delete(entity);
-            log.error("Employee {} is successfully removed from the Task {} ", entity.getEmployeeId(), entity.getTask().getId());
+            log.debug("Employee {} is successfully removed from the Task {}", entity.getEmployeeId(), entity.getTask().getId());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to remove Employee [%s] from the Task[%s]", entity.getEmployeeId(), entity.getTask().getId());
             throw new LnFException(errorMessage, e);
@@ -198,7 +198,7 @@ public class ProjectTaskEmployeeService {
      */
     public void clearProjectTaskEmployeesCache() {
         Objects.requireNonNull(cacheManager.getCache("projectTaskEmployees")).clear();
-        log.error("ProjectTaskEmployees cache cleared.");
+        log.debug("ProjectTaskEmployees cache cleared.");
     }
 
     private ProjectTaskEmployee search(Project project, Task task, String employeeId) {
@@ -232,10 +232,10 @@ public class ProjectTaskEmployeeService {
                 taskEmployee.setTask(task);
                 taskEmployee.setEmployeeId(employeeId);
                 save(taskEmployee);
-                log.error("Successfully added the employee {} to the task {} of the project {} ", employeeId, task.getName(), project.getCode());
+                log.debug("Successfully added the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
 
             } else {
-                log.error("Failed to add the employee {} to the task {} of the project {} ", employeeId, task.getName(), project.getCode());
+                log.error("Failed to add the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
             }
 
         });

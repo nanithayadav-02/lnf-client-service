@@ -68,7 +68,7 @@ public class EscalationService {
             entities.add(entity);
         });
         save(entities);
-        log.error("Escalation for Client {} successfully created", clientId);
+        log.debug("Escalation for Client {} successfully created", clientId);
     }
 
     /**
@@ -84,7 +84,7 @@ public class EscalationService {
         Escalation entity = searchForEscalation(escalationId);
         Escalation updatedEntity = EscalationConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.error("Escalation for Client {} successfully created", clientId);
+        log.debug("Escalation for Client {} successfully created", clientId);
     }
 
     /**
@@ -97,7 +97,7 @@ public class EscalationService {
         List<Escalation> entities = repository.findByClientId(clientId);
         try {
             repository.deleteAll(entities);
-            log.error("Escalation for Client {} successfully deleted", clientId);
+            log.debug("Escalation for Client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Escalation for client [%s]", clientId);
             throw new LnFException(errorMessage);
@@ -115,7 +115,7 @@ public class EscalationService {
         Escalation entity = searchForEscalation(escalationId);
         try {
             repository.delete(entity);
-            log.error("Escalation {} for client {} successfully deleted", escalationId, clientId);
+            log.debug("Escalation {} for client {} successfully deleted", escalationId, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Escalation[[%s] for client [%s]", escalationId, clientId);
             throw new LnFException(errorMessage);

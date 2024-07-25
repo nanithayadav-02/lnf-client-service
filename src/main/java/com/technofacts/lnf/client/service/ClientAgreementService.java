@@ -91,7 +91,7 @@ public class ClientAgreementService {
 
                 var folder = String.format(S_S_S, folderName, clientId, AGREEMENTS);
                 String filePath = fileService.uploadFile(folder, file);
-                log.error("File uploaded successfully to S3 bucket: " + filePath);
+                log.debug("File uploaded successfully to S3 bucket: " + filePath);
             } catch (RuntimeException e) {
                 String errorMessage = String.format("Failed to create agreement[%s] for client [%s]", file.getName(), clientId);
                 throw new LnFException(errorMessage, e);
@@ -109,14 +109,14 @@ public class ClientAgreementService {
             String s3ObjectKey = String.format("%s/%s/%s/%s", folderName, clientId, AGREEMENTS, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
-            log.error("S3 object deleted for sows file");
+            log.debug("S3 object deleted for sows file");
 
             //Before Updating the file we are deleting from the s3 bucket
             var folder = String.format(S_S_S, folderName, clientId, AGREEMENTS);
             String filePath = fileService.uploadFile(folder, file);
 
-            log.error("File uploaded successfully to S3 bucket: " + filePath);
-            log.error("fileName {} for agreement {} successfully updated", fileName, clientId);
+            log.debug("File uploaded successfully to S3 bucket: " + filePath);
+            log.debug("fileName {} for agreement {} successfully updated", fileName, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to update fileName[%s] for agreement [%s]", fileName, clientId);
             throw new LnFException(errorMessage, e);
@@ -130,9 +130,9 @@ public class ClientAgreementService {
             String s3ObjectKey = String.format("%s/%s/%s/%s", folderName, clientId, AGREEMENTS, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
-            log.error("S3 object deleted for agreement file");
+            log.debug("S3 object deleted for agreement file");
             repository.delete(entity);
-            log.error("file {} for agreement {} successfully deleted", fileName, clientId);
+            log.debug("file {} for agreement {} successfully deleted", fileName, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete File[[%s] for agreement [%s]", fileName, clientId);
             throw new LnFException(errorMessage);

@@ -27,7 +27,7 @@ public class EmployeeTaskService {
 
         EmployeeProjectTasksDto employeeProjectTasksDto = new EmployeeProjectTasksDto();
         employeeProjectTasksDto.setEmployeeId(employeeId);
-        EmployeeProjectDto employeeProjectDto = employeeProjectService.findProjectsByEmployeeId(employeeId);
+        EmployeeProjectDto employeeProjectDto =  employeeProjectService.findProjectsByEmployeeId(employeeId);
         List<ProjectTasksDto> projectTaskDtos = new ArrayList<>();
         employeeProjectDto.getProjects().stream()
                 .filter(projectDto -> ACTIVE.equalsIgnoreCase(projectDto.getStatus()))

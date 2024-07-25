@@ -132,7 +132,7 @@ public class TaskService {
         Task entity = TaskConverter.toEntityModel(resource);
         entity.setProject(projectEntity);
         save(entity);
-        log.error("Task for Project {} successfully created", projectId);
+        log.debug("Task for Project {} successfully created", projectId);
     }
 
     /**
@@ -148,7 +148,7 @@ public class TaskService {
         Task entity = search(taskId);
         Task updatedEntity = TaskConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.error("Task {} for Project {} successfully created", taskId, projectId);
+        log.debug("Task {} for Project {} successfully created", taskId, projectId);
     }
 
     /**
@@ -169,7 +169,7 @@ public class TaskService {
 
         try {
             repository.deleteAll(tasks);
-            log.error("Tasks for project {} successfully deleted", projectId);
+            log.debug("Tasks for project {} successfully deleted", projectId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete tasks for project[%s]", projectId);
             throw new LnFException(errorMessage);
@@ -187,7 +187,7 @@ public class TaskService {
         Task entity = search(taskId);
         try {
             repository.delete(entity);
-            log.error("Task {} for project {} successfully deleted", taskId, projectId);
+            log.debug("Task {} for project {} successfully deleted", taskId, projectId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Task[[%s] for project [%s]", taskId, projectId);
             throw new LnFException(errorMessage);
