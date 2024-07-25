@@ -13,7 +13,7 @@ import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.file.FileFolderService;
 import com.technofacts.lnf.service.file.FileService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ import java.util.stream.IntStream;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class StatementOfWorkService {
 
     public static final String PROJECT = "project";
@@ -42,8 +42,8 @@ public class StatementOfWorkService {
     @Value("${aws.s3.bucket.folderName}")
     private String folderName;
 
-    public List<StatementOfWorkDto> findByProjectIdAndClientId( UUID clientId, UUID projectId) {
-        String filePath =  String.format(S_S_S_S_S, folderName, clientId, PROJECT, projectId, SOW);
+    public List<StatementOfWorkDto> findByProjectIdAndClientId(UUID clientId, UUID projectId) {
+        String filePath = String.format(S_S_S_S_S, folderName, clientId, PROJECT, projectId, SOW);
         List<FileDto> files = fileFolderService.findFiles(filePath);
         List<StatementOfWorkDto> statementOfWorkDtos = new ArrayList<>();
         files.forEach(file -> {
@@ -94,7 +94,7 @@ public class StatementOfWorkService {
 
                 var folder = String.format(S_S_S_S_S, folderName, clientId, PROJECT, projectId, SOW);
                 String filePath = fileService.uploadFile(folder, file);
-                log.info("File uploaded successfully to S3 bucket: " + filePath);
+                log.error("File uploaded successfully to S3 bucket: " + filePath);
             } catch (RuntimeException e) {
                 String errorMessage = String.format("Failed to create sows[%s] for project [%s]", file.getName(), projectId);
                 throw new LnFException(errorMessage, e);
@@ -112,14 +112,14 @@ public class StatementOfWorkService {
             String s3ObjectKey = String.format("%s/%s/%s/%s/%s/%s", folderName, clientId, PROJECT, projectId, SOW, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
-            log.info("S3 object deleted for sows file");
+            log.error("S3 object deleted for sows file");
 
             //Before Updating the file we are deleting from the s3 bucket
             var folder = String.format(S_S_S_S_S, folderName, clientId, PROJECT, projectId, SOW);
             String filePath = fileService.uploadFile(folder, file);
 
-            log.info("File uploaded successfully to S3 bucket: " + filePath);
-            log.info(() -> String.format("fileName [%s] for sows[%s] successfully updated", fileName, projectId));
+            log.error("File uploaded successfully to S3 bucket: " + filePath);
+            log.error("fileName {} for sows {} successfully updated", fileName, projectId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to update fileName[%s] for sows [%s]", fileName, projectId);
             throw new LnFException(errorMessage, e);
@@ -133,9 +133,9 @@ public class StatementOfWorkService {
             String s3ObjectKey = String.format("%s/%s/%s/%s/%s/%s", folderName, clientId, PROJECT, projectId, SOW, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
-            log.info("S3 object deleted for sows file");
+            log.error("S3 object deleted for sows file");
             repository.delete(entity);
-            log.info(() -> String.format("file[%s] for sows [%s] successfully deleted", fileName, projectId));
+            log.error("file {} for sows {} successfully deleted", fileName, projectId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete File[[%s] for sows [%s]", fileName, projectId);
             throw new LnFException(errorMessage);

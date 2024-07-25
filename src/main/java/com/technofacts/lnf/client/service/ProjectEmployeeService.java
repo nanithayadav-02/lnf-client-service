@@ -12,7 +12,7 @@ import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.employee.EmployeeService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,12 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.logging.Level;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class ProjectEmployeeService {
 
     private final ProjectEmployeeRepository repository;
@@ -47,7 +46,7 @@ public class ProjectEmployeeService {
         List<ProjectEmployee> employees = repository.findByProject(project);
         List<ClientEmployeeDto> employeeDtos = fetchEmployeeDetails(employees);
 
-        return createProjectEmployeeDto(project ,employeeDtos);
+        return createProjectEmployeeDto(project, employeeDtos);
     }
 
     @Cacheable(value = "projectEmployees")
@@ -80,7 +79,7 @@ public class ProjectEmployeeService {
                 .map(ProjectEmployee::getEmployeeId)
                 .toList();
         return employeeService.findByEmployeeIds(employeeIds).stream()
-                .map(ProjectConverter:: mapToClientEmployee)
+                .map(ProjectConverter::mapToClientEmployee)
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -97,11 +96,11 @@ public class ProjectEmployeeService {
     }
 
     /**
-         * Add employees to the project
-         *
-         * @param projectId   Project Id
-         * @param employeeIds List of Strings
-         */
+     * Add employees to the project
+     *
+     * @param projectId   Project Id
+     * @param employeeIds List of Strings
+     */
     @CacheEvict(value = "projectEmployees", allEntries = true)
     public void addEmployeeToProject(UUID projectId, List<String> employeeIds) {
 
@@ -109,7 +108,7 @@ public class ProjectEmployeeService {
         employeeIds.forEach(employeeId -> {
             try {
                 search(projectId, employeeId);
-                log.info(String.format("Employee[%s] is already associated to the projectId [%s]", employeeId, projectId));
+                log.error("Employee {} is already associated to the projectId {} ", employeeId, projectId);
 
             } catch (LnFEntityNotFoundException ex) {
                 EmployeeDto employeeDto = employeeService.findOne(employeeId);
@@ -118,9 +117,9 @@ public class ProjectEmployeeService {
                     projectEmployee.setProject(project);
                     projectEmployee.setEmployeeId(employeeId);
                     save(projectEmployee);
-                    log.log(Level.INFO, String.format("Successfully added the employee [%s] to the project [%s]", employeeId, project.getCode()));
+                    log.error("Successfully added the employee {} to the project {} ", employeeId, project.getCode());
                 } else {
-                    log.log(Level.SEVERE, String.format("Failed to add the employee [%s] to the project [%s]", employeeId, project.getCode()));
+                    log.error("Failed to add the employee {} to the project {} ", employeeId, project.getCode());
                 }
             }
         });
@@ -141,7 +140,7 @@ public class ProjectEmployeeService {
                 ProjectEmployee projectEmployee = search(projectId, employeeId);
                 repository.delete(projectEmployee);
             } catch (LnFEntityNotFoundException ex) {
-                log.warning(ex.getMessage());
+                log.error(ex.getMessage());
             }
         });
     }
@@ -159,7 +158,7 @@ public class ProjectEmployeeService {
         List<ProjectEmployee> projectEmployees = repository.findByProject(project);
         try {
             repository.deleteAll(projectEmployees);
-            log.info(() -> String.format("projectEmployees is successfully removed from the Project[%s]", project.getId()));
+            log.error("projectEmployees is successfully removed from the Project {} ", project.getId());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to remove projectEmployees from the Project[%s]", project.getId());
             throw new LnFException(errorMessage, e);
@@ -169,7 +168,7 @@ public class ProjectEmployeeService {
     public void delete(ProjectEmployee entity) {
         try {
             repository.delete(entity);
-            log.info(() -> String.format("Employee [%s] is successfully removed from the Project[%s]", entity.getEmployeeId(), entity.getProject().getCode()));
+            log.error("Employee {} is successfully removed from the Project {} ", entity.getEmployeeId(), entity.getProject().getCode());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to remove Employee [%s] from the Project[%s]", entity.getEmployeeId(), entity.getProject().getCode());
             throw new LnFException(errorMessage, e);
@@ -181,7 +180,7 @@ public class ProjectEmployeeService {
      */
     public void clearProjectEmployeesCache() {
         Objects.requireNonNull(cacheManager.getCache("projectEmployees")).clear();
-        log.info("ProjectEmployees cache cleared.");
+        log.error("ProjectEmployees cache cleared.");
     }
 
     private ProjectEmployee search(UUID projectId, String employeeId) {
@@ -193,7 +192,7 @@ public class ProjectEmployeeService {
     }
 
     @CacheEvict(value = "projectEmployees", allEntries = true)
-    public void addAllActiveEmployeeToProject(UUID projectId,List<String> statuses) {
+    public void addAllActiveEmployeeToProject(UUID projectId, List<String> statuses) {
         Project project = searchForProject(projectId);
         List<String> requiredIds = new ArrayList<>(employeeService.findByStatuses(statuses));
         requiredIds.removeAll(repository.findAllByProjectId(projectId)
@@ -205,7 +204,7 @@ public class ProjectEmployeeService {
             projectEmployee.setProject(project);
             projectEmployee.setEmployeeId(employeeId);
             save(projectEmployee);
-            log.log(Level.INFO, String.format("Successfully added the employee [%s] to the project [%s]", employeeId, project.getCode()));
+            log.error("Successfully added the employee {} to the project {} ", employeeId, project.getCode());
         });
     }
 }

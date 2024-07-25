@@ -1,11 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.technofacts.lnf.client.converter.ContactConverter;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.ClientContact;
@@ -16,14 +10,19 @@ import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class ClientContactService {
 
     private final ClientContactRepository repository;
@@ -63,7 +62,7 @@ public class ClientContactService {
             entities.add(entity);
         });
         save(entities);
-        log.info(() -> String.format("Contact for client[%s] successfully created", clientId));
+        log.error("Contact for client {} successfully created", clientId);
     }
 
     /**
@@ -78,7 +77,7 @@ public class ClientContactService {
         ClientContact entity = ContactConverter.toEntityModel(resource);
         entity.setClient(clientEntity);
         save(entity);
-        log.info(() -> String.format("Contact for client[%s] successfully created", clientId));
+        log.error("Contact for client {} successfully created", clientId);
     }
 
     /**
@@ -94,7 +93,7 @@ public class ClientContactService {
         ClientContact entity = searchForContact(contactId);
         ClientContact updatedEntity = ContactConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.info(() -> String.format("Contact for client[%s] successfully updated", clientId));
+        log.error("Contact for client {} successfully updated", clientId);
     }
 
     /**
@@ -107,7 +106,7 @@ public class ClientContactService {
         List<ClientContact> entities = repository.findByClientId(clientId);
         try {
             repository.deleteAll(entities);
-            log.info(() -> String.format("Contacts for client[%s] successfully deleted", clientId));
+            log.error("Contacts for client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete contacts for client [%s]", clientId);
             throw new LnFException(errorMessage);
@@ -125,7 +124,7 @@ public class ClientContactService {
         ClientContact entity = searchForContact(contactId);
         try {
             repository.delete(entity);
-            log.info(() -> String.format("Contact[%s] for client [%s] successfully deleted", contactId, clientId));
+            log.error("Contact {} for client {} successfully deleted", contactId, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete contact[%s] for client [%s]", contactId, clientId);
             throw new LnFException(errorMessage);

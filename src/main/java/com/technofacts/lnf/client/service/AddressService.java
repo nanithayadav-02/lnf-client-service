@@ -11,7 +11,7 @@ import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +23,7 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class AddressService {
 
     private final ClientAddressRepository repository;
@@ -69,14 +69,14 @@ public class AddressService {
             entities.add(entity);
         });
         save(entities);
-        log.info(() -> String.format("Address for Client[%s] successfully created", clientId));
+        log.error("Address for Client {} successfully created", clientId);
     }
 
     /**
      * Checks if a primary address already exists for the client
      *
-     * @param clientId    Client Id
-     * @param clientEntity The client entity
+     * @param clientId      Client Id
+     * @param clientEntity  The client entity
      * @param clientAddress Address of the client
      */
     private void checkIfPrimaryAddressExists(UUID clientId, Client clientEntity, AddressDto clientAddress) {
@@ -100,7 +100,7 @@ public class AddressService {
         ClientAddress entity = AddressConverter.toEntityModel(resource);
         entity.setClient(clientEntity);
         save(entity);
-        log.info(() -> String.format("Address for Client[%s] successfully created", clientId));
+        log.error("Address for Client {} successfully created", clientId);
     }
 
     /**
@@ -117,7 +117,7 @@ public class AddressService {
         checkIfPrimaryAddressExists(clientId, clientEntity, resource);
         ClientAddress updatedEntity = AddressConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.info(() -> String.format("Address for Client[%s] successfully updated", clientId));
+        log.error("Address for Client {} successfully updated", clientId);
     }
 
     /**
@@ -130,7 +130,7 @@ public class AddressService {
         List<ClientAddress> entities = repository.findAddressByClientId(clientId);
         try {
             repository.deleteAll(entities);
-            log.info(() -> String.format("Addresses for Client[%s] successfully deleted", clientId));
+            log.error("Addresses for Client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Addresses for client [%s]", clientId);
             throw new LnFException(errorMessage);
@@ -149,7 +149,7 @@ public class AddressService {
         ClientAddress entity = searchForAddress(addressId);
         try {
             repository.delete(entity);
-            log.info(() -> String.format("Address[%s] for client [%s] successfully deleted", addressId, clientId));
+            log.error("Address {} for client {} successfully deleted", addressId, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Address[[%s] for client [%s]", addressId, clientId);
             throw new LnFException(errorMessage);

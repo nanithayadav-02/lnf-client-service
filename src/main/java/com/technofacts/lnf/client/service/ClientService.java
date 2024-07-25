@@ -17,7 +17,7 @@ import com.technofacts.lnf.service.specification.GenericSpecificationBuilder;
 import com.technofacts.lnf.util.RestUtil;
 import com.technofacts.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -37,7 +37,7 @@ import java.util.function.Function;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class ClientService implements PaginatedAndSortedService<ClientOverviewDto> {
 
     private final ClientRepository repository;
@@ -148,7 +148,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
                 "Failed to create Client with null payload");
         Client entity = ClientConverter.toEntityModel(resource);
         saveEntity(entity);
-        log.info(() -> String.format("Client[%s] successfully created", entity.getCode()));
+        log.error("Client {} successfully created", entity.getCode());
     }
 
     /**
@@ -165,7 +165,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
         Client entity = search(clientId);
         Client updatedEntity = ClientConverter.toEntityModel(resource, entity);
         saveEntity(updatedEntity);
-        log.info(() -> String.format("Client[%s] successfully updated", clientId));
+        log.error("Client {} successfully updated", clientId);
     }
 
     /**
@@ -180,7 +180,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
         projectList.forEach(project -> projectService.delete(project.getId()));
         try {
             repository.delete(entity);
-            log.info(() -> String.format("Client[%s] successfully deleted", entity.getCode()));
+            log.error("Client {} successfully deleted", entity.getCode());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Client [%s]", entity.getCode());
             throw new LnFException(errorMessage, e);
@@ -192,7 +192,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      */
     public void clearClientsCache() {
         Objects.requireNonNull(cacheManager.getCache("clients")).clear();
-        log.info("Clients cache cleared.");
+        log.error("Clients cache cleared.");
     }
 
     private Page<ClientOverviewDto> validateAndGetPages(int page, Page<Client> resultPage) {

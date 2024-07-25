@@ -16,7 +16,7 @@ import com.technofacts.lnf.service.specification.GenericSpecificationBuilder;
 import com.technofacts.lnf.util.RestUtil;
 import com.technofacts.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +34,7 @@ import java.util.function.Function;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class ClientNotesService implements PaginatedAndSortedService<ClientNotesDto> {
 
     private final ClientNotesRepository repository;
@@ -129,7 +129,7 @@ public class ClientNotesService implements PaginatedAndSortedService<ClientNotes
             entities.add(entity);
         });
         save(entities);
-        log.info(() -> "Notes for Client[" + clientId + "] successfully created");
+        log.error("Notes for Client[" + clientId + "] successfully created");
     }
 
     public void create(UUID clientId, ClientNotesDto resource) {
@@ -138,7 +138,7 @@ public class ClientNotesService implements PaginatedAndSortedService<ClientNotes
         ClientNotes entity = ClientNotesConverter.toEntityModel(resource, new ClientNotes());
         entity.setClient(employeeEntity);
         save(entity);
-        log.info(() -> String.format("Notes for Client[%s] successfully created", clientId));
+        log.error("Notes for Client {} successfully created", clientId);
     }
 
     public void update(UUID clientId, UUID notesId, ClientNotesDto resource) {
@@ -146,7 +146,7 @@ public class ClientNotesService implements PaginatedAndSortedService<ClientNotes
         searchForClient(clientId);
         ClientNotes entity = searchForNotes(notesId);
         save(ClientNotesConverter.toEntityModel(resource, entity));
-        log.info(() -> String.format("Notes for Client[%s] successfully created", clientId));
+        log.error("Notes for Client {} successfully created", clientId);
     }
 
     public void deleteById(UUID clientId, UUID notesId) {
@@ -154,7 +154,7 @@ public class ClientNotesService implements PaginatedAndSortedService<ClientNotes
         ClientNotes entity = searchForNotes(notesId);
         try {
             repository.delete(entity);
-            log.info(() -> String.format("Notes[%s] for client [%s] successfully deleted", notesId, clientId));
+            log.error("Notes {} for client {} successfully deleted", notesId, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Notes[[%s] for client [%s]", notesId, clientId);
             throw new LnFException(errorMessage);
@@ -166,7 +166,7 @@ public class ClientNotesService implements PaginatedAndSortedService<ClientNotes
         List<ClientNotes> entities = repository.findByClientId(clientId);
         try {
             repository.deleteAll(entities);
-            log.info(() -> String.format("Notes for Client[%s] successfully deleted", clientId));
+            log.error("Notes for Client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Notes for client [%s]", clientId);
             throw new LnFException(errorMessage);

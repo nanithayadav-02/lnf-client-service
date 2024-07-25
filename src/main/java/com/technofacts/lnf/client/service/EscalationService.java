@@ -10,7 +10,7 @@ import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +22,7 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class EscalationService {
 
     private final EscalationRepository repository;
@@ -61,14 +61,14 @@ public class EscalationService {
     public void create(UUID clientId, List<EscalationDto> resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create escalation for client [%s] with null payload", clientId));
         Client clientEntity = searchForClient(clientId);
-        List<Escalation> entities = new ArrayList<> ();
+        List<Escalation> entities = new ArrayList<>();
         resource.stream().filter(Objects::nonNull).forEach(escalationDto -> {
             Escalation entity = EscalationConverter.toEntityModel(escalationDto);
             entity.setClient(clientEntity);
             entities.add(entity);
         });
         save(entities);
-        log.info(() -> String.format("Escalation for Client[%s] successfully created", clientId));
+        log.error("Escalation for Client {} successfully created", clientId);
     }
 
     /**
@@ -84,7 +84,7 @@ public class EscalationService {
         Escalation entity = searchForEscalation(escalationId);
         Escalation updatedEntity = EscalationConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.info(() -> String.format("Escalation for Client[%s] successfully created", clientId));
+        log.error("Escalation for Client {} successfully created", clientId);
     }
 
     /**
@@ -97,7 +97,7 @@ public class EscalationService {
         List<Escalation> entities = repository.findByClientId(clientId);
         try {
             repository.deleteAll(entities);
-            log.info(() -> String.format("Escalation for Client[%s] successfully deleted", clientId));
+            log.error("Escalation for Client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Escalation for client [%s]", clientId);
             throw new LnFException(errorMessage);
@@ -110,15 +110,15 @@ public class EscalationService {
      * @param clientId     Client Id
      * @param escalationId Escalation Id
      */
-    public void deleteById (UUID clientId, UUID escalationId) {
-        searchForClient (clientId);
-        Escalation entity = searchForEscalation (escalationId);
+    public void deleteById(UUID clientId, UUID escalationId) {
+        searchForClient(clientId);
+        Escalation entity = searchForEscalation(escalationId);
         try {
-            repository.delete (entity);
-            log.info (() -> String.format ("Escalation[%s] for client [%s] successfully deleted", escalationId, clientId));
+            repository.delete(entity);
+            log.error("Escalation {} for client {} successfully deleted", escalationId, clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format ("Failed to delete Escalation[[%s] for client [%s]", escalationId, clientId);
-            throw new LnFException (errorMessage);
+            String errorMessage = String.format("Failed to delete Escalation[[%s] for client [%s]", escalationId, clientId);
+            throw new LnFException(errorMessage);
         }
     }
 
