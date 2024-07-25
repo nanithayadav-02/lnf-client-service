@@ -13,7 +13,7 @@ import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.file.FileFolderService;
 import com.technofacts.lnf.service.file.FileService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ import java.util.stream.IntStream;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class ClientAgreementService {
 
     public static final String AGREEMENTS = "agreements";
@@ -41,7 +41,7 @@ public class ClientAgreementService {
     private String folderName;
 
     public List<AgreementDto> findByClientId(UUID clientId) {
-        String filePath =  String.format(S_S_S, folderName, clientId, AGREEMENTS);
+        String filePath = String.format(S_S_S, folderName, clientId, AGREEMENTS);
         List<FileDto> files = fileFolderService.findFiles(filePath);
         List<AgreementDto> agreementDtos = new ArrayList<>();
         files.forEach(file -> {
@@ -91,7 +91,7 @@ public class ClientAgreementService {
 
                 var folder = String.format(S_S_S, folderName, clientId, AGREEMENTS);
                 String filePath = fileService.uploadFile(folder, file);
-                log.info("File uploaded successfully to S3 bucket: " + filePath);
+                log.debug("File uploaded successfully to S3 bucket: " + filePath);
             } catch (RuntimeException e) {
                 String errorMessage = String.format("Failed to create agreement[%s] for client [%s]", file.getName(), clientId);
                 throw new LnFException(errorMessage, e);
@@ -109,14 +109,14 @@ public class ClientAgreementService {
             String s3ObjectKey = String.format("%s/%s/%s/%s", folderName, clientId, AGREEMENTS, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
-            log.info("S3 object deleted for sows file");
+            log.debug("S3 object deleted for sows file");
 
             //Before Updating the file we are deleting from the s3 bucket
             var folder = String.format(S_S_S, folderName, clientId, AGREEMENTS);
             String filePath = fileService.uploadFile(folder, file);
 
-            log.info("File uploaded successfully to S3 bucket: " + filePath);
-            log.info(() -> String.format("fileName [%s] for agreement[%s] successfully updated", fileName, clientId));
+            log.debug("File uploaded successfully to S3 bucket: " + filePath);
+            log.debug("fileName {} for agreement {} successfully updated", fileName, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to update fileName[%s] for agreement [%s]", fileName, clientId);
             throw new LnFException(errorMessage, e);
@@ -130,9 +130,9 @@ public class ClientAgreementService {
             String s3ObjectKey = String.format("%s/%s/%s/%s", folderName, clientId, AGREEMENTS, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
-            log.info("S3 object deleted for agreement file");
+            log.debug("S3 object deleted for agreement file");
             repository.delete(entity);
-            log.info(() -> String.format("file[%s] for agreement [%s] successfully deleted", fileName, clientId));
+            log.debug("file {} for agreement {} successfully deleted", fileName, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete File[[%s] for agreement [%s]", fileName, clientId);
             throw new LnFException(errorMessage);

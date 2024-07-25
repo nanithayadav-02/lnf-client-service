@@ -16,7 +16,7 @@ import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.employee.EmployeeService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,12 +24,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.logging.Level;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class ProjectTaskEmployeeService {
 
     private final ProjectTaskEmployeeRepository repository;
@@ -93,7 +92,7 @@ public class ProjectTaskEmployeeService {
                 .toList();
         return employeeService.findByEmployeeIds(employeeIds)
                 .stream()
-                .map(ProjectConverter:: mapToClientEmployee)
+                .map(ProjectConverter::mapToClientEmployee)
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -123,7 +122,7 @@ public class ProjectTaskEmployeeService {
         employeeIds.forEach(employeeId -> {
             try {
                 search(project, task, employeeId);
-                log.info(String.format("Employee[%s] is already associated to the Task [%s]", employeeId, task.getId()));
+                log.debug("Employee {} is already associated to the Task {}", employeeId, task.getId());
 
             } catch (LnFEntityNotFoundException ex) {
                 EmployeeDto employeeDto = employeeService.findOne(employeeId);
@@ -133,10 +132,10 @@ public class ProjectTaskEmployeeService {
                     taskEmployee.setTask(task);
                     taskEmployee.setEmployeeId(employeeId);
                     save(taskEmployee);
-                    log.log(Level.INFO, String.format("Successfully added the employee [%s] to the task [%s] of the project [%s]", employeeId, task.getName(), project.getCode()));
+                    log.debug("Successfully added the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
 
                 } else {
-                    log.log(Level.SEVERE, String.format("Failed to add the employee [%s] to the task [%s] of the project [%s]", employeeId, task.getName(), project.getCode()));
+                    log.error("Failed to add the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
                 }
             }
         });
@@ -159,7 +158,7 @@ public class ProjectTaskEmployeeService {
                 ProjectTaskEmployee taskEmployee = search(project, task, employeeId);
                 repository.delete(taskEmployee);
             } catch (LnFEntityNotFoundException ex) {
-                log.warning(ex.getMessage());
+                log.warn(ex.getMessage());
             }
         });
     }
@@ -177,7 +176,7 @@ public class ProjectTaskEmployeeService {
         List<ProjectTaskEmployee> projectTaskEmployees = repository.findByTask(task);
         try {
             repository.deleteAll(projectTaskEmployees);
-            log.info(() -> String.format("projectTaskEmployees is successfully removed from the Task[%s]", task.getId()));
+            log.debug("projectTaskEmployees is successfully removed from the Task {}", task.getId());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to remove projectTaskEmployees from the Task[%s]", task.getId());
             throw new LnFException(errorMessage, e);
@@ -187,7 +186,7 @@ public class ProjectTaskEmployeeService {
     public void delete(ProjectTaskEmployee entity) {
         try {
             repository.delete(entity);
-            log.info(() -> String.format("Employee [%s] is successfully removed from the Task[%s]", entity.getEmployeeId(), entity.getTask().getId()));
+            log.debug("Employee {} is successfully removed from the Task {}", entity.getEmployeeId(), entity.getTask().getId());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to remove Employee [%s] from the Task[%s]", entity.getEmployeeId(), entity.getTask().getId());
             throw new LnFException(errorMessage, e);
@@ -199,7 +198,7 @@ public class ProjectTaskEmployeeService {
      */
     public void clearProjectTaskEmployeesCache() {
         Objects.requireNonNull(cacheManager.getCache("projectTaskEmployees")).clear();
-        log.info("ProjectTaskEmployees cache cleared.");
+        log.debug("ProjectTaskEmployees cache cleared.");
     }
 
     private ProjectTaskEmployee search(Project project, Task task, String employeeId) {
@@ -226,18 +225,18 @@ public class ProjectTaskEmployeeService {
                 .toList();
 
         requiredIds.forEach(employeeId -> {
-                EmployeeDto employeeDto = employeeService.findOne(employeeId);
-                if (employeeDto != null) {
-                    ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
-                    taskEmployee.setProject(project);
-                    taskEmployee.setTask(task);
-                    taskEmployee.setEmployeeId(employeeId);
-                    save(taskEmployee);
-                    log.log(Level.INFO, String.format("Successfully added the employee [%s] to the task [%s] of the project [%s]", employeeId, task.getName(), project.getCode()));
+            EmployeeDto employeeDto = employeeService.findOne(employeeId);
+            if (employeeDto != null) {
+                ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
+                taskEmployee.setProject(project);
+                taskEmployee.setTask(task);
+                taskEmployee.setEmployeeId(employeeId);
+                save(taskEmployee);
+                log.debug("Successfully added the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
 
-                } else {
-                    log.log(Level.SEVERE, String.format("Failed to add the employee [%s] to the task [%s] of the project [%s]", employeeId, task.getName(), project.getCode()));
-                }
+            } else {
+                log.error("Failed to add the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
+            }
 
         });
     }

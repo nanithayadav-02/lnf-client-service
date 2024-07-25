@@ -12,7 +12,7 @@ import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.util.RestUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -26,7 +26,7 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class TaskService {
 
     private final TaskRepository repository;
@@ -39,8 +39,8 @@ public class TaskService {
      * project is not found.
      *
      * @param projectId Project Id
-     * @param page Requested Page Number
-     * @param size Requested size in the page
+     * @param page      Requested Page Number
+     * @param size      Requested size in the page
      * @return A Page object with taskDtos
      */
     public Page<TaskDto> findPaginatedByProjectId(final UUID projectId, final int page, final int size) {
@@ -100,7 +100,7 @@ public class TaskService {
      * if there is no project or task.
      *
      * @param projectId Project Id
-     * @param taskId Task Id
+     * @param taskId    Task Id
      * @return TaskDto object
      */
     public TaskDto findByProjectIdAndTaskId(UUID projectId, UUID taskId) {
@@ -124,7 +124,7 @@ public class TaskService {
      * Creates the project
      *
      * @param projectId Project Id
-     * @param resource TaskDto object
+     * @param resource  TaskDto object
      */
     public void create(UUID projectId, TaskDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create Task for project[%s] with null payload", projectId));
@@ -132,15 +132,15 @@ public class TaskService {
         Task entity = TaskConverter.toEntityModel(resource);
         entity.setProject(projectEntity);
         save(entity);
-        log.info(() -> String.format("Task for Project[%s] successfully created", projectId));
+        log.debug("Task for Project {} successfully created", projectId);
     }
 
     /**
      * Updates the project
      *
      * @param projectId Project Id
-     * @param taskId Task Id
-     * @param resource TaskDto
+     * @param taskId    Task Id
+     * @param resource  TaskDto
      */
     public void update(UUID projectId, UUID taskId, TaskDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to update Task for project[%s] with null payload", projectId));
@@ -148,7 +148,7 @@ public class TaskService {
         Task entity = search(taskId);
         Task updatedEntity = TaskConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.info(() -> String.format("Task[%s] for Project[%s] successfully created", taskId, projectId));
+        log.debug("Task {} for Project {} successfully created", taskId, projectId);
     }
 
     /**
@@ -169,7 +169,7 @@ public class TaskService {
 
         try {
             repository.deleteAll(tasks);
-            log.info(() -> String.format("Tasks for project[%s] successfully deleted", projectId));
+            log.debug("Tasks for project {} successfully deleted", projectId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete tasks for project[%s]", projectId);
             throw new LnFException(errorMessage);
@@ -180,14 +180,14 @@ public class TaskService {
      * Deletes the task by projectId and taskId
      *
      * @param projectId Project Id
-     * @param taskId Task Id
+     * @param taskId    Task Id
      */
     public void deleteByProjectIdAndTaskId(UUID projectId, UUID taskId) {
         searchForProject(projectId);
         Task entity = search(taskId);
         try {
             repository.delete(entity);
-            log.info(() -> String.format("Task[%s] for project [%s] successfully deleted", taskId, projectId));
+            log.debug("Task {} for project {} successfully deleted", taskId, projectId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Task[[%s] for project [%s]", taskId, projectId);
             throw new LnFException(errorMessage);

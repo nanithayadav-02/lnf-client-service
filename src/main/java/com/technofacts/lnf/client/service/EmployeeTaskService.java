@@ -1,22 +1,22 @@
 package com.technofacts.lnf.client.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.technofacts.lnf.dto.client.EmployeeProjectDto;
 import com.technofacts.lnf.dto.client.EmployeeProjectTaskDto;
 import com.technofacts.lnf.dto.client.EmployeeProjectTasksDto;
 import com.technofacts.lnf.dto.client.ProjectTasksDto;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class EmployeeTaskService {
 
     private final EmployeeProjectService employeeProjectService;
