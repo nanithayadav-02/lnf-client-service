@@ -1,6 +1,7 @@
 package com.technofacts.lnf.client.converter;
 
 import com.technofacts.lnf.client.model.ClientAddress;
+import com.technofacts.lnf.client.model.enums.AddressType;
 import com.technofacts.lnf.dto.client.AddressDto;
 
 public class AddressConverter {
@@ -18,6 +19,7 @@ public class AddressConverter {
                 .state(entity.getState())
                 .country(entity.getCountry())
                 .postCode(entity.getPostCode())
+                .addressType(entity.getAddressType() != null ? entity.getAddressType().name() : null)
                 .build();
     }
 
@@ -41,7 +43,7 @@ public class AddressConverter {
         entity.setState(transport.getState());
         entity.setCountry(transport.getCountry());
         entity.setPostCode(transport.getPostCode());
-
+        entity.setAddressType(transport.getAddressType() != null ? AddressType.valueOf(transport.getAddressType()) : null);
         return entity;
     }
 

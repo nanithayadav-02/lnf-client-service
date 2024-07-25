@@ -133,11 +133,11 @@ spring:
     data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      idle-timeout: 60000
-      max-lifetime: 1800000
-      connection-timeout: 30000
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:5}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:60000}
+      max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:1800000}
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:30000}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -190,11 +190,11 @@ spring:
     data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      idle-timeout: 60000
-      max-lifetime: 1800000
-      connection-timeout: 30000
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:5}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:60000}
+      max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:1800000}
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:30000}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -247,11 +247,11 @@ spring:
     data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      idle-timeout: 60000
-      max-lifetime: 1800000
-      connection-timeout: 30000
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:5}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:60000}
+      max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:1800000}
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:30000}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

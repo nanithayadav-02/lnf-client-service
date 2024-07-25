@@ -1,5 +1,6 @@
 package com.technofacts.lnf.client.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +27,9 @@ public class Client extends AuditableEntity {
 
     @Column(name = "pan")
     private String pan;
+
+    @Column(name = "opening_balance")
+    private BigDecimal openingBalance;
 
     @Column(name = "tan")
     private String tan;

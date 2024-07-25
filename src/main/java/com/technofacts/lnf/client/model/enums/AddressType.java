@@ -5,7 +5,9 @@ public enum AddressType {
     //@formatter:off
     Communication("Communication"),
     Permanent("Permanent"),
-    Work("Work");
+    Work("Work"),
+    Primary("Primary"),
+    Secondary("Secondary");
     //@formatter:on
 
     private final String label;
