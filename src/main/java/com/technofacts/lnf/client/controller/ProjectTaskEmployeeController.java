@@ -79,4 +79,10 @@ public class ProjectTaskEmployeeController {
         service.clearProjectTaskEmployeesCache();
     }
 
+    @PostMapping(value = "/projects/{projectId}/employee/{employeeId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addAllTasksToEmployee(@PathVariable("projectId") final UUID projectId, @PathVariable("employeeId") final String employeeId) {
+        service.addAllTasksToEmployee(projectId, employeeId);
+    }
+
 }
