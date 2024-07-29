@@ -79,10 +79,10 @@ public class ProjectTaskEmployeeController {
         service.clearProjectTaskEmployeesCache();
     }
 
-    @PostMapping(value = "/projects/{projectId}/employee/{employeeId}")
+    @PostMapping(value = "/projects/{projectId}/tasks/employees")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addAllTasksToEmployee(@PathVariable("projectId") final UUID projectId, @PathVariable("employeeId") final String employeeId) {
-        service.addAllTasksToEmployee(projectId, employeeId);
+    public void addAllTasksToEmployee(@PathVariable("projectId") final UUID projectId, @RequestBody  List<String> employeeIds) {
+        service.addAllTasksToEmployee(projectId, employeeIds);
     }
 
 }

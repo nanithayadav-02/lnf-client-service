@@ -241,22 +241,23 @@ public class ProjectTaskEmployeeService {
         });
     }
 
-    public void addAllTasksToEmployee(UUID projectId, String employeeId) {
+    public void addAllTasksToEmployee(UUID projectId, List<String> employeeIds) {
         Project project = searchForProject(projectId);
         Set<Task> tasks = project.getTasks();
-        tasks.forEach(
-                task -> {
-                    EmployeeDto employeeDto = employeeService.findOne(employeeId);
-                    if (employeeDto != null) {
-                        ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
-                        taskEmployee.setEmployeeId(employeeId);
-                        taskEmployee.setProject(project);
-                        taskEmployee.setTask(task);
-                        save(taskEmployee);
-                    } else {
-                        log.error("Failed to add the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
-                    }
-                }
-        );
+        employeeIds.forEach(employeeId ->
+                tasks.forEach(
+                        task -> {
+                            EmployeeDto employeeDto = employeeService.findOne(employeeId);
+                            if (employeeDto != null) {
+                                ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
+                                taskEmployee.setEmployeeId(employeeId);
+                                taskEmployee.setProject(project);
+                                taskEmployee.setTask(task);
+                                save(taskEmployee);
+                            } else {
+                                log.error("Failed to add the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
+                            }
+                        }
+                ));
     }
 }
