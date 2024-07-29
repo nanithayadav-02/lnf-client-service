@@ -81,8 +81,14 @@ public class ProjectTaskEmployeeController {
 
     @PostMapping(value = "/projects/{projectId}/tasks/employees")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addAllTasksToEmployee(@PathVariable("projectId") final UUID projectId, @RequestBody  List<String> employeeIds) {
+    public void addAllTasksToEmployees(@PathVariable("projectId") final UUID projectId, @RequestBody  List<String> employeeIds) {
         service.addAllTasksToEmployee(projectId, employeeIds);
+    }
+
+    @PostMapping(value = "/projects/{projectId}/employee/{employeeId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addAllTasksToEmployee(@PathVariable("projectId") final UUID projectId, @PathVariable final String employeeId) {
+        service.addAllTasksToEmployee(projectId, employeeId);
     }
 
 }
