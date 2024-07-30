@@ -247,16 +247,12 @@ public class ProjectTaskEmployeeService {
         employeeIds.forEach(employeeId ->
                 tasks.forEach(
                         task -> {
-                            EmployeeDto employeeDto = employeeService.findOne(employeeId);
-                            if (employeeDto != null) {
-                                ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
-                                taskEmployee.setEmployeeId(employeeId);
-                                taskEmployee.setProject(project);
-                                taskEmployee.setTask(task);
-                                save(taskEmployee);
-                            } else {
-                                log.error("Failed to add the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
-                            }
+                            ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
+                            taskEmployee.setEmployeeId(employeeId);
+                            taskEmployee.setProject(project);
+                            taskEmployee.setTask(task);
+                            save(taskEmployee);
+
                         }
                 ));
     }
@@ -266,16 +262,12 @@ public class ProjectTaskEmployeeService {
         Set<Task> tasks = project.getTasks();
         tasks.forEach(
                 task -> {
-                    EmployeeDto employeeDto = employeeService.findOne(employeeId);
-                    if (employeeDto != null) {
-                        ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
-                        taskEmployee.setEmployeeId(employeeId);
-                        taskEmployee.setProject(project);
-                        taskEmployee.setTask(task);
-                        save(taskEmployee);
-                    } else {
-                        log.error("Failed to add the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
-                    }
+                    ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
+                    taskEmployee.setEmployeeId(employeeId);
+                    taskEmployee.setProject(project);
+                    taskEmployee.setTask(task);
+                    save(taskEmployee);
+
                 }
         );
     }
