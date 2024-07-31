@@ -5,7 +5,6 @@ import com.technofacts.lnf.dto.timesheet.WeeklyTimesheetDto;
 import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.timesheet.TimesheetService;
 import jakarta.transaction.Transactional;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Level;
 
 @Service
 @Transactional
