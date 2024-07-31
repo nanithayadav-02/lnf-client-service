@@ -78,7 +78,7 @@ public class EmployeeClientImpl extends BaseWebClientService implements Employee
         }
 
         int responseSize = employeeDtos != null ? employeeDtos.size() : 0;
-        log.info("Queried for {} employees, Received {} employee details, " +
+        log.debug("Queried for {} employees, Received {} employee details, " +
                 "Unable to fetch {} employees details", employeeIds.size(), responseSize, employeeIds.size() - responseSize);
 
         return employeeDtos;
