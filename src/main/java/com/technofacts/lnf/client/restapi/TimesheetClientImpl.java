@@ -33,7 +33,7 @@ public class TimesheetClientImpl extends BaseWebClientService implements Timeshe
     }
 
     @Override
-    public List<WeeklyTimesheetDto> findAllByEmployeeId(String employeeId, Optional<LocalDate> startDate, Optional<LocalDate> endDate, Optional<String> status) {
+    public List<WeeklyTimesheetDto> findAllTimesheet(String employeeId, Optional<LocalDate> startDate, Optional<LocalDate> endDate, Optional<String> status) {
         return null;
     }
 
