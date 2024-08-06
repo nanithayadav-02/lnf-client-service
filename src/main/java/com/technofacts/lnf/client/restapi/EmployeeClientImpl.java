@@ -137,8 +137,9 @@ public class EmployeeClientImpl extends BaseWebClientService implements Employee
     }
 
     @Override
-    public Map<String, String> findIdAndFullNameByStatuses(List<String> statuses) {
+    public Map<String, String> findEmployeeIdsAndFullNamesByStatuses(List<String> statuses) {
         return null;
     }
+
 
 }
