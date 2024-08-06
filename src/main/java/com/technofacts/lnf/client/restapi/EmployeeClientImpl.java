@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -133,6 +134,11 @@ public class EmployeeClientImpl extends BaseWebClientService implements Employee
     @Override
     public List<EmployeeDto> findDirectReports(String employeeId) {
         return Collections.emptyList();
+    }
+
+    @Override
+    public Map<String, String> findIdAndFullNameByStatuses(List<String> statuses) {
+        return null;
     }
 
 }
