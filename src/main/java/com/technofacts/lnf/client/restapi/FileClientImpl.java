@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -72,13 +71,13 @@ public class FileClientImpl extends BaseWebClientService implements FileService,
     }
 
     @Override
-    public List<String> uploadFiles (String folder, List<MultipartFile> files) {
-        return Collections.emptyList ();
+    public List<String> uploadFiles(String folder, List<MultipartFile> files) {
+        return Collections.emptyList();
     }
 
     @Override
-    public List<String> findFilesInFolder (String folderName) {
-        List<String> files = new ArrayList<> ();
+    public List<String> findFilesInFolder(String folderName) {
+        List<String> files = new ArrayList<>();
         try {
             WebClient.RequestHeadersSpec<?> spec = webClient.get()
                     .uri(s3Service + "/folder-name?folderName={folderName}", folderName)
@@ -87,11 +86,13 @@ public class FileClientImpl extends BaseWebClientService implements FileService,
             addJwtToken(spec);
             // Execute the request and block to get the response, consider using subscribe for a non-blocking approach
             files = spec.retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<String>> () {})
+                    .bodyToMono(new ParameterizedTypeReference<List<String>>() {
+                    })
                     .block();
 
         } catch (LnFEntityNotFoundException ex) {
-            log.error("Failed to get the files in the folder");
+            log.error("Failed to get the files in the folder with error message : {}", ex.getMessage());
+            throw new LnFException("Failed to get the files in folder with exception ", ex);
         }
         return files;
     }
@@ -102,7 +103,7 @@ public class FileClientImpl extends BaseWebClientService implements FileService,
             String joinedKeys = String.join(",", filePaths);
             WebClient.RequestHeadersSpec<?> spec = webClient
                     .delete()
-                    .uri(s3Service  +"?filePaths=" + joinedKeys)
+                    .uri(s3Service + "?filePaths=" + joinedKeys)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
             addJwtToken(spec);
             spec.retrieve()
@@ -119,10 +120,10 @@ public class FileClientImpl extends BaseWebClientService implements FileService,
     }
 
     @Override
-    public ResponseEntity<byte[]> findFileContent (String filePath) {
+    public ResponseEntity<byte[]> findFileContent(String filePath) {
         try {
-            WebClient.RequestHeadersSpec<?> spec = webClient.get ()
-                    .uri (s3Service + "/content" + "?filePath={filePath}", filePath);
+            WebClient.RequestHeadersSpec<?> spec = webClient.get()
+                    .uri(s3Service + "/content" + "?filePath={filePath}", filePath);
             addJwtToken(spec);
             ResponseEntity<byte[]> response = spec
                     .retrieve()
@@ -130,15 +131,15 @@ public class FileClientImpl extends BaseWebClientService implements FileService,
                     .block();
             log.info("file is retrieved");
             return response;
-        }  catch (Exception ex) {
+        } catch (Exception ex) {
             log.error("File is not retrieved {}", ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            throw new LnFException("Failed to retrieve file content due to exception : ", ex);
         }
     }
 
     @Override
     public List<FileDto> findFiles(String folderName) {
-        List<FileDto> files = new ArrayList<> ();
+        List<FileDto> files = new ArrayList<>();
         try {
             WebClient.RequestHeadersSpec<?> spec = webClient.get()
                     .uri(s3Service + "/folder-names?folderName={folderName}", folderName)
@@ -147,11 +148,13 @@ public class FileClientImpl extends BaseWebClientService implements FileService,
             addJwtToken(spec);
             // Execute the request and block to get the response, consider using subscribe for a non-blocking approach
             files = spec.retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<FileDto>> () {})
+                    .bodyToMono(new ParameterizedTypeReference<List<FileDto>>() {
+                    })
                     .block();
 
         } catch (LnFEntityNotFoundException ex) {
-            log.error("Failed to get the files in the folder");
+            log.error("Failed to get the files in the folder with error message : {}", ex.getMessage());
+            throw new LnFException("Failed to get the files with exception ", ex);
         }
         return files;
     }

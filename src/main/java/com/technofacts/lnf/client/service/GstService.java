@@ -1,11 +1,5 @@
 package com.technofacts.lnf.client.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.technofacts.lnf.client.converter.GstConverter;
 import com.technofacts.lnf.client.model.Client;
 import com.technofacts.lnf.client.model.Gst;
@@ -16,14 +10,19 @@ import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class GstService {
 
     private final GstRepository repository;
@@ -69,7 +68,7 @@ public class GstService {
             entities.add(entity);
         });
         save(entities);
-        log.info(() -> String.format("Gst for client[%s] successfully created", clientId));
+        log.debug("Gst for client {} successfully created", clientId);
     }
 
     /**
@@ -84,7 +83,7 @@ public class GstService {
         Gst entity = GstConverter.toEntityModel(resource);
         entity.setClient(clientEntity);
         save(entity);
-        log.info(() -> String.format("Gst for client[%s] successfully created", clientId));
+        log.debug("Gst for client {} successfully created", clientId);
     }
 
     /**
@@ -100,7 +99,7 @@ public class GstService {
         Gst entity = searchForGst(gstId);
         Gst updatedEntity = GstConverter.toEntityModel(resource, entity);
         save(updatedEntity);
-        log.info(() -> String.format("Gst for client[%s] successfully updated", clientId));
+        log.debug("Gst for client {} successfully updated", clientId);
     }
 
     /**
@@ -113,7 +112,7 @@ public class GstService {
         List<Gst> entities = repository.findByClientId(clientId);
         try {
             repository.deleteAll(entities);
-            log.info(() -> String.format("Gsts for client[%s] successfully deleted", clientId));
+            log.debug("Gsts for client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete gsts for client [%s]", clientId);
             throw new LnFException(errorMessage);
@@ -131,7 +130,7 @@ public class GstService {
         Gst entity = searchForGst(gstId);
         try {
             repository.delete(entity);
-            log.info(() -> String.format("Gst[%s] for client [%s] successfully deleted", gstId, clientId));
+            log.debug("Gst {} for client {} successfully deleted", gstId, clientId);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete gst[%s] for client [%s]", gstId, clientId);
             throw new LnFException(errorMessage);

@@ -20,7 +20,7 @@ import com.technofacts.lnf.service.timesheet.TimesheetService;
 import com.technofacts.lnf.util.RestUtil;
 import com.technofacts.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -41,7 +41,7 @@ import java.util.function.Function;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class ProjectService implements PaginatedAndSortedService<ProjectOverviewDto> {
 
     private final ProjectRepository repository;
@@ -211,7 +211,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
             entity.setClient(client);
         }
         saveEntity(entity);
-        log.info(() -> String.format("Project[%s] successfully created", entity.getCode()));
+        log.debug("Project {} successfully created", entity.getCode());
     }
 
     /**
@@ -234,7 +234,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
             updatedEntity.setClient(null);
         }
         saveEntity(updatedEntity);
-        log.info(() -> String.format("Project[%s] successfully updated", projectId));
+        log.debug("Project {} successfully updated", projectId);
     }
 
     /**
@@ -257,7 +257,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
     private void deleteProject(Project entity) {
         try {
             repository.delete(entity);
-            log.info(() -> String.format("Project[%s] successfully deleted", entity.getCode()));
+            log.debug("Project {} successfully deleted", entity.getCode());
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to delete Project [%s]", entity.getCode());
             throw new LnFException(errorMessage, e);
@@ -269,7 +269,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      */
     public void clearProjectsCache() {
         Objects.requireNonNull(cacheManager.getCache("projects")).clear();
-        log.info("Projects cache cleared.");
+        log.debug("Projects cache cleared.");
     }
 
     private Page<ProjectOverviewDto> validateAndGetPages(int page, Page<Project> resultPage) {

@@ -9,20 +9,18 @@ import com.technofacts.lnf.client.repository.TaskRepository;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.common.DashboardDto;
 import com.technofacts.lnf.dto.common.StatisticsDto;
-import com.technofacts.lnf.dto.employee.EmployeeDto;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class DashboardService {
 
     private final ClientRepository clientRepository;
@@ -37,8 +35,8 @@ public class DashboardService {
     public DashboardDto getClientDashboardStatistics() {
         DashboardDto dashboardDto = new DashboardDto();
         dashboardDto.setTotal(clientRepository.count());
-        mapStatistics(dashboardDto,  clientRepository.clientsByYearAndMonth());
-        return  dashboardDto;
+        mapStatistics(dashboardDto, clientRepository.clientsByYearAndMonth());
+        return dashboardDto;
     }
 
     /**
@@ -50,7 +48,7 @@ public class DashboardService {
         DashboardDto dashboardDto = new DashboardDto();
         dashboardDto.setTotal(projectRepository.count());
         mapStatistics(dashboardDto, projectRepository.projectsByYearAndMonth());
-        return  dashboardDto;
+        return dashboardDto;
     }
 
     /**
@@ -62,7 +60,7 @@ public class DashboardService {
         DashboardDto dashboardDto = new DashboardDto();
         dashboardDto.setTotal(taskRepository.count());
         mapStatistics(dashboardDto, taskRepository.tasksByYearAndStatus());
-        return  dashboardDto;
+        return dashboardDto;
     }
 
     private void mapStatistics(DashboardDto dashboardDto, List<StatisticsSummary> statisticsSummaries) {
@@ -81,5 +79,6 @@ public class DashboardService {
                 .map(ClientConverter::toTransportModel)
                 .toList();
 
-    }}
+    }
+}
 
