@@ -12,7 +12,7 @@ import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.service.employee.EmployeeService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +23,7 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Log
+@Slf4j
 public class EmployeeProjectTaskService {
 
     private final ProjectTaskEmployeeRepository repository;

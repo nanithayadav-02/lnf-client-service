@@ -2,8 +2,9 @@ package com.technofacts.lnf.client.restapi;
 
 import com.technofacts.lnf.dto.employee.EmployeeDto;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
+import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.employee.EmployeeService;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -15,11 +16,10 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 
 @Service
-@Log
-public class EmployeeClientImpl extends BaseWebClientService  implements EmployeeService {
+@Slf4j
+public class EmployeeClientImpl extends BaseWebClientService implements EmployeeService {
 
     private final WebClient webClient;
 
@@ -31,7 +31,7 @@ public class EmployeeClientImpl extends BaseWebClientService  implements Employe
     public EmployeeDto findOne(String employeeId) {
         try {
             // Create the web request, adding JWT token if available
-            WebClient.RequestHeadersSpec<?> spec =  webClient.get()
+            WebClient.RequestHeadersSpec<?> spec = webClient.get()
                     .uri("/lnf/employees/" + employeeId)
                     .accept(MediaType.APPLICATION_JSON);
             // Conditionally add the JWT token to the request headers
@@ -40,11 +40,12 @@ public class EmployeeClientImpl extends BaseWebClientService  implements Employe
                     .bodyToMono(EmployeeDto.class)
                     .block();
         } catch (LnFEntityNotFoundException ex) {
-            log.warning(String.format("Employee with id [%s] does not exist", employeeId));
+            log.error("Employee with id {} does not exist", employeeId);
+            throw new LnFException("Fetching of employee failed due to exception : ", ex);
         } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, String.format("Error occurred fetching the details of the employee [%s]", employeeId), ex);
+            log.error("Error occurred fetching the details of the employee {} with message : {}", employeeId, ex.getMessage());
+            throw new LnFException("Employee finding failed due to exception ", ex);
         }
-        return null;
     }
 
     /**
@@ -60,23 +61,25 @@ public class EmployeeClientImpl extends BaseWebClientService  implements Employe
         try {
             // POST the request
             WebClient.RequestHeadersSpec<?> spec = webClient.post()
-                     .uri("/lnf/employeeList")
-                     .body(BodyInserters.fromPublisher(Mono.just(employeeIds), new ParameterizedTypeReference<List<String>>() {
-                     }))
-                     .accept(MediaType.APPLICATION_JSON);
+                    .uri("/lnf/employeeList")
+                    .body(BodyInserters.fromPublisher(Mono.just(employeeIds), new ParameterizedTypeReference<List<String>>() {
+                    }))
+                    .accept(MediaType.APPLICATION_JSON);
             // Conditionally add the JWT token to the request headers
             addJwtToken(spec);
             employeeDtos = spec.retrieve()
-                     .bodyToMono(new ParameterizedTypeReference<List<EmployeeDto>>() {})
-                     .block();
+                    .bodyToMono(new ParameterizedTypeReference<List<EmployeeDto>>() {
+                    })
+                    .block();
 
         } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, String.format("Error occurred fetching the employee details for the employee Ids - [%s]", employeeIds), ex);
+            log.error("Error occurred fetching the employee details for the employee Ids - {}", employeeIds);
+            throw new LnFException("Failed to retrieve the details of employeeIds due to exception : ", ex);
         }
 
         int responseSize = employeeDtos != null ? employeeDtos.size() : 0;
-        log.info(String.format("Queried for [%d] employees, Received [%d] employee details, " +
-                "Unable to fetch [%d] employees details", employeeIds.size(), responseSize, employeeIds.size() - responseSize));
+        log.debug("Queried for {} employees, Received {} employee details, " +
+                "Unable to fetch {} employees details", employeeIds.size(), responseSize, employeeIds.size() - responseSize);
 
         return employeeDtos;
     }
@@ -99,12 +102,15 @@ public class EmployeeClientImpl extends BaseWebClientService  implements Employe
                     .accept(MediaType.APPLICATION_JSON);
             addJwtToken(spec);
             employeeIds = spec.retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                    .bodyToMono(new ParameterizedTypeReference<List<String>>() {
+                    })
                     .block();
         } catch (LnFEntityNotFoundException ex) {
-            log.warning(String.format("Employee with active status does not exist"));
+            log.error("Employee with active status does not exist");
+            throw new LnFException("Exception occurred while fetching the employee with active status",ex);
         } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, String.format("Error occurred fetching the details of the employee", ex));
+            log.error("Error occurred fetching the details of the employee with message {}", ex.getMessage());
+            throw new LnFException("Employee not found with active status",ex);
         }
         return employeeIds;
     }

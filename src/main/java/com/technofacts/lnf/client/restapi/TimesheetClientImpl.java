@@ -2,9 +2,10 @@ package com.technofacts.lnf.client.restapi;
 
 import com.technofacts.lnf.dto.timesheet.TimesheetDto;
 import com.technofacts.lnf.dto.timesheet.WeeklyTimesheetDto;
+import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.timesheet.TimesheetService;
 import jakarta.transaction.Transactional;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
@@ -18,11 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Level;
 
 @Service
 @Transactional
-@Log
+@Slf4j
 public class TimesheetClientImpl extends BaseWebClientService implements TimesheetService {
 
     private final WebClient webClient;
@@ -33,7 +33,7 @@ public class TimesheetClientImpl extends BaseWebClientService implements Timeshe
     }
 
     @Override
-    public List<WeeklyTimesheetDto> findAllByEmployeeId(String employeeId, Optional<LocalDate> startDate, Optional<LocalDate> endDate, Optional<String> status) {
+    public List<WeeklyTimesheetDto> findAllTimesheet(String employeeId, Optional<LocalDate> startDate, Optional<LocalDate> endDate, Optional<String> status) {
         return null;
     }
 
@@ -57,7 +57,8 @@ public class TimesheetClientImpl extends BaseWebClientService implements Timeshe
                     .bodyToMono(new ParameterizedTypeReference<List<TimesheetDto>>() {})
                     .block();
         } catch (RuntimeException ex) {
-            log.log(Level.SEVERE, String.format("Error occurred fetching the timesheet details for the employeeIds - [%s]", employeeIds), ex);
+            log.error("Error occurred fetching the timesheet details for the employeeIds - {}", employeeIds, ex);
+            throw new LnFException("Fetching timesheet details for employeeIds failed due to exception",ex);
         }
 
         return timesheetDtos;
