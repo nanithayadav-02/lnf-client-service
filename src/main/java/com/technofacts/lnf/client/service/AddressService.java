@@ -114,7 +114,13 @@ public class AddressService {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to update Address for client[%s] with null payload", clientId));
         Client clientEntity = searchForClient(clientId);
         ClientAddress entity = searchForAddress(addressId);
-        checkIfPrimaryAddressExists(clientId, clientEntity, resource);
+        boolean primaryExists = clientEntity.getClientAddresses().stream()
+                .anyMatch(address -> address.getAddressType() == AddressType.Primary);
+
+        if (primaryExists && entity.getAddressType() != AddressType.Primary
+                && resource.getAddressType().equals(AddressType.Primary.name())) {
+            throw new LnFException("Primary AddressType already exists for addressId  : "+addressId);
+        }
         ClientAddress updatedEntity = AddressConverter.toEntityModel(resource, entity);
         save(updatedEntity);
         log.debug("Address for Client {} successfully updated", clientId);
