@@ -15,10 +15,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -33,7 +30,7 @@ public class TimesheetClientImpl extends BaseWebClientService implements Timeshe
     }
 
     @Override
-    public List<WeeklyTimesheetDto> findAllTimesheet(String employeeId, Optional<LocalDate> startDate, Optional<LocalDate> endDate, Optional<String> status) {
+    public List<Map<String, Object>> findAllTimesheet(String employeeId, Integer month, Integer year) {
         return null;
     }
 
