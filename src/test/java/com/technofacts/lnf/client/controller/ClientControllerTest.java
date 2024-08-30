@@ -6,10 +6,7 @@ import com.technofacts.lnf.client.BaseTestClass;
 import com.technofacts.lnf.client.service.ClientService;
 import com.technofacts.lnf.client.service.DataExportService;
 import com.technofacts.lnf.client.service.ProjectService;
-import com.technofacts.lnf.dto.client.ClientDto;
-import com.technofacts.lnf.dto.client.ClientEmployeeDto;
-import com.technofacts.lnf.dto.client.ClientOverviewDto;
-import com.technofacts.lnf.dto.client.ProjectDto;
+import com.technofacts.lnf.dto.client.*;
 import com.technofacts.lnf.dto.common.PageRequestDto;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import org.junit.jupiter.api.Assertions;
@@ -134,7 +131,7 @@ class ClientControllerTest extends BaseTestClass {
     @Test
     void testFindProjectsByClientId() throws Exception {
 
-        List<ProjectDto> expectedDto = Arrays.asList(mockProject1(), mockProject2());
+        List<ProjectOverviewDto> expectedDto = List.of(mockProjectOverview1());
 
         given(projectService.findProjectsByClientId(any(UUID.class))).willReturn(expectedDto);
 
@@ -307,35 +304,31 @@ class ClientControllerTest extends BaseTestClass {
                 .andExpect(jsonPath("$.clientDetails").value(expectedDto.getClientDetails()));
     }
 
-    private ProjectDto mockProject1() {
-        return createProject("cfe94b9f-c86f-4733-be96-a9b619f7bca7", "PRJ83", "Power Bi", "Project04", "Project Description",
-                "PO26032021", "Fixed", "active", "INR", "8500000.00", "8","Quarterly", "2024-03-01",
-                "2024-12-31");
+    private ProjectOverviewDto mockProjectOverview1() {
+        return createProjectOverview("e17a4ac7-873f-460e-9b38-eb02d7bb8ba7", "PRJ-020", "Data Analytics", "Project08", "Testing",
+                "PO26032043",  "8500000.00","Variable", "On-Hold", "10","Monthly", "2024-02-01", UUID.fromString("45a83fb6-78e0-45ff-9507-2781893722b7"),
+                "Ajax technologies", "2024-05-01"
+        );
     }
 
-    private ProjectDto mockProject2() {
-        return createProject("e17a4ac7-873f-460e-9b38-eb02d7bb8ba7", "PRJ-020", "Data Analytics", "Project08", "Testing",
-                "PO26032043", "Variable", "On-Hold", "USD", "7500000.00", "10","Monthly", "2024-02-01",
-                "2025-12-31");
-    }
-
-    private ProjectDto createProject(String id, String code, String name, String type, String description, String purchaseOrder,
-                                     String budgetTerms, String status, String currency, String budget, String hoursPerDay,
-                                     String billingTerm, String startDate, String endDate) {
-        ProjectDto dto = new ProjectDto();
+    private ProjectOverviewDto createProjectOverview(String id, String code, String name, String type, String description, String purchaseOrder,
+                                                     String budget, String budgetTerms, String status, String hoursPerDay,
+                                                     String billingTerm, String startDate, UUID clientId, String clientName, String endDate) {
+        ProjectOverviewDto dto = new ProjectOverviewDto();
         dto.setId(UUID.fromString(id));
         dto.setCode(code);
         dto.setName(name);
         dto.setType(type);
         dto.setDescription(description);
         dto.setPurchaseOrder(purchaseOrder);
+        dto.setBudget(new BigDecimal(budget));
         dto.setBudgetTerms(budgetTerms);
         dto.setStatus(status);
-        dto.setCurrency(currency);
-        dto.setBudget(new BigDecimal(budget));
         dto.setHoursPerDay(Integer.valueOf(hoursPerDay));
         dto.setBillingTerm(billingTerm);
         dto.setStartDate(LocalDate.parse(startDate));
+        dto.setClientId(clientId);
+        dto.setClientName(clientName);
         dto.setEndDate(LocalDate.parse(endDate));
 
         return dto;
