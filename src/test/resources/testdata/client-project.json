@@ -1,34 +1,19 @@
 [
   {
-    "id": "cfe94b9f-c86f-4733-be96-a9b619f7bca7",
-    "code": "PRJ83",
-    "name": "Power Bi",
-    "type": "Project04",
-    "description": "Project Description",
-    "purchaseOrder": "PO26032021",
-    "budgetTerms": "Fixed",
-    "status": "active",
-    "currency": "INR",
-    "budget": 8500000.00,
-    "hoursPerDay": 8,
-    "billingTerm": "Quarterly",
-    "startDate": "2024-03-01",
-    "endDate": "2024-12-31"
-  },
-  {
     "id": "e17a4ac7-873f-460e-9b38-eb02d7bb8ba7",
     "code": "PRJ-020",
     "name": "Data Analytics",
-    "type": "Project08",
+    "type" : "Project08",
     "description": "Testing",
     "purchaseOrder": "PO26032043",
+    "budget": 8500000.00,
     "budgetTerms": "Variable",
     "status": "On-Hold",
-    "currency": "USD",
-    "budget": 7500000.00,
     "hoursPerDay": 10,
     "billingTerm": "Monthly",
     "startDate": "2024-02-01",
-    "endDate": "2025-12-31"
+    "clientId": "45a83fb6-78e0-45ff-9507-2781893722b7",
+    "clientName": "Ajax technologies",
+    "endDate": "2024-05-01"
   }
 ]
