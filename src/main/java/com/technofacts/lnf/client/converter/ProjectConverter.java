@@ -52,6 +52,7 @@ public class ProjectConverter {
         dto.setType(entity.getType());
         dto.setBudgetTerms(entity.getBudgetTerms());
         dto.setHoursPerDay(entity.getHoursPerDay());
+        dto.setBudget(entity.getBudget());
         dto.setBillingTerm(entity.getBillingTerm());
         dto.setStartDate(entity.getStartDate());
         dto.setClientName(entity.getClient() != null ? entity.getClient().getName() : null);
@@ -59,6 +60,7 @@ public class ProjectConverter {
         dto.setDescription(entity.getDescription());
         dto.setPurchaseOrder(entity.getPurchaseOrder());
         dto.setStatus(entity.getStatus());
+        dto.setEndDate(entity.getEndDate());
 
         return dto;
     }
