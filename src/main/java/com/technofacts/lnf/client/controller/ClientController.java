@@ -6,7 +6,6 @@ import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ClientEmployeeDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
-import com.technofacts.lnf.dto.client.ProjectOverviewDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
 import com.technofacts.lnf.service.common.page.PageableAsQueryParam;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
@@ -94,7 +93,7 @@ public class ClientController {
      */
     @GetMapping(value = "/clients/{clientId}/projects")
     @ResponseStatus(HttpStatus.OK)
-    public List<ProjectOverviewDto> findProjectsByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<ProjectDto> findProjectsByClientId(@PathVariable("clientId") final UUID clientId) {
         return projectService.findProjectsByClientId(clientId);
     }
 

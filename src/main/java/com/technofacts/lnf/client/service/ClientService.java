@@ -8,7 +8,6 @@ import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ClientOverviewDto;
 import com.technofacts.lnf.dto.client.ProjectDto;
-import com.technofacts.lnf.dto.client.ProjectOverviewDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
@@ -178,7 +177,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
     @CacheEvict(value = "clients", allEntries = true)
     public void delete(UUID clientId) {
         Client entity = search(clientId);
-        List<ProjectOverviewDto> projectList = projectService.findProjectsByClientId(clientId);
+        List<ProjectDto> projectList = projectService.findProjectsByClientId(clientId);
         projectList.forEach(project -> projectService.delete(project.getId()));
         try {
             repository.delete(entity);
