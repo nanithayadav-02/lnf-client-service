@@ -170,10 +170,10 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @return List of ProjectDto objects associated to the client.
      */
     @Cacheable(value = "projects")
-    public List<ProjectDto> findProjectsByClientId(UUID clientId) {
+    public List<ProjectOverviewDto> findProjectsByClientId(UUID clientId) {
         searchForClient(clientId);
         List<Project> projects = repository.findByClientId(clientId);
-        return projects.stream().map(ProjectConverter::toTransportModel)
+        return projects.stream().map(ProjectConverter::toMiniTransportModel)
                 .filter(Objects::nonNull)
                 .toList();
     }
