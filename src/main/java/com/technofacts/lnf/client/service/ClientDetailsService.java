@@ -18,7 +18,7 @@ import java.util.UUID;
 @Slf4j
 public class ClientDetailsService {
 
-    private final ClientRepository  clientRepository;
+    private final ClientRepository clientRepository;
 
     public ClientDetailsDto findByClientId(UUID clientId) {
         Client entity = search(clientId);
