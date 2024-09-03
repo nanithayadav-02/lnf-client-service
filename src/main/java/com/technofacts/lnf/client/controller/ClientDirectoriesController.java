@@ -25,7 +25,7 @@ public class ClientDirectoriesController {
 
     private final PaginationAndSortingHandler paginationAndSortingHandler;
 
-    @GetMapping(value = "/clients/directory")
+    @GetMapping(value = "/clients/directories")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> findAll(@RequestParam(value = "search", required = false) String search,
                                      @PageableAsQueryParam PageRequestDto pageRequest) {
