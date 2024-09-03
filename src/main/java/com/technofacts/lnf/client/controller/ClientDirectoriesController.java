@@ -45,4 +45,5 @@ public class ClientDirectoriesController {
     public void create(@PathVariable("clientId") UUID clientId, @RequestBody final List<ClientDirectoryDto> resource) {
         service.createAll(clientId, resource);
     }
+
 }
