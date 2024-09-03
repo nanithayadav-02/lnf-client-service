@@ -3,8 +3,10 @@ package com.technofacts.lnf.client.converter;
 import com.technofacts.lnf.client.model.*;
 import com.technofacts.lnf.client.model.enums.AddressType;
 import com.technofacts.lnf.dto.client.AddressDto;
+import com.technofacts.lnf.dto.client.ClientDirectoryDto;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.client.ClientOverviewDto;
+import com.technofacts.lnf.dto.recruiter.JobDto;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,6 +49,9 @@ public class ClientConverter {
 
         dto.getAddresses().addAll(sortedAddresses);
 
+        dto.getClientDirectoryDtos().addAll(entity.getClientDirectories().stream().map(ClientDirectoryConverter::toTransportModel)
+                .filter(Objects::nonNull).toList());
+
         return dto;
     }
 
@@ -80,6 +85,7 @@ public class ClientConverter {
         addGstToEntityModel(transport, entity);
         addClientNotesToEntityModel(transport, entity);
         addAddressesToEntityModel(transport, entity);
+        addClientDirectoryToEntityModel(transport, entity);
 
         return entity;
     }
@@ -103,6 +109,17 @@ public class ClientConverter {
         entity.setClientDetails(transport.getClientDetails());
 
         return entity;
+    }
+
+    private static void addClientDirectoryToEntityModel(ClientDto transport, Client client) {
+        List<ClientDirectory> entityList = new ArrayList<>();
+        transport.getClientDirectoryDtos().stream().filter(Objects::nonNull).forEach(dto -> {
+            ClientDirectory entity = ClientDirectoryConverter.toEntityModel(dto);
+            entity.setClient(client);
+            entityList.add(entity);
+        });
+        client.getClientDirectories().addAll(entityList);
+
     }
 
     private static void addAddressesToEntityModel(ClientDto transport, Client client) {

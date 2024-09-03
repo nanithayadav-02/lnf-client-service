@@ -60,4 +60,7 @@ public abstract class BaseTestClass {
     @InjectMocks
     private PaginationAndSortingHandler paginationAndSortingHandler;
 
+    @MockBean
+    private ClientDirectoryService clientDirectoryService;
+
 }

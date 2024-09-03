@@ -56,7 +56,7 @@ public class DataExportService {
         } catch (Exception e) {
             throw new IOException(String.format("Error processing file %s: %s", absoluteFilePath, e.getMessage()), e);
         } finally {
-            deleteFile(absoluteFilePath, csvFile);
+            deleteFile(absoluteFilePath);
         }
         return parsedData;
     }
@@ -106,7 +106,7 @@ public class DataExportService {
         throw new LnFException(message, e);
     }
 
-    private void deleteFile(String absoluteFilePath, File csvFile) {
+    private void deleteFile(String absoluteFilePath) {
         try {
             Files.deleteIfExists(Paths.get(absoluteFilePath));
         } catch (IOException e) {
