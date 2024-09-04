@@ -88,4 +88,7 @@ public class Client extends AuditableEntity {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<Agreement> agreements = new HashSet<>();
 
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private Set<ClientDirectory> clientDirectories = new HashSet<>();
+
 }
