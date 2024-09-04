@@ -38,10 +38,8 @@ public class ClientDirectoryControllerTest extends BaseTestClass {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ClientDirectoryService service;
-
     private static UUID clientId;
     private static UUID directoryId;
 

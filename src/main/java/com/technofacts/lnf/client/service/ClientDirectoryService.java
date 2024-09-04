@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 public class ClientDirectoryService implements PaginatedAndSortedService<ClientDirectoryDto> {
 
     private final ClientDirectoryRepository repository;
-
     private final ClientRepository clientRepository;
 
     @Override
@@ -83,7 +82,6 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         return resultPage.map(ClientDirectoryConverter::toTransportModel);
     }
 
-
     public Page<ClientDirectoryDto> findingAllWithPagination(String search, PageRequestDto pageRequestDto) {
         Pageable pageable = PageRequest.of(pageRequestDto.getPage(), pageRequestDto.getSize(),
                 RestUtil.constructSort(pageRequestDto.getSortBy(), pageRequestDto.getSortOrder()));
@@ -114,7 +112,6 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
                 .filter(Objects::nonNull)
                 .toList();
     }
-
 
     public ClientDirectoryDto findByClientIdAndDirectoryId(UUID clientId, UUID directoryId) {
         searchForClient(clientId);

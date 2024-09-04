@@ -22,10 +22,9 @@ import java.util.UUID;
 public class ClientDirectoriesController {
 
     private final ClientDirectoryService service;
-
     private final PaginationAndSortingHandler paginationAndSortingHandler;
 
-    @GetMapping(value = "/clients/directories")
+    @GetMapping(value = "/clients/directory")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> findAll(@RequestParam(value = "search", required = false) String search,
                                      @PageableAsQueryParam PageRequestDto pageRequest) {

@@ -30,13 +30,10 @@ public class ClientDirectoriesControllerTest extends BaseTestClass {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ClientDirectoryService service;
-
     @Autowired
     private ObjectMapper objectMapper;
-
     @Autowired
     private PaginationAndSortingHandler paginationAndSortingHandler;
 
@@ -108,4 +105,5 @@ public class ClientDirectoriesControllerTest extends BaseTestClass {
                 .active(false)
                 .build();
     }
+
 }
