@@ -10,11 +10,15 @@ import com.technofacts.lnf.client.model.ClientDirectory;
 import com.technofacts.lnf.client.repository.ClientDirectoryRepository;
 import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.dto.client.ClientDirectoryDto;
+import com.technofacts.lnf.dto.client.ClientDirectoryExcelDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
+import com.technofacts.lnf.dto.email.ThymeleafDocumentDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
+import com.technofacts.lnf.service.client.ClientDirectoryExcelService;
 import com.technofacts.lnf.service.common.page.PaginatedAndSortedService;
+import com.technofacts.lnf.service.email.ThymeleafDocumentService;
 import com.technofacts.lnf.service.specification.GenericSpecificationBuilder;
 import com.technofacts.lnf.util.RestUtil;
 import com.technofacts.lnf.util.specification.SpecificationUtil;
@@ -28,10 +32,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,9 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
 
     private final ClientDirectoryRepository repository;
     private final ClientRepository clientRepository;
+    private final ClientDirectoryExcelService excelSpreadSheetService;
+    private final ThymeleafDocumentService documentService;
+    private static final String CLIENT_EXCEL_FILE = "LNF_Client_directory_sample_data.xlsx";
 
     @Override
     public Page<ClientDirectoryDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
@@ -216,6 +220,50 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
                     entities.get(0).getClient().getId());
             throw new LnFException(errorMessage);
         }
+    }
+
+    public byte[] clientDirectoryExcel(UUID clientId) {
+        List<ClientDirectoryDto> summaries = findByClientId(clientId);
+        ClientDirectoryExcelDto excelSpreadSheetDto = createExcelSpreadSheetDto(summaries);
+        return excelSpreadSheetService.generateExcelBytes(excelSpreadSheetDto);
+    }
+
+    public byte[] clientDirectoryExcel() {
+        List<ClientDirectoryDto> summaries = findAll();
+        ClientDirectoryExcelDto excelSpreadSheetDto = createExcelSpreadSheetDto(summaries);
+        return excelSpreadSheetService.generateExcelBytes(excelSpreadSheetDto);
+    }
+
+    private ClientDirectoryExcelDto createExcelSpreadSheetDto(List<ClientDirectoryDto> dto) {
+        ClientDirectoryExcelDto excelSpreadSheetDto = new ClientDirectoryExcelDto();
+        excelSpreadSheetDto.setDynamicData(dto);
+        excelSpreadSheetDto.setFileName(CLIENT_EXCEL_FILE);
+
+        return excelSpreadSheetDto;
+    }
+
+    public byte[] downloadClientDirectoryAsPdf() {
+        List<ClientDirectoryDto> clientDirectoryDtos = findAll();
+        String fileName = "client-directory-overview.pdf";
+        return generatePdfFromVendorDirectoryDtos(clientDirectoryDtos, fileName);
+    }
+
+    public byte[] downloadClientDirectoryAsPdf(UUID clientId) {
+        List<ClientDirectoryDto> clientDirectoryDtos = findByClientId(clientId);
+        String fileName = "client-directory-overview.pdf";
+        return generatePdfFromVendorDirectoryDtos(clientDirectoryDtos, fileName);
+    }
+
+    private byte[] generatePdfFromVendorDirectoryDtos(List<ClientDirectoryDto> summaries, String fileName) {
+        Map<String, Object> dynamicData = new HashMap<>();
+        dynamicData.put("listObjects", summaries);
+
+        ThymeleafDocumentDto thymeleafDocumentDto = new ThymeleafDocumentDto();
+        thymeleafDocumentDto.setTemplateName("client-directory");
+        thymeleafDocumentDto.setFileName(fileName);
+        thymeleafDocumentDto.setDynamicData(dynamicData);
+
+        return documentService.generatePdf(thymeleafDocumentDto);
     }
 
 }
