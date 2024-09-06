@@ -37,7 +37,7 @@ timesheet:
 
 email:
   service:
-    url: "http://localhost:8111/api/v3"
+    url: "http://localhost:8081/api/v3"
 
 # Metrics Configuration
 management:
