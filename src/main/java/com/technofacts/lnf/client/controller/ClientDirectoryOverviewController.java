@@ -21,14 +21,14 @@ public class ClientDirectoryOverviewController {
 
     private final ClientDirectoryService service;
 
-    @GetMapping("/clients/{clientId}/client-directory/excel")
+    @GetMapping("/clients/{clientId}/directory/excel")
     public ResponseEntity<byte[]> clientDirectoryExcel(@PathVariable("clientId") UUID clientId) throws IOException {
         byte[] excelBytes = service.clientDirectoryExcel(clientId);
         HttpHeaders headers = generateHeadersForFile("client-directory" + "-" + ".xlsx");
         return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
     }
 
-    @GetMapping("/client-directory/excel")
+    @GetMapping("/client/directory/excel")
     public ResponseEntity<byte[]> clientDirectoryExcel() throws IOException {
         byte[] excelBytes = service.clientDirectoryExcel();
         HttpHeaders headers = generateHeadersForFile("client-directory" + "-" + ".xlsx");
@@ -42,7 +42,7 @@ public class ClientDirectoryOverviewController {
         return headers;
     }
 
-    @GetMapping("/client-directory-overview/pdf")
+    @GetMapping("/client/directory/pdf")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> downloadClientDirectoryAsPdf() {
 
@@ -58,7 +58,7 @@ public class ClientDirectoryOverviewController {
                 .body(pdfBytes);
     }
 
-    @GetMapping("/clients/{clientId}/client-directory-overview/pdf")
+    @GetMapping("/clients/{clientId}/directory/pdf")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> downloadClientDirectoryAsPdf(@PathVariable("clientId") UUID clientId) {
 
@@ -73,4 +73,5 @@ public class ClientDirectoryOverviewController {
                 .headers(headers)
                 .body(pdfBytes);
     }
+
 }

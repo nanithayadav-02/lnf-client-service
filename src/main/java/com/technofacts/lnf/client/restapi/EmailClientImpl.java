@@ -6,7 +6,7 @@ package com.technofacts.lnf.client.restapi;
 import com.technofacts.lnf.dto.client.ClientDirectoryExcelDto;
 import com.technofacts.lnf.dto.email.ThymeleafDocumentDto;
 import com.technofacts.lnf.exception.LnFException;
-import com.technofacts.lnf.service.email.ClientDirectoryExcelService;
+import com.technofacts.lnf.service.client.ClientDirectoryExcelService;
 import com.technofacts.lnf.service.email.ThymeleafDocumentService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ public class EmailClientImpl extends BaseWebClientService implements ClientDirec
     public byte[] generateExcelBytes(ClientDirectoryExcelDto spreadSheetDto) {
         try {
             WebClient.RequestHeadersSpec<?> spec = webClient.post()
-                    .uri("/lnf/client-directory/excel")
+                    .uri("/lnf/client/directory/excel")
                     .body(BodyInserters.fromValue(spreadSheetDto));
             addJwtToken(spec);
 
