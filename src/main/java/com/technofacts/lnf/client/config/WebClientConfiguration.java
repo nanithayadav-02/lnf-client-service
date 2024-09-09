@@ -28,6 +28,9 @@ public class WebClientConfiguration {
     @Value("${timesheet.service.url}")
     private String timesheetServiceUrl;
 
+    @Value("${email.service.url}")
+    private String emailServiceUrl;
+
     @Value("${application.maxInMemorySize}")
     private int maxInMemorySize;
 
@@ -51,6 +54,12 @@ public class WebClientConfiguration {
     @Qualifier("timesheetService")
     public WebClient timesheetServiceWebClient() {
         return createWebClient(timesheetServiceUrl);
+    }
+
+    @Bean
+    @Qualifier("emailService")
+    public WebClient emailServiceWebClient() {
+        return createWebClient(emailServiceUrl);
     }
 
     private WebClient createWebClient(String baseUrl) {
