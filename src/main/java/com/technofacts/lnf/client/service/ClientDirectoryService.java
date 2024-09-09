@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ClientDirectoryService implements PaginatedAndSortedService<ClientDirectoryDto> {
 
+    public static final String FILE_NAME = "client-directory-overview.pdf";
     private final ClientDirectoryRepository repository;
     private final ClientRepository clientRepository;
     private final ClientDirectoryExcelService excelSpreadSheetService;
@@ -244,14 +245,12 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
 
     public byte[] downloadClientDirectoryAsPdf() {
         List<ClientDirectoryDto> clientDirectoryDtos = findAll();
-        String fileName = "client-directory-overview.pdf";
-        return generatePdfFromVendorDirectoryDtos(clientDirectoryDtos, fileName);
+        return generatePdfFromVendorDirectoryDtos(clientDirectoryDtos, FILE_NAME);
     }
 
     public byte[] downloadClientDirectoryAsPdf(UUID clientId) {
         List<ClientDirectoryDto> clientDirectoryDtos = findByClientId(clientId);
-        String fileName = "client-directory-overview.pdf";
-        return generatePdfFromVendorDirectoryDtos(clientDirectoryDtos, fileName);
+        return generatePdfFromVendorDirectoryDtos(clientDirectoryDtos, FILE_NAME);
     }
 
     private byte[] generatePdfFromVendorDirectoryDtos(List<ClientDirectoryDto> summaries, String fileName) {
