@@ -13,6 +13,7 @@ import com.technofacts.lnf.dto.client.ClientDirectoryDto;
 import com.technofacts.lnf.dto.client.ClientDirectoryExcelDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
 import com.technofacts.lnf.dto.email.ThymeleafDocumentDto;
+import com.technofacts.lnf.dto.vendor.VendorDirectoryDto;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
@@ -202,6 +203,11 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         return clients.stream()
                 .map(ClientDirectoryConverter::toTransportModel)
                 .collect(Collectors.toList());
+    }
+
+    public List<ClientDirectoryDto> findByClientIdAndEmail(UUID clientId, String email) {
+        List<ClientDirectory> entities = repository.findByClientIdAndEmail(clientId, email);
+        return entities.stream().map(ClientDirectoryConverter::toTransportModel).toList();
     }
 
     private void saveEntity(ClientDirectory entity) {

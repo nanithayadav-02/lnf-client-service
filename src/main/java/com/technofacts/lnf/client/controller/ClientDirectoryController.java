@@ -5,6 +5,7 @@ package com.technofacts.lnf.client.controller;
 
 import com.technofacts.lnf.client.service.ClientDirectoryService;
 import com.technofacts.lnf.dto.client.ClientDirectoryDto;
+import com.technofacts.lnf.dto.vendor.VendorDirectoryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -65,5 +66,11 @@ public class ClientDirectoryController {
         return service.findByEmail(email);
     }
 
+    @GetMapping("/clients/{clientId}/directory/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ClientDirectoryDto> searchByClientIdAndEmail(@PathVariable("clientId") UUID clientId,
+                                                  @RequestParam("email") String email) {
+        return service.findByClientIdAndEmail(clientId, email);
+    }
 
 }
