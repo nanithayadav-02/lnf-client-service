@@ -9,6 +9,7 @@ import com.technofacts.lnf.client.service.ClientDirectoryService;
 import com.technofacts.lnf.dto.client.ClientDirectoryDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,12 +22,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class ClientDirectoriesControllerTest extends BaseTestClass {
+class ClientDirectoriesControllerTest extends BaseTestClass {
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,7 +40,7 @@ public class ClientDirectoriesControllerTest extends BaseTestClass {
     @Test
     void findAll() {
         String searchQuery = "description:the resume has to be uploaded";
-        Page<ClientDirectoryDto> mockedPage = mock(Page.class);
+        Page mockedPage = mock(Page.class);
         PageRequestDto pageRequest = new PageRequestDto(0, 10, "firstName", "asc");
 
         List<ClientDirectoryDto> mockedList = List.of(createClientDirectory1());
@@ -50,29 +50,29 @@ public class ClientDirectoriesControllerTest extends BaseTestClass {
         when(service.findAll()).thenReturn(mockedList);
         when(service.findingAllWithPagination(searchQuery, pageRequest)).thenReturn(mockedPage);
 
-        ClientDirectoriesController controller = new ClientDirectoriesController(service, paginationAndSortingHandler);
+        DirectoryController controller = new DirectoryController(service, paginationAndSortingHandler);
         // Test for paginated and sorted request
         ResponseEntity<?> response = controller.findAll(searchQuery, pageRequest);
-        assertEquals(ResponseEntity.ok(mockedPage), response);
+        Assertions.assertEquals(ResponseEntity.ok(mockedPage), response);
 
         // Pagination with  sortBy and sortOrder
         pageRequest = new PageRequestDto(0, 10, null, null);
         response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
-        assertEquals(ResponseEntity.ok(mockedPage), response);
+        Assertions.assertEquals(ResponseEntity.ok(mockedPage), response);
 
         // Pagination with sortBy and sortOrder
         pageRequest = new PageRequestDto(null, null, "firstName", "asc");
         response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
-        assertEquals(ResponseEntity.ok(mockedList), response);
+        Assertions.assertEquals(ResponseEntity.ok(mockedList), response);
 
         //find All
         pageRequest = new PageRequestDto();
         response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
-        assertEquals(ResponseEntity.ok(mockedList), response);
+        Assertions.assertEquals(ResponseEntity.ok(mockedList), response);
     }
 
     @Test
-    public void testCreateClientDirectories() throws Exception {
+    void testCreateClientDirectories() throws Exception {
         List<ClientDirectoryDto> mockDtos = Arrays.asList(createClientDirectory1(), createClientDirectory2());
         UUID clientId = UUID.fromString("cfe94b9f-c86f-4733-be96-a9b619f7bca7");
         String requestBody = objectMapper.writeValueAsString(mockDtos);

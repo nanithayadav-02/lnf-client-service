@@ -12,12 +12,14 @@ import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.dto.client.ClientDirectoryDto;
 import com.technofacts.lnf.dto.client.ClientDirectoryExcelDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
+import com.technofacts.lnf.dto.email.ExcelReportRequestDto;
 import com.technofacts.lnf.dto.email.ThymeleafDocumentDto;
+import com.technofacts.lnf.enums.ReportType;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
-import com.technofacts.lnf.service.client.ClientDirectoryExcelService;
 import com.technofacts.lnf.service.common.page.PaginatedAndSortedService;
+import com.technofacts.lnf.service.email.ExcelReportRequestService;
 import com.technofacts.lnf.service.email.ThymeleafDocumentService;
 import com.technofacts.lnf.service.specification.GenericSpecificationBuilder;
 import com.technofacts.lnf.util.RestUtil;
@@ -34,7 +36,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -42,12 +43,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ClientDirectoryService implements PaginatedAndSortedService<ClientDirectoryDto> {
 
-    public static final String FILE_NAME = "client-directory-overview.pdf";
+    public static final String FILE_NAME = "client_directory.pdf";
+    private static final String CLIENT_EXCEL_FILE = "client_directory.xlsx";
+
+    private final ThymeleafDocumentService documentService;
+    private final ExcelReportRequestService excelReportRequestService;
+
     private final ClientDirectoryRepository repository;
     private final ClientRepository clientRepository;
-    private final ClientDirectoryExcelService excelSpreadSheetService;
-    private final ThymeleafDocumentService documentService;
-    private static final String CLIENT_EXCEL_FILE = "LNF_Client_directory_sample_data.xlsx";
 
     @Override
     public Page<ClientDirectoryDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
@@ -201,7 +204,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         List<ClientDirectory> clients = repository.findByEmail(email);
         return clients.stream()
                 .map(ClientDirectoryConverter::toTransportModel)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private void saveEntity(ClientDirectory entity) {
@@ -226,13 +229,13 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
     public byte[] clientDirectoryExcel(UUID clientId) {
         List<ClientDirectoryDto> summaries = findByClientId(clientId);
         ClientDirectoryExcelDto excelSpreadSheetDto = createExcelSpreadSheetDto(summaries);
-        return excelSpreadSheetService.generateExcelBytes(excelSpreadSheetDto);
+        return excelReportRequestService.generateReport(createExcelReportDto(excelSpreadSheetDto));
     }
 
     public byte[] clientDirectoryExcel() {
         List<ClientDirectoryDto> summaries = findAll();
         ClientDirectoryExcelDto excelSpreadSheetDto = createExcelSpreadSheetDto(summaries);
-        return excelSpreadSheetService.generateExcelBytes(excelSpreadSheetDto);
+        return excelReportRequestService.generateReport(createExcelReportDto(excelSpreadSheetDto));
     }
 
     private ClientDirectoryExcelDto createExcelSpreadSheetDto(List<ClientDirectoryDto> dto) {
@@ -241,6 +244,13 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         excelSpreadSheetDto.setFileName(CLIENT_EXCEL_FILE);
 
         return excelSpreadSheetDto;
+    }
+
+    private ExcelReportRequestDto<ClientDirectoryExcelDto> createExcelReportDto(ClientDirectoryExcelDto clientDirectoryDto) {
+        ExcelReportRequestDto<ClientDirectoryExcelDto> dto = new ExcelReportRequestDto<>();
+        dto.setReportType(ReportType.CLIENT_DIRECTORY);
+        dto.setReportData(clientDirectoryDto);
+        return dto;
     }
 
     public byte[] downloadClientDirectoryAsPdf() {
