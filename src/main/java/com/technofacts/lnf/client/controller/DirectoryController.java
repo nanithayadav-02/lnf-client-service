@@ -19,7 +19,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/lnf")
-public class ClientDirectoriesController {
+public class DirectoryController {
 
     private final ClientDirectoryService service;
     private final PaginationAndSortingHandler paginationAndSortingHandler;

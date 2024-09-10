@@ -3,10 +3,10 @@
  */
 package com.technofacts.lnf.client.restapi;
 
-import com.technofacts.lnf.dto.client.ClientDirectoryExcelDto;
+import com.technofacts.lnf.dto.email.ExcelReportDto;
 import com.technofacts.lnf.dto.email.ThymeleafDocumentDto;
 import com.technofacts.lnf.exception.LnFException;
-import com.technofacts.lnf.service.client.ClientDirectoryExcelService;
+import com.technofacts.lnf.service.email.ExcelReportService;
 import com.technofacts.lnf.service.email.ThymeleafDocumentService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 @Transactional
 @Slf4j
-public class EmailClientImpl extends BaseWebClientService implements ClientDirectoryExcelService, ThymeleafDocumentService {
+public class EmailClientImpl extends BaseWebClientService implements ThymeleafDocumentService, ExcelReportService {
 
     private final WebClient webClient;
     public static final String ERROR_OCCURRED_WHILE_GENERATING_EXCEL_BYTES_S = "Error occurred while generating Excel bytes [%s]";
@@ -30,11 +30,11 @@ public class EmailClientImpl extends BaseWebClientService implements ClientDirec
     }
 
     @Override
-    public byte[] generateExcelBytes(ClientDirectoryExcelDto spreadSheetDto) {
+    public byte[] generateReport(ExcelReportDto requestDto) {
         try {
             WebClient.RequestHeadersSpec<?> spec = webClient.post()
-                    .uri("/lnf/client/directory/excel")
-                    .body(BodyInserters.fromValue(spreadSheetDto));
+                    .uri("/lnf/reports/excel")
+                    .body(BodyInserters.fromValue(requestDto));
             addJwtToken(spec);
 
             return spec.retrieve()
@@ -45,6 +45,7 @@ public class EmailClientImpl extends BaseWebClientService implements ClientDirec
             throw new LnFException(String.format(ERROR_OCCURRED_WHILE_GENERATING_EXCEL_BYTES_S, ex.getMessage()), ex);
         }
     }
+
 
     @Override
     public byte[] generatePdf(ThymeleafDocumentDto resource) {
@@ -63,4 +64,5 @@ public class EmailClientImpl extends BaseWebClientService implements ClientDirec
             throw new LnFException(String.format("Error occurred while generating PDF [%s]", ex.getMessage()), ex);
         }
     }
+
 }
