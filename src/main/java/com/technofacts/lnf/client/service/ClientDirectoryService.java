@@ -12,14 +12,14 @@ import com.technofacts.lnf.client.repository.ClientRepository;
 import com.technofacts.lnf.dto.client.ClientDirectoryDto;
 import com.technofacts.lnf.dto.client.ClientDirectoryExcelDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
-import com.technofacts.lnf.dto.email.ExcelReportRequestDto;
+import com.technofacts.lnf.dto.email.ExcelReportDto;
 import com.technofacts.lnf.dto.email.ThymeleafDocumentDto;
 import com.technofacts.lnf.enums.ReportType;
 import com.technofacts.lnf.exception.LnFBadRequestException;
 import com.technofacts.lnf.exception.LnFEntityNotFoundException;
 import com.technofacts.lnf.exception.LnFException;
 import com.technofacts.lnf.service.common.page.PaginatedAndSortedService;
-import com.technofacts.lnf.service.email.ExcelReportRequestService;
+import com.technofacts.lnf.service.email.ExcelReportService;
 import com.technofacts.lnf.service.email.ThymeleafDocumentService;
 import com.technofacts.lnf.service.specification.GenericSpecificationBuilder;
 import com.technofacts.lnf.util.RestUtil;
@@ -47,7 +47,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
     private static final String CLIENT_EXCEL_FILE = "client_directory.xlsx";
 
     private final ThymeleafDocumentService documentService;
-    private final ExcelReportRequestService excelReportRequestService;
+    private final ExcelReportService excelReportService;
 
     private final ClientDirectoryRepository repository;
     private final ClientRepository clientRepository;
@@ -229,13 +229,13 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
     public byte[] clientDirectoryExcel(UUID clientId) {
         List<ClientDirectoryDto> summaries = findByClientId(clientId);
         ClientDirectoryExcelDto excelSpreadSheetDto = createExcelSpreadSheetDto(summaries);
-        return excelReportRequestService.generateReport(createExcelReportDto(excelSpreadSheetDto));
+        return excelReportService.generateReport(createExcelReportDto(excelSpreadSheetDto));
     }
 
     public byte[] clientDirectoryExcel() {
         List<ClientDirectoryDto> summaries = findAll();
         ClientDirectoryExcelDto excelSpreadSheetDto = createExcelSpreadSheetDto(summaries);
-        return excelReportRequestService.generateReport(createExcelReportDto(excelSpreadSheetDto));
+        return excelReportService.generateReport(createExcelReportDto(excelSpreadSheetDto));
     }
 
     private ClientDirectoryExcelDto createExcelSpreadSheetDto(List<ClientDirectoryDto> dto) {
@@ -246,8 +246,8 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         return excelSpreadSheetDto;
     }
 
-    private ExcelReportRequestDto<ClientDirectoryExcelDto> createExcelReportDto(ClientDirectoryExcelDto clientDirectoryDto) {
-        ExcelReportRequestDto<ClientDirectoryExcelDto> dto = new ExcelReportRequestDto<>();
+    private ExcelReportDto<ClientDirectoryExcelDto> createExcelReportDto(ClientDirectoryExcelDto clientDirectoryDto) {
+        ExcelReportDto<ClientDirectoryExcelDto> dto = new ExcelReportDto<>();
         dto.setReportType(ReportType.CLIENT_DIRECTORY);
         dto.setReportData(clientDirectoryDto);
         return dto;

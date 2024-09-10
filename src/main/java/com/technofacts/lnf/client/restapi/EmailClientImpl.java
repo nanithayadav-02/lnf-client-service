@@ -3,10 +3,10 @@
  */
 package com.technofacts.lnf.client.restapi;
 
-import com.technofacts.lnf.dto.email.ExcelReportRequestDto;
+import com.technofacts.lnf.dto.email.ExcelReportDto;
 import com.technofacts.lnf.dto.email.ThymeleafDocumentDto;
 import com.technofacts.lnf.exception.LnFException;
-import com.technofacts.lnf.service.email.ExcelReportRequestService;
+import com.technofacts.lnf.service.email.ExcelReportService;
 import com.technofacts.lnf.service.email.ThymeleafDocumentService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 @Transactional
 @Slf4j
-public class EmailClientImpl extends BaseWebClientService implements ExcelReportRequestService, ThymeleafDocumentService {
+public class EmailClientImpl extends BaseWebClientService implements ThymeleafDocumentService, ExcelReportService {
 
     private final WebClient webClient;
     public static final String ERROR_OCCURRED_WHILE_GENERATING_EXCEL_BYTES_S = "Error occurred while generating Excel bytes [%s]";
@@ -30,7 +30,7 @@ public class EmailClientImpl extends BaseWebClientService implements ExcelReport
     }
 
     @Override
-    public byte[] generateReport(ExcelReportRequestDto requestDto) {
+    public byte[] generateReport(ExcelReportDto requestDto) {
         try {
             WebClient.RequestHeadersSpec<?> spec = webClient.post()
                     .uri("/lnf/reports/excel")
