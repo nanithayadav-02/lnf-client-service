@@ -87,9 +87,8 @@ public class EmployeeClientImpl extends BaseWebClientService implements Employee
 
     @Override
     public List<EmployeeDto> findAll(String search) {
-        return null;
+        return Collections.emptyList();
     }
-
 
     @Override
     public List<String> findByStatuses(List<String> statuses) {
@@ -140,6 +139,5 @@ public class EmployeeClientImpl extends BaseWebClientService implements Employee
     public Map<String, String> findEmployeeIdsAndFullNamesByStatuses(List<String> statuses) {
         return Collections.emptyMap();
     }
-
 
 }

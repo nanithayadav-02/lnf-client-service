@@ -5,6 +5,9 @@ import com.technofacts.lnf.dto.client.ContactDto;
 
 public class ContactConverter {
 
+    private ContactConverter() {
+    }
+
     public static ContactDto toTransportModel(ClientContact entity) {
         if (entity == null) {
             return null;

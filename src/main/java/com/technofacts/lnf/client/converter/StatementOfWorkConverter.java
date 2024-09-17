@@ -6,6 +6,9 @@ import com.technofacts.lnf.dto.client.StatementOfWorkDto;
 
 public class StatementOfWorkConverter {
 
+    private StatementOfWorkConverter() {
+    }
+
     public static StatementOfWorkDto toTransportModel(StatementOfWork entity) {
         if (entity == null) {
             return null;

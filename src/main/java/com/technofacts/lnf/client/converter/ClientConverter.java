@@ -15,6 +15,9 @@ import java.util.Objects;
 
 public class ClientConverter {
 
+    private ClientConverter() {
+    }
+
     public static ClientDto toTransportModel(Client entity) {
 
         if (entity == null) {

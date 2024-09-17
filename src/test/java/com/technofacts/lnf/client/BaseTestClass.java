@@ -63,4 +63,7 @@ public abstract class BaseTestClass {
     @MockBean
     private ClientDirectoryService clientDirectoryService;
 
+    @MockBean
+    private ClientDetailsService clientDetailsService;
+
 }

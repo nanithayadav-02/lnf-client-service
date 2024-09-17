@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.HashMap;
@@ -25,8 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -139,6 +139,49 @@ class ProjectTaskEmployeeControllerTest extends BaseTestClass {
                 .andExpect(status().isNoContent());
 
         verify(service).removeEmployeesFromProjectAndTask(projectId, taskId, requestedDto);
+    }
+
+    @Test
+    public void testClearCaches() throws Exception {
+
+        String url = "/lnf//projectTaskEmployees/refresh";
+        // When
+        ResultActions resultActions = mockMvc.perform(post(url));
+
+        // Then
+        resultActions.andExpect(status().isCreated());
+        verify(service, times(1)).clearProjectTaskEmployeesCache();
+    }
+
+    @Test
+    public void testAddAllTasksToEmployees() throws Exception {
+        UUID projectId = UUID.randomUUID();
+        List<String> employeeIds = List.of("HRD-FE-TF-1008","HRD-FE-TF-1009");
+
+        String url = "/lnf/projects/" + projectId + "/tasks/employees";
+
+        mockMvc.perform(MockMvcRequestBuilders.post(url)
+                        .contentType(APPLICATION_JSON)
+                        .content(asJsonString(employeeIds)))
+                .andExpect(status().isCreated());
+
+
+        verify(service, times(1)).addAllTasksToEmployee(projectId, employeeIds);
+    }
+
+    @Test
+    public void testAddAllTasksToEmployee() throws Exception {
+        UUID projectId = UUID.randomUUID();
+        String employeeId = "HRD-FE-TF-1009";
+
+        String url = "/lnf/projects/" + projectId + "/employee/"+ employeeId ;
+
+        // When
+        ResultActions resultActions = mockMvc.perform(post(url));
+
+        // Then
+        resultActions.andExpect(status().isCreated());
+        verify(service, times(1)).addAllTasksToEmployee(projectId, employeeId);
     }
 
     private static String asJsonString(final Object obj) {

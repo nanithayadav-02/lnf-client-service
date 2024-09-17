@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -238,6 +239,30 @@ class ClientControllerTest extends BaseTestClass {
                 .andExpect(status().isNoContent());
 
         verify(service).delete(clientId);
+    }
+
+    @Test
+    public void testHealth() throws Exception {
+
+        String url = "/lnf/clients/health";
+        // When
+        ResultActions resultActions = mockMvc.perform(get(url));
+
+        // Then
+        resultActions.andExpect(status().isOk())
+                .andExpect(content().string("Client SVC healthy!"));
+    }
+
+    @Test
+    public void testClearCaches() throws Exception {
+
+        String url = "/lnf/clients/refresh";
+        // When
+        ResultActions resultActions = mockMvc.perform(post(url));
+
+        // Then
+        resultActions.andExpect(status().isCreated());
+        verify(service, times(1)).clearClientsCache();
     }
 
     private ClientDto createClient1() {

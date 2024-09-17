@@ -6,6 +6,9 @@ import com.technofacts.lnf.dto.client.EscalationDto;
 
 public class EscalationConverter {
 
+    private EscalationConverter() {
+    }
+
     public static EscalationDto toTransportModel(Escalation entity) {
         if (entity == null) {
             return null;

@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.UUID;
 
 @RestController
@@ -22,14 +21,14 @@ public class ClientDirectoryOverviewController {
     private final ClientDirectoryService service;
 
     @GetMapping("/clients/{clientId}/directory/excel")
-    public ResponseEntity<byte[]> clientDirectoryExcel(@PathVariable("clientId") UUID clientId) throws IOException {
+    public ResponseEntity<byte[]> clientDirectoryExcel(@PathVariable("clientId") UUID clientId)  {
         byte[] excelBytes = service.clientDirectoryExcel(clientId);
         HttpHeaders headers = generateHeadersForFile("client-directory" + "-" + ".xlsx");
         return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
     }
 
     @GetMapping("/client/directory/excel")
-    public ResponseEntity<byte[]> clientDirectoryExcel() throws IOException {
+    public ResponseEntity<byte[]> clientDirectoryExcel()  {
         byte[] excelBytes = service.clientDirectoryExcel();
         HttpHeaders headers = generateHeadersForFile("client-directory" + "-" + ".xlsx");
         return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);

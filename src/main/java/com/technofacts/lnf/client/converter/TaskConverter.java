@@ -5,6 +5,9 @@ import com.technofacts.lnf.dto.client.TaskDto;
 
 public class TaskConverter {
 
+    private TaskConverter() {
+    }
+
     public static TaskDto toTransportModel(Task entity) {
 
         if (entity == null) {

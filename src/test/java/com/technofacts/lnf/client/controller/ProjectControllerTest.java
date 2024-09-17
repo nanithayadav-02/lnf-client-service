@@ -8,6 +8,7 @@ import com.technofacts.lnf.client.service.ProjectService;
 import com.technofacts.lnf.dto.client.ProjectDto;
 import com.technofacts.lnf.dto.client.ProjectOverviewDto;
 import com.technofacts.lnf.dto.common.PageRequestDto;
+import com.technofacts.lnf.dto.timesheet.TimesheetDto;
 import com.technofacts.lnf.service.common.page.PaginationAndSortingHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -173,6 +175,36 @@ class ProjectControllerTest extends BaseTestClass {
                 .andExpect(status().isNoContent());
 
         verify(service).delete(projectId);
+    }
+
+    @Test
+    public void testClearCaches() throws Exception {
+        // When
+        ResultActions resultActions = mockMvc.perform(post("/lnf/projects/refresh"));
+
+        // Then
+        resultActions.andExpect(status().isCreated());
+        verify(service, times(1)).clearProjectsCache();
+    }
+
+    @Test
+    public void testGetTimeSheetsByClientId() throws Exception {
+        // Given
+        UUID clientId = UUID.randomUUID();
+        UUID projectId = UUID.randomUUID();
+        List<TimesheetDto> timesheets = List.of(new TimesheetDto(), new TimesheetDto());
+
+        when(service.getTimeSheetsByClientId(clientId, projectId)).thenReturn(timesheets);
+
+        // When
+        ResultActions resultActions = mockMvc.perform(get("/lnf/projects/clients/{clientId}", clientId)
+                .param("projectId", projectId.toString())
+                .accept(MediaType.APPLICATION_JSON));
+
+        // Then
+        resultActions.andExpect(status().isOk())
+                .andExpect(content().json("[{},{}]"));
+        verify(service, times(1)).getTimeSheetsByClientId(clientId, projectId);
     }
 
     private ProjectDto mockProject1() {
