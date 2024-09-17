@@ -25,7 +25,7 @@ public class TimesheetClientImpl extends BaseWebClientService implements Timeshe
     private final WebClient webClient;
 
     @Autowired
-    public TimesheetClientImpl(@Qualifier("timesheetService") WebClient webClient) {
+    public TimesheetClientImpl(@Qualifier("timesheetServiceWebClient") WebClient webClient) {
         this.webClient = webClient;
     }
 

@@ -5,6 +5,9 @@ import com.technofacts.lnf.dto.client.ClientNotesDto;
 
 public class ClientNotesConverter {
 
+    private ClientNotesConverter() {
+    }
+
     public static ClientNotesDto toTransportModel(ClientNotes entity) {
         if (entity == null) {
             return null;

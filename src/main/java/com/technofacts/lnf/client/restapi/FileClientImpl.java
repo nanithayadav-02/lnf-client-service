@@ -36,7 +36,7 @@ public class FileClientImpl extends BaseWebClientService implements FileService,
     private String s3Service;
 
     @Autowired
-    public FileClientImpl(@Qualifier("fileService") WebClient webClient) {
+    public FileClientImpl(@Qualifier("fileServiceWebClient") WebClient webClient) {
         this.webClient = webClient;
     }
 

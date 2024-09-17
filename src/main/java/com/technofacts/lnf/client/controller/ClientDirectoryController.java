@@ -6,12 +6,9 @@ package com.technofacts.lnf.client.controller;
 import com.technofacts.lnf.client.service.ClientDirectoryService;
 import com.technofacts.lnf.dto.client.ClientDirectoryDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 

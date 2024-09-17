@@ -3,7 +3,6 @@ package com.technofacts.lnf.client.controller;
 import com.technofacts.lnf.client.service.DashboardService;
 import com.technofacts.lnf.dto.client.ClientDto;
 import com.technofacts.lnf.dto.common.DashboardDto;
-import com.technofacts.lnf.dto.employee.EmployeeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

@@ -1,13 +1,13 @@
 package com.technofacts.lnf.client.yaml.factory;
 
-import java.io.IOException;
-import java.util.Properties;
-
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertySourceFactory;
+
+import java.io.IOException;
+import java.util.Properties;
 
 public class YamlPropertySourceFactory implements PropertySourceFactory {
 
@@ -18,7 +18,13 @@ public class YamlPropertySourceFactory implements PropertySourceFactory {
 
         Properties properties = factory.getObject();
 
-        return new PropertiesPropertySource(encodedResource.getResource().getFilename(), properties);
+        String filename = encodedResource.getResource().getFilename();
+
+        if (filename == null || properties == null) {
+            throw new IllegalArgumentException("Filename or properties cannot be null");
+        }
+
+        return new PropertiesPropertySource(filename, properties);
     }
 
 }

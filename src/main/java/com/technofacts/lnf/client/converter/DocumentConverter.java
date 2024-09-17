@@ -12,6 +12,9 @@ import java.util.UUID;
 
 public class DocumentConverter {
 
+    private DocumentConverter() {
+    }
+
     public static DocumentDto toTransportModel(ClientDocument entity) {
         if (entity == null) {
             return null;

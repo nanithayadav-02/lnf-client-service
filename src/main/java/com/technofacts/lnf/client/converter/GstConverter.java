@@ -5,6 +5,9 @@ import com.technofacts.lnf.dto.client.GstDto;
 
 public class GstConverter {
 
+    private GstConverter() {
+    }
+
     public static GstDto toTransportModel(Gst entity) {
         if (entity == null) {
             return null;

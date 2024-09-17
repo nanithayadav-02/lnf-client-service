@@ -37,7 +37,7 @@ public class WebClientConfiguration {
     @Value("${connection.timeout}")
     private int timeOut;
 
-    @Qualifier("employeeService")
+
     @Bean
     public WebClient employeeWebClient() {
         return createWebClient(employeeServiceUrl);
@@ -45,19 +45,16 @@ public class WebClientConfiguration {
 
     @Bean
     @Primary
-    @Qualifier("fileService")
     public WebClient fileServiceWebClient() {
         return createWebClient(fileServiceUrl);
     }
 
     @Bean
-    @Qualifier("timesheetService")
     public WebClient timesheetServiceWebClient() {
         return createWebClient(timesheetServiceUrl);
     }
 
     @Bean
-    @Qualifier("emailService")
     public WebClient emailServiceWebClient() {
         return createWebClient(emailServiceUrl);
     }

@@ -6,6 +6,9 @@ import com.technofacts.lnf.dto.client.AgreementDto;
 
 public class ClientAgreementConverter {
 
+    private ClientAgreementConverter() {
+    }
+
     public static AgreementDto toTransportModel(Agreement entity) {
         if (entity == null) {
             return null;
