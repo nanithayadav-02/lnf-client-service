@@ -25,7 +25,7 @@ public class EmailClientImpl extends BaseWebClientService implements ThymeleafDo
     public static final String ERROR_OCCURRED_WHILE_GENERATING_EXCEL_BYTES_S = "Error occurred while generating Excel bytes [%s]";
 
     @Autowired
-    public EmailClientImpl(@Qualifier("emailService") WebClient webClient) {
+    public EmailClientImpl(@Qualifier("emailServiceWebClient") WebClient webClient) {
         this.webClient = webClient;
     }
 

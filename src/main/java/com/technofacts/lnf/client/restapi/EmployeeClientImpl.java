@@ -24,7 +24,7 @@ public class EmployeeClientImpl extends BaseWebClientService implements Employee
 
     private final WebClient webClient;
 
-    public EmployeeClientImpl(@Qualifier("employeeService") WebClient webClient) {
+    public EmployeeClientImpl(@Qualifier("employeeWebClient") WebClient webClient) {
         this.webClient = webClient;
     }
 

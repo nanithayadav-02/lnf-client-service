@@ -18,7 +18,13 @@ public class YamlPropertySourceFactory implements PropertySourceFactory {
 
         Properties properties = factory.getObject();
 
-        return new PropertiesPropertySource(encodedResource.getResource().getFilename(), properties);
+        String filename = encodedResource.getResource().getFilename();
+
+        if (filename == null || properties == null) {
+            throw new IllegalArgumentException("Filename or properties cannot be null");
+        }
+
+        return new PropertiesPropertySource(filename, properties);
     }
 
 }
