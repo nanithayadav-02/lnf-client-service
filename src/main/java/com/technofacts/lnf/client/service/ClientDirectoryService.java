@@ -207,6 +207,11 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
                 .toList();
     }
 
+    public List<ClientDirectoryDto> findByClientIdAndEmail(UUID clientId, String email) {
+        List<ClientDirectory> entities = repository.findByClientIdAndEmail(clientId, email);
+        return entities.stream().map(ClientDirectoryConverter::toTransportModel).toList();
+    }
+
     private void saveEntity(ClientDirectory entity) {
         try {
             repository.save(entity);

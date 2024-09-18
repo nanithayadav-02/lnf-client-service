@@ -16,4 +16,8 @@ public interface ClientDirectoryRepository extends JpaRepository<ClientDirectory
 
     @Query("select c from ClientDirectory c where c.email = :email")
     List<ClientDirectory> findByEmail(@Param("email") String email);
+
+    @Query("SELECT cd FROM ClientDirectory cd WHERE cd.client.id = :clientId AND cd.email = :email")
+    List<ClientDirectory> findByClientIdAndEmail(@Param("clientId") UUID clientId, @Param("email") String email);
+
 }
