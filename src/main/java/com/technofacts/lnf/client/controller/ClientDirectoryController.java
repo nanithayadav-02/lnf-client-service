@@ -52,7 +52,7 @@ public class ClientDirectoryController {
     @DeleteMapping(value = "/clients/{clientId}/directory/{directoryId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteByClientIdAndId(@PathVariable("clientId") UUID clientId,
-                                      @PathVariable("directoryId") UUID directoryId){
+                                      @PathVariable("directoryId") UUID directoryId) {
         service.deleteByClientIdAndDirectoryId(clientId, directoryId);
     }
 
@@ -62,5 +62,11 @@ public class ClientDirectoryController {
         return service.findByEmail(email);
     }
 
+    @GetMapping("/clients/{clientId}/directory/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ClientDirectoryDto> searchByClientIdAndEmail(@PathVariable("clientId") UUID clientId,
+                                                             @RequestParam("email") String email) {
+        return service.findByClientIdAndEmail(clientId, email);
+    }
 
 }
