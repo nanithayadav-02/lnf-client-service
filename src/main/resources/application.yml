@@ -62,7 +62,7 @@ logging:
     org:
       springframework: INFO
     root: ERROR
-  com.technofacts.lnf.client.*: DEBUG
+    com.lnf.client.*: DEBUG
 
 springdoc:
   api-docs:
