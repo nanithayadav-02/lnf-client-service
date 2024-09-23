@@ -18,12 +18,9 @@ package com.lnf.client.converter;
 
 import com.lnf.client.model.*;
 import com.lnf.client.model.enums.AddressType;
-import com.lnf.client.model.*;
 import com.lnf.dto.client.AddressDto;
-import com.lnf.dto.client.ClientDirectoryDto;
 import com.lnf.dto.client.ClientDto;
 import com.lnf.dto.client.ClientOverviewDto;
-import com.lnf.dto.recruiter.JobDto;
 
 import java.util.ArrayList;
 import java.util.Comparator;
