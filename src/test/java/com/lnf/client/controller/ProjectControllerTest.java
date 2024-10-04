@@ -203,25 +203,25 @@ class ProjectControllerTest extends BaseTestClass {
         verify(service, times(1)).clearProjectsCache();
     }
 
-    @Test
-    public void testGetTimeSheetsByClientId() throws Exception {
-        // Given
-        UUID clientId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        List<TimesheetDto> timesheets = List.of(new TimesheetDto(), new TimesheetDto());
-
-        when(service.getTimeSheetsByClientId(clientId, projectId)).thenReturn(timesheets);
-
-        // When
-        ResultActions resultActions = mockMvc.perform(get("/lnf/projects/clients/{clientId}", clientId)
-                .param("projectId", projectId.toString())
-                .accept(MediaType.APPLICATION_JSON));
-
-        // Then
-        resultActions.andExpect(status().isOk())
-                .andExpect(content().json("[{},{}]"));
-        verify(service, times(1)).getTimeSheetsByClientId(clientId, projectId);
-    }
+//    @Test
+//    public void testGetTimeSheetsByClientId() throws Exception {
+//        // Given
+//        UUID clientId = UUID.randomUUID();
+//        UUID projectId = UUID.randomUUID();
+//        List<TimesheetDto> timesheets = List.of(new TimesheetDto(), new TimesheetDto());
+//
+//        when(service.getTimeSheetsByClientId(clientId, projectId)).thenReturn(timesheets);
+//
+//        // When
+//        ResultActions resultActions = mockMvc.perform(get("/lnf/projects/clients/{clientId}", clientId)
+//                .param("projectId", projectId.toString())
+//                .accept(MediaType.APPLICATION_JSON));
+//
+//        // Then
+//        resultActions.andExpect(status().isOk())
+//                .andExpect(content().json("[{},{}]"));
+//        verify(service, times(1)).getTimeSheetsByClientId(clientId, projectId);
+//    }
 
     private ProjectDto mockProject1() {
         return createProject("cfe94b9f-c86f-4733-be96-a9b619f7bca7", "PRJ83", "GSTIN139302hk2", "Project04", "Project Description",

@@ -48,10 +48,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -314,7 +311,9 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                 orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
     }
 
-    public List<TimesheetDto> getTimeSheetsByClientId(UUID clientId, UUID projectId) {
+    public Page<TimesheetDto> getTimeSheetsByClientId(UUID clientId, UUID projectId,
+                                                      Optional<Integer> month, Optional<Integer> year,
+                                                      PageRequestDto pageRequestDto) {
 
         //listing the employeeIds based on clientId
         List<String> employeeIds = repository.findEmployeeIdsByClientId(clientId);
@@ -327,8 +326,8 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
             //listing the projectIds based on clientId
             projectIds = repository.findProjectIdsByClientId(clientId);
         }
-        //Based on clientId we are passing employeeIds and projectIds for listing the timeSheets
-        return timesheetService.findTimeSheetsByEmployeeIds(employeeIds, projectIds);
+        //Based on clientId we are passing employeeIds and projectIds for listing the timeSheets by year and month filter with pagination
+        return timesheetService.findTimeSheetsByEmployeeIds(employeeIds, projectIds, month, year, pageRequestDto);
     }
 
 }
