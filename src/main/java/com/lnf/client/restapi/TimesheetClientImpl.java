@@ -16,21 +16,30 @@
 
 package com.lnf.client.restapi;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lnf.dto.common.PageRequestDto;
 import com.lnf.dto.timesheet.TimesheetDto;
-import com.lnf.dto.timesheet.WeeklyTimesheetDto;
 import com.lnf.exception.LnFException;
 import com.lnf.service.timesheet.TimesheetService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -38,6 +47,7 @@ import java.util.*;
 public class TimesheetClientImpl extends BaseWebClientService implements TimesheetService {
 
     private final WebClient webClient;
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Autowired
     public TimesheetClientImpl(@Qualifier("timesheetServiceWebClient") WebClient webClient) {
@@ -50,30 +60,41 @@ public class TimesheetClientImpl extends BaseWebClientService implements Timeshe
     }
 
     @Override
-    public List<TimesheetDto> findTimeSheetsByEmployeeIds(List<String> employeeIds, List<UUID> projectIds) {
-        List<TimesheetDto> timesheetDtos = new ArrayList<>();
+    public Page<TimesheetDto> findTimeSheetsByEmployeeIds(List<String> employeeIds, List<UUID> projectIds,
+                                                          Optional<Integer> month, Optional<Integer> year,
+                                                          PageRequestDto pageRequestDto) {
         try {
-
+            // Build the WebClient request spec
             WebClient.RequestHeadersSpec<?> spec = webClient.post()
                     .uri(uriBuilder -> uriBuilder.path("/lnf/timesheet/project-employees")
                             .queryParam("projectId", projectIds)
+                            .queryParam("month", month.orElse(null))
+                            .queryParam("year", year.orElse(null))
+                            .queryParam("page", pageRequestDto.getPage())
+                            .queryParam("size", pageRequestDto.getSize())
                             .build())
                     .body(BodyInserters.fromValue(employeeIds))
                     .accept(MediaType.APPLICATION_JSON);
 
-            // Conditionally add the JWT token to the request headers
+            // Add JWT token to request headers if available
             addJwtToken(spec);
 
-            // Retrieve the response
-            timesheetDtos = spec.retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<TimesheetDto>>() {})
+            String responseBody = spec.retrieve()
+                    .bodyToMono(String.class)
                     .block();
-        } catch (RuntimeException ex) {
+
+            JsonNode responseMap = objectMapper.readTree(responseBody);
+            List<TimesheetDto> content = objectMapper.convertValue(responseMap.get("content"), new TypeReference<>() {
+            });
+            int number = responseMap.get("number").asInt();
+            int size = responseMap.get("size").asInt();
+            long totalElements = responseMap.get("totalElements").asLong();
+
+            return new PageImpl<>(content, PageRequest.of(number, size), totalElements);
+        } catch (RuntimeException | JsonProcessingException ex) {
             log.error("Error occurred fetching the timesheet details for the employeeIds - {}", employeeIds, ex);
             throw new LnFException("Fetching timesheet details for employeeIds failed due to exception",ex);
         }
-
-        return timesheetDtos;
     }
 
 }
