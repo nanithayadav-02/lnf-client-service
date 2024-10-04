@@ -135,6 +135,7 @@ public class ProjectController {
     }
 
     @GetMapping("/projects/clients/{clientId}")
+    @ResponseStatus(HttpStatus.OK)
     public Page<TimesheetDto> getTimeSheetsByClientId(@PathVariable("clientId") UUID clientId,
                                                       @RequestParam(value = "projectId", required = false) UUID projectId,
                                                       @RequestParam(value = "month", required = false) Optional<Integer> month,
