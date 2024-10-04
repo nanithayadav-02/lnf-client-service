@@ -32,6 +32,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
@@ -42,6 +44,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.aspectj.bridge.MessageUtil.fail;
@@ -77,13 +80,13 @@ class ProjectControllerTest extends BaseTestClass {
         when(service.findAllSorted("degree", "asc")).thenReturn(mockedList);
         when(service.findAll()).thenReturn(mockedList);
 
-        ProjectController controller = new ProjectController(service,paginationAndSortingHandler,dataExportService);
+        ProjectController controller = new ProjectController(service, paginationAndSortingHandler, dataExportService);
         // Test for paginated and sorted request
         ResponseEntity<?> response = controller.findAll(pageRequest);
         assertEquals(ResponseEntity.ok(mockedPage), response);
 
         // Pagination with  sortBy and sortOrder
-        pageRequest = new PageRequestDto(0, 10,null,null);
+        pageRequest = new PageRequestDto(0, 10, null, null);
         response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
         assertEquals(ResponseEntity.ok(mockedPage), response);
 
@@ -179,7 +182,7 @@ class ProjectControllerTest extends BaseTestClass {
         ProjectDto actualType = captor.getValue();
 
         assertEquals(updatedProject.getId(), actualType.getId(), "Address IDs should match");
-        assertEquals(updatedProject.getName(), actualType.getName(),"Address name should match");
+        assertEquals(updatedProject.getName(), actualType.getName(), "Address name should match");
     }
 
     @Test
@@ -203,35 +206,41 @@ class ProjectControllerTest extends BaseTestClass {
         verify(service, times(1)).clearProjectsCache();
     }
 
-//    @Test
-//    public void testGetTimeSheetsByClientId() throws Exception {
-//        // Given
-//        UUID clientId = UUID.randomUUID();
-//        UUID projectId = UUID.randomUUID();
-//        List<TimesheetDto> timesheets = List.of(new TimesheetDto(), new TimesheetDto());
-//
-//        when(service.getTimeSheetsByClientId(clientId, projectId)).thenReturn(timesheets);
-//
-//        // When
-//        ResultActions resultActions = mockMvc.perform(get("/lnf/projects/clients/{clientId}", clientId)
-//                .param("projectId", projectId.toString())
-//                .accept(MediaType.APPLICATION_JSON));
-//
-//        // Then
-//        resultActions.andExpect(status().isOk())
-//                .andExpect(content().json("[{},{}]"));
-//        verify(service, times(1)).getTimeSheetsByClientId(clientId, projectId);
-//    }
+    @Test
+    void testGetTimeSheetsByClientId() throws Exception {
+        // Given
+        UUID clientId = UUID.randomUUID();
+        UUID projectId = UUID.randomUUID();
+        Optional<Integer> month = Optional.of(5);
+        Optional<Integer> year = Optional.of(2024);
+        int page = 0;
+        int size = 5;
+        PageRequestDto pageRequest = new PageRequestDto(page, size, null, null);
+        List<TimesheetDto> timesheets = List.of(new TimesheetDto(), new TimesheetDto());
+
+        Page<TimesheetDto> leavePage = new PageImpl<>(timesheets, PageRequest.of(page, size), timesheets.size());
+        when(service.getTimeSheetsByClientId(clientId, projectId, month, year, pageRequest)).thenReturn(leavePage);
+
+        mockMvc.perform(get("/lnf/projects/clients/{clientId}", clientId)
+                .param("projectId", projectId.toString())
+                .param("month", month.get().toString())
+                .param("year", year.get().toString())
+                .param("page", String.valueOf(pageRequest.getPage()))
+                .param("size", String.valueOf(pageRequest.getSize()))
+                .accept(MediaType.APPLICATION_JSON));
+
+        verify(service, times(1)).getTimeSheetsByClientId(clientId, projectId, month, year, pageRequest);
+    }
 
     private ProjectDto mockProject1() {
         return createProject("cfe94b9f-c86f-4733-be96-a9b619f7bca7", "PRJ83", "GSTIN139302hk2", "Project04", "Project Description",
-                             "PO26032021", "Fixed", "active", "INR", "8500000.0", "8","Quarterly", "2024-12-31",
-                              "2025-12-31");
+                "PO26032021", "Fixed", "active", "INR", "8500000.0", "8", "Quarterly", "2024-12-31",
+                "2025-12-31");
     }
 
     private ProjectDto mockProject2() {
         return createProject("e17a4ac7-873f-460e-9b38-eb02d7bb8ba7", "PRJ-020", "Data Analytics", "Project08", "Testing",
-                "PO26032043", "Variable", "On-Hold", "USD", "7500000.0", "10","Monthly", "2024-02-01",
+                "PO26032043", "Variable", "On-Hold", "USD", "7500000.0", "10", "Monthly", "2024-02-01",
                 "2025-12-31");
     }
 
@@ -264,7 +273,7 @@ class ProjectControllerTest extends BaseTestClass {
     }
 
     private ProjectOverviewDto createProjectOverview(String id, String code, String name, String type, String description, String purchaseOrder,
-                                     String budgetTerms, String status) {
+                                                     String budgetTerms, String status) {
         ProjectOverviewDto dto = new ProjectOverviewDto();
         dto.setId(UUID.fromString(id));
         dto.setCode(code);
