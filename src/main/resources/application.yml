@@ -2,6 +2,11 @@ spring:
   profiles:
     active: dev-ide
 
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:false}
+    baseline-on-migrate: true
+    validate-on-migrate: true
+
   application:
     name: lnf-client-service
 
