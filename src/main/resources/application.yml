@@ -2,6 +2,11 @@ spring:
   profiles:
     active: dev-ide
 
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:false}
+    baseline-on-migrate: true
+    validate-on-migrate: true
+
   application:
     name: lnf-client-service
 
@@ -35,6 +40,10 @@ timesheet:
   service:
     url: "http://localhost:8081/api/v3"
 
+email:
+  service:
+    url: "http://localhost:8081/api/v3"
+
 # Metrics Configuration
 management:
   metrics:
@@ -58,7 +67,7 @@ logging:
     org:
       springframework: INFO
     root: ERROR
-  com.technofacts.lnf.client.*: DEBUG
+    com.lnf.client.*: DEBUG
 
 springdoc:
   api-docs:
