@@ -17,18 +17,21 @@
 package com.lnf.client.service;
 
 import com.lnf.client.converter.DocumentConverter;
-import com.lnf.client.model.enums.DocumentType;
 import com.lnf.client.model.Client;
 import com.lnf.client.model.ClientDocument;
+import com.lnf.client.model.enums.DocumentType;
 import com.lnf.client.repository.ClientDocumentRepository;
 import com.lnf.client.repository.ClientRepository;
 import com.lnf.dto.client.DocumentDto;
+import com.lnf.dto.file.FileDto;
 import com.lnf.exception.LnFBadRequestException;
 import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
+import com.lnf.service.file.FileFolderService;
 import com.lnf.service.file.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -39,7 +42,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -49,9 +51,10 @@ import java.util.*;
 public class DocumentService {
 
     public static final String S_S_S_S = "%s/%s/%s/%s";
+    public static final String S_S_S = "%s/%s/%s/";
     private final ClientRepository clientRepository;
     private final ClientDocumentRepository repository;
-
+    private final FileFolderService fileFolderService;
     private final FileService fileService;
 
     @Value("${aws.s3.bucket.enabled}")
@@ -70,23 +73,14 @@ public class DocumentService {
     public DocumentDto findByClientId(UUID clientId, String type) {
         try {
             if (awsS3BucketEnabled) {
-                var filePath = String.format("%s/%s/%s/", folderName, clientId, type);
-                List<String> filePaths = fileService.findFilesInFolder(filePath);
+                var filePath = String.format(S_S_S, folderName, clientId, type);
+                List<FileDto> filePaths = fileFolderService.findFiles(filePath);
                 if (filePaths == null || filePaths.isEmpty()) {
                     log.error("Document not found for client {} ", clientId);
                     return null;
                 }
-                var fileName = Paths.get(filePaths.get(0)).getFileName().toString();
-                String url = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path(DocumentConverter.constructUrlFromType(clientId, DocumentType.valueOf(type)))
-                        .path(fileName)
-                        .toUriString();
 
-                DocumentDto documentDto = new DocumentDto();
-                documentDto.setName(fileName);
-                documentDto.setUrl(url);
-
-                return documentDto;
+                return setDocumentDto(clientId, type, filePaths);
             } else {
                 searchForClient(clientId);
                 ClientDocument entity = searchForDocument(clientId, DocumentType.valueOf(type));
@@ -97,6 +91,20 @@ public class DocumentService {
         } catch (Exception e) {
             throw new LnFException("file not found for clientId:" + e.getMessage());
         }
+    }
+
+    private static DocumentDto setDocumentDto(UUID clientId, String type, List<FileDto> filePaths) {
+        var fileName = StringUtils.substringAfterLast(filePaths.get(0).getFileName(), "/");
+        String url = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(DocumentConverter.constructUrlFromType(clientId, DocumentType.valueOf(type)))
+                .path(fileName)
+                .toUriString();
+
+        DocumentDto documentDto = new DocumentDto();
+        documentDto.setName(fileName);
+        documentDto.setSize(filePaths.get(0).getFileSize());
+        documentDto.setUrl(url);
+        return documentDto;
     }
 
     /**
@@ -160,7 +168,7 @@ public class DocumentService {
     public void create(UUID clientId, DocumentType type, MultipartFile file) {
         try {
             if (awsS3BucketEnabled) {
-                var folder = String.format("%s/%s/%s/", folderName, clientId, type);
+                var folder = String.format(S_S_S, folderName, clientId, type);
                 String filePath = uploadFile(folder, file);
                 log.debug("File uploaded successfully to S3 bucket: " + filePath);
             } else {
@@ -198,7 +206,7 @@ public class DocumentService {
         LnFBadRequestException.throwOnCondition(Objects::isNull, file, String.format("Failed to update document for client [%s] with null payload", clientId));
         try {
             if (awsS3BucketEnabled) {
-                var folder = String.format("%s/%s/%s/", folderName, clientId, type);
+                var folder = String.format(S_S_S, folderName, clientId, type);
                 String filePath = uploadFile(folder, file);
                 log.debug("File {} for client  successfully updated in S3", filePath);
             } else {
