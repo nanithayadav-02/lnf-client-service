@@ -62,9 +62,9 @@ class ClientDirectoriesControllerTest extends BaseTestClass {
         when(service.findAll()).thenReturn(mockedList);
         when(service.findingAllWithPagination(searchQuery, pageRequest)).thenReturn(mockedPage);
 
-        DirectoryController controller = new DirectoryController(service, paginationAndSortingHandler);
+        ClientDirectoriesController controller = new ClientDirectoriesController(service, paginationAndSortingHandler);
         // Test for paginated and sorted request
-        ResponseEntity<?> response = controller.findAll(searchQuery, pageRequest);
+        ResponseEntity<?> response = controller.findAll(searchQuery, UUID.randomUUID(), pageRequest);
         Assertions.assertEquals(ResponseEntity.ok(mockedPage), response);
 
         // Pagination with  sortBy and sortOrder
