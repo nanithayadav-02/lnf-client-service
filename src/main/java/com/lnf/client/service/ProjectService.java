@@ -17,16 +17,15 @@
 package com.lnf.client.service;
 
 import com.google.common.collect.Lists;
-import com.lnf.client.repository.ClientRepository;
-import com.lnf.client.repository.ProjectRepository;
 import com.lnf.client.converter.ProjectConverter;
 import com.lnf.client.model.Client;
 import com.lnf.client.model.Project;
+import com.lnf.client.repository.ClientRepository;
+import com.lnf.client.repository.ProjectRepository;
 import com.lnf.dto.client.ClientEmployeeDto;
 import com.lnf.dto.client.ProjectDto;
 import com.lnf.dto.client.ProjectOverviewDto;
 import com.lnf.dto.common.PageRequestDto;
-import com.lnf.dto.timesheet.TimesheetDto;
 import com.lnf.exception.LnFBadRequestException;
 import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
@@ -311,9 +310,9 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                 orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
     }
 
-    public Page<TimesheetDto> getTimeSheetsByClientId(UUID clientId, UUID projectId,
-                                                      Optional<Integer> month, Optional<Integer> year,
-                                                      PageRequestDto pageRequestDto) {
+    public List<Map<String, Object>> getTimeSheetsByClientId(UUID clientId, UUID projectId,
+                                                             Optional<Integer> month, Optional<Integer> year,
+                                                             String status) {
 
         //listing the employeeIds based on clientId
         List<String> employeeIds = repository.findEmployeeIdsByClientId(clientId);
@@ -326,8 +325,8 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
             //listing the projectIds based on clientId
             projectIds = repository.findProjectIdsByClientId(clientId);
         }
-        //Based on clientId we are passing employeeIds and projectIds for listing the timeSheets by year and month filter with pagination
-        return timesheetService.findTimeSheetsByEmployeeIds(employeeIds, projectIds, month, year, pageRequestDto);
+        //Based on clientId we are passing employeeIds and projectIds for listing the timeSheets by year and month and status
+        return timesheetService.findTimeSheetsByEmployeeIds(employeeIds, projectIds, month, year, status);
     }
 
 }
