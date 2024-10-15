@@ -36,16 +36,16 @@ public class ClientDirectoriesController {
     private final ClientDirectoryService service;
     private final PaginationAndSortingHandler paginationAndSortingHandler;
 
-    @GetMapping(value = "/clients/directory")
+    @GetMapping(value = "/clients/{clientId}/directory")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> findAll(@RequestParam(value = "search", required = false) String search,
-                                     @RequestParam(required = false) final UUID clientId,
+                                     @PathVariable("clientId") UUID clientId,
                                      @PageableAsQueryParam PageRequestDto pageRequest) {
         if (search != null && !search.isEmpty()) {
             if (pageRequest != null && pageRequest.getPage() != null) {
-                return ResponseEntity.ok(service.findingAllWithPagination(search, pageRequest));
+                return ResponseEntity.ok(service.findingAllWithPagination(search, clientId, pageRequest));
             } else {
-                return ResponseEntity.ok(service.findAll(search));
+                return ResponseEntity.ok(service.findAllByClientId(clientId, search));
             }
         } else if (clientId != null) {
             return ResponseEntity.ok(service.findClientsDirectoryByClientId(clientId, pageRequest));

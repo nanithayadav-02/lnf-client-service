@@ -44,11 +44,6 @@ public class ClientDirectoryController {
         service.update(clientId, directoryId, resource);
     }
 
-    @GetMapping(value = "/clients/{clientId}/directory")
-    public List<ClientDirectoryDto> findByClientId(@PathVariable("clientId") final UUID clientId) {
-        return service.findByClientId(clientId);
-    }
-
     @GetMapping(value = "/clients/{clientId}/directory/{directoryId}")
     public ClientDirectoryDto findByClientIdAndId(@PathVariable("clientId") final UUID clientId,
                                                   @PathVariable("directoryId") final UUID directoryId) {

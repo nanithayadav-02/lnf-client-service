@@ -104,26 +104,34 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         return resultPage.map(ClientDirectoryConverter::toTransportModel);
     }
 
-    public Page<ClientDirectoryDto> findingAllWithPagination(String search, PageRequestDto pageRequestDto) {
+    public Page<ClientDirectoryDto> findingAllWithPagination(String search, UUID clientId, PageRequestDto pageRequestDto) {
         Pageable pageable = PageRequest.of(pageRequestDto.getPage(), pageRequestDto.getSize(),
                 RestUtil.constructSort(pageRequestDto.getSortBy(), pageRequestDto.getSortOrder()));
-        Specification<ClientDirectory> specification = buildClientDirectorySpecification(search);
+
+        Specification<ClientDirectory> specification = buildClientDirectorySpecification(clientId, search);
+
         Page<ClientDirectory> resultPage = repository.findAll(specification, pageable);
         return resultPage.map(ClientDirectoryConverter::toTransportModel);
     }
 
-    private Specification<ClientDirectory> buildClientDirectorySpecification(String search) {
+    private Specification<ClientDirectory> buildClientDirectorySpecification(UUID clientId, String search) {
         GenericSpecificationBuilder<ClientDirectory> clientDirectoryBuilder = new GenericSpecificationBuilder<>();
         Function<String, Class<?>> fieldClassForClientDirectory = this::getFieldClassFromClientDirectory;
-        return SpecificationUtil.buildSpecification(search, clientDirectoryBuilder, fieldClassForClientDirectory);
+
+        Specification<ClientDirectory> searchSpecification = SpecificationUtil.buildSpecification(search, clientDirectoryBuilder, fieldClassForClientDirectory);
+
+        Specification<ClientDirectory> clientIdSpecification = (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("client").get("id"), clientId);
+
+        return Specification.where(clientIdSpecification).and(searchSpecification);
     }
 
     private Class<?> getFieldClassFromClientDirectory(String fieldName) {
         return SpecificationUtil.getFieldClass(ClientDirectory.class, fieldName);
     }
 
-    public List<ClientDirectoryDto> findAll(String search) {
-        Specification<ClientDirectory> specification = buildClientDirectorySpecification(search);
+    public List<ClientDirectoryDto> findAll(String search, UUID clientId) {
+        Specification<ClientDirectory> specification = buildClientDirectorySpecification(clientId, search);
         List<ClientDirectory> entities = repository.findAll(specification);
         return convertToDtos(entities);
     }
@@ -321,6 +329,12 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
                 pageRequestDto.getSize(),
                 RestUtil.constructSort(pageRequestDto.getSortBy(), pageRequestDto.getSortOrder())
         );
+    }
+
+    public List<ClientDirectoryDto> findAllByClientId(UUID clientId, String search) {
+        Specification<ClientDirectory> specification = buildClientDirectorySpecification(clientId, search);
+        List<ClientDirectory> entities = repository.findAll(specification);
+        return convertToDtos(entities);
     }
 
 }

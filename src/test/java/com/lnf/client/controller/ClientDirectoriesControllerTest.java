@@ -52,35 +52,48 @@ class ClientDirectoriesControllerTest extends BaseTestClass {
     @Test
     void findAll() {
         String searchQuery = "description:the resume has to be uploaded";
-        Page mockedPage = mock(Page.class);
+        Page<ClientDirectoryDto> mockedPage = mock(Page.class);
+        List<ClientDirectoryDto> mockedList = List.of(createClientDirectory1());
+
+        when(mockedPage.getContent()).thenReturn(mockedList);
+
         PageRequestDto pageRequest = new PageRequestDto(0, 10, "firstName", "asc");
 
-        List<ClientDirectoryDto> mockedList = List.of(createClientDirectory1());
+        UUID mockUUID = UUID.randomUUID();
+
         when(service.findPaginatedAndSorted(0, 10, "firstName", "asc")).thenReturn(mockedPage);
         when(service.findPaginated(0, 10)).thenReturn(mockedPage);
         when(service.findAllSorted("firstName", "asc")).thenReturn(mockedList);
         when(service.findAll()).thenReturn(mockedList);
-        when(service.findingAllWithPagination(searchQuery, pageRequest)).thenReturn(mockedPage);
+        when(service.findingAllWithPagination(searchQuery, mockUUID, pageRequest)).thenReturn(mockedPage);
 
         ClientDirectoriesController controller = new ClientDirectoriesController(service, paginationAndSortingHandler);
-        // Test for paginated and sorted request
-        ResponseEntity<?> response = controller.findAll(searchQuery, UUID.randomUUID(), pageRequest);
-        Assertions.assertEquals(ResponseEntity.ok(mockedPage), response);
 
-        // Pagination with  sortBy and sortOrder
+        // Test for paginated and sorted request
+        ResponseEntity<?> response = controller.findAll(searchQuery, mockUUID, pageRequest);
+
+        // Verify that the body of the response contains the expected page content
+        Assertions.assertNotNull(response.getBody(), "Response body should not be null");
+        Assertions.assertTrue(response.getBody() instanceof Page, "Response body should be of type Page");
+        Assertions.assertEquals(mockedList, ((Page<ClientDirectoryDto>) response.getBody()).getContent());
+
+        // Pagination without sortBy and sortOrder
         pageRequest = new PageRequestDto(0, 10, null, null);
         response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
-        Assertions.assertEquals(ResponseEntity.ok(mockedPage), response);
+        Assertions.assertNotNull(response.getBody(), "Response body should not be null");
+        Assertions.assertEquals(mockedList, ((Page<ClientDirectoryDto>) response.getBody()).getContent());
 
         // Pagination with sortBy and sortOrder
         pageRequest = new PageRequestDto(null, null, "firstName", "asc");
         response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
-        Assertions.assertEquals(ResponseEntity.ok(mockedList), response);
+        Assertions.assertNotNull(response.getBody(), "Response body should not be null");
+        Assertions.assertEquals(mockedList, response.getBody());
 
-        //find All
+        // Find all
         pageRequest = new PageRequestDto();
         response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
-        Assertions.assertEquals(ResponseEntity.ok(mockedList), response);
+        Assertions.assertNotNull(response.getBody(), "Response body should not be null");
+        Assertions.assertEquals(mockedList, response.getBody());
     }
 
     @Test
