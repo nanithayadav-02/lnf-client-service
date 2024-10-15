@@ -48,7 +48,7 @@ public class ClientDirectoriesController {
                 return ResponseEntity.ok(service.findAllByClientId(clientId, search));
             }
         } else if (clientId != null) {
-            return ResponseEntity.ok(service.findClientsDirectoryByClientId(clientId, pageRequest));
+            return service.findClientsDirectoryByClientId(clientId, pageRequest);
         } else {
             return paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
         }

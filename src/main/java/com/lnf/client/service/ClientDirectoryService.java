@@ -302,7 +302,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         return documentService.generatePdf(thymeleafDocumentDto);
     }
 
-    public ResponseEntity<?> findClientsDirectoryByClientId(UUID clientId, @PageableAsQueryParam PageRequestDto pageRequest) {
+    public ResponseEntity<?> findClientsDirectoryByClientId(UUID clientId, PageRequestDto pageRequest) {
         boolean hasPagination = pageRequest != null && pageRequest.getPage() != null;
 
         return ResponseEntity.ok(
