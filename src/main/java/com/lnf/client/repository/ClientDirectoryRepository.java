@@ -17,6 +17,8 @@
 package com.lnf.client.repository;
 
 import com.lnf.client.model.ClientDirectory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -35,5 +37,11 @@ public interface ClientDirectoryRepository extends JpaRepository<ClientDirectory
 
     @Query("SELECT cd FROM ClientDirectory cd WHERE cd.client.id = :clientId AND cd.email = :email")
     List<ClientDirectory> findByClientIdAndEmail(@Param("clientId") UUID clientId, @Param("email") String email);
+
+    @Query("SELECT cd FROM ClientDirectory cd WHERE cd.client.id = :clientId")
+    List<ClientDirectory> findClientDirectoryByClientId(@Param("clientId") UUID clientId);
+
+    @Query("SELECT cd FROM ClientDirectory cd WHERE cd.client.id = :clientId")
+    Page<ClientDirectory> findClientDirectoryByClientId(@Param("clientId") UUID clientId, Pageable pageable);
 
 }
