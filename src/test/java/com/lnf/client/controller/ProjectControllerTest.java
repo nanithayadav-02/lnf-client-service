@@ -220,6 +220,7 @@ class ProjectControllerTest extends BaseTestClass {
                 .param("projectId", projectId.toString())
                 .param("month", month.get().toString())
                 .param("year", year.get().toString())
+                .param("status", status)
                 .accept(MediaType.APPLICATION_JSON));
 
         verify(service, times(1)).getTimeSheetsByClientId(clientId, projectId, month, year, status);
