@@ -43,9 +43,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.aspectj.bridge.MessageUtil.fail;
 import static org.hamcrest.Matchers.containsString;
@@ -197,7 +195,7 @@ class ProjectControllerTest extends BaseTestClass {
     }
 
     @Test
-    public void testClearCaches() throws Exception {
+    void testClearCaches() throws Exception {
         // When
         ResultActions resultActions = mockMvc.perform(post("/lnf/projects/refresh"));
 
@@ -213,23 +211,42 @@ class ProjectControllerTest extends BaseTestClass {
         UUID projectId = UUID.randomUUID();
         Optional<Integer> month = Optional.of(5);
         Optional<Integer> year = Optional.of(2024);
-        int page = 0;
-        int size = 5;
-        PageRequestDto pageRequest = new PageRequestDto(page, size, null, null);
-        List<TimesheetDto> timesheets = List.of(new TimesheetDto(), new TimesheetDto());
+        List<Map<String, Object>> timesheets = createMockEmployeeTimesheet();
+        String status = "Approved";
 
-        Page<TimesheetDto> leavePage = new PageImpl<>(timesheets, PageRequest.of(page, size), timesheets.size());
-        when(service.getTimeSheetsByClientId(clientId, projectId, month, year, pageRequest)).thenReturn(leavePage);
+        when(service.getTimeSheetsByClientId(clientId, projectId, month, year, status)).thenReturn(timesheets);
 
         mockMvc.perform(get("/lnf/projects/clients/{clientId}", clientId)
                 .param("projectId", projectId.toString())
                 .param("month", month.get().toString())
                 .param("year", year.get().toString())
-                .param("page", String.valueOf(pageRequest.getPage()))
-                .param("size", String.valueOf(pageRequest.getSize()))
                 .accept(MediaType.APPLICATION_JSON));
 
-        verify(service, times(1)).getTimeSheetsByClientId(clientId, projectId, month, year, pageRequest);
+        verify(service, times(1)).getTimeSheetsByClientId(clientId, projectId, month, year, status);
+    }
+
+    public List<Map<String, Object>> createMockEmployeeTimesheet() {
+
+        String employeeId = "HRD-NE-TF-4028";
+        String employeeName = "Kushbu ";
+        double totalHours = 176.0;
+        LocalDate date = LocalDate.parse("2023-05-31");
+        double hours = 8.0;
+
+        Map<String, Object> timesheetEntry = new HashMap<>();
+        timesheetEntry.put("date", date.toString());
+        timesheetEntry.put("hours", hours);
+
+        List<String> timesheetEntryList = new ArrayList<>();
+        timesheetEntryList.add(timesheetEntry.toString());
+
+        Map<String, Object> employeeTimesheet = new HashMap<>();
+        employeeTimesheet.put("employeeId", employeeId);
+        employeeTimesheet.put(employeeName, employeeName);
+        employeeTimesheet.put("timesheetEntryList", timesheetEntryList);
+        employeeTimesheet.put("totalHours", totalHours);
+
+        return List.of(employeeTimesheet);
     }
 
     private ProjectDto mockProject1() {
