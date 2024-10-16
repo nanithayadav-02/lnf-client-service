@@ -17,10 +17,10 @@ package com.lnf.client.service;
 
 import com.google.common.collect.Lists;
 import com.lnf.client.converter.ClientDirectoryConverter;
-import com.lnf.client.repository.ClientDirectoryRepository;
-import com.lnf.client.repository.ClientRepository;
 import com.lnf.client.model.Client;
 import com.lnf.client.model.ClientDirectory;
+import com.lnf.client.repository.ClientDirectoryRepository;
+import com.lnf.client.repository.ClientRepository;
 import com.lnf.dto.client.ClientDirectoryDto;
 import com.lnf.dto.client.ClientDirectoryExcelDto;
 import com.lnf.dto.common.PageRequestDto;
@@ -30,6 +30,7 @@ import com.lnf.enums.ReportType;
 import com.lnf.exception.LnFBadRequestException;
 import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
+import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginatedAndSortedService;
 import com.lnf.service.email.ExcelReportService;
 import com.lnf.service.email.ThymeleafDocumentService;
@@ -44,6 +45,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -102,26 +104,34 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         return resultPage.map(ClientDirectoryConverter::toTransportModel);
     }
 
-    public Page<ClientDirectoryDto> findingAllWithPagination(String search, PageRequestDto pageRequestDto) {
+    public Page<ClientDirectoryDto> findingAllWithPagination(String search, UUID clientId, PageRequestDto pageRequestDto) {
         Pageable pageable = PageRequest.of(pageRequestDto.getPage(), pageRequestDto.getSize(),
                 RestUtil.constructSort(pageRequestDto.getSortBy(), pageRequestDto.getSortOrder()));
-        Specification<ClientDirectory> specification = buildClientDirectorySpecification(search);
+
+        Specification<ClientDirectory> specification = buildClientDirectorySpecification(clientId, search);
+
         Page<ClientDirectory> resultPage = repository.findAll(specification, pageable);
         return resultPage.map(ClientDirectoryConverter::toTransportModel);
     }
 
-    private Specification<ClientDirectory> buildClientDirectorySpecification(String search) {
+    private Specification<ClientDirectory> buildClientDirectorySpecification(UUID clientId, String search) {
         GenericSpecificationBuilder<ClientDirectory> clientDirectoryBuilder = new GenericSpecificationBuilder<>();
         Function<String, Class<?>> fieldClassForClientDirectory = this::getFieldClassFromClientDirectory;
-        return SpecificationUtil.buildSpecification(search, clientDirectoryBuilder, fieldClassForClientDirectory);
+
+        Specification<ClientDirectory> searchSpecification = SpecificationUtil.buildSpecification(search, clientDirectoryBuilder, fieldClassForClientDirectory);
+
+        Specification<ClientDirectory> clientIdSpecification = (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("client").get("id"), clientId);
+
+        return Specification.where(clientIdSpecification).and(searchSpecification);
     }
 
     private Class<?> getFieldClassFromClientDirectory(String fieldName) {
         return SpecificationUtil.getFieldClass(ClientDirectory.class, fieldName);
     }
 
-    public List<ClientDirectoryDto> findAll(String search) {
-        Specification<ClientDirectory> specification = buildClientDirectorySpecification(search);
+    public List<ClientDirectoryDto> findAll(String search, UUID clientId) {
+        Specification<ClientDirectory> specification = buildClientDirectorySpecification(clientId, search);
         List<ClientDirectory> entities = repository.findAll(specification);
         return convertToDtos(entities);
     }
@@ -290,6 +300,41 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         thymeleafDocumentDto.setDynamicData(dynamicData);
 
         return documentService.generatePdf(thymeleafDocumentDto);
+    }
+
+    public ResponseEntity<?> findClientsDirectoryByClientId(UUID clientId, PageRequestDto pageRequest) {
+        boolean hasPagination = pageRequest != null && pageRequest.getPage() != null;
+
+        return ResponseEntity.ok(
+                hasPagination ? getJobsByClientId(clientId, pageRequest) : getJobsByClientId(clientId)
+        );
+    }
+
+    private List<ClientDirectoryDto> getJobsByClientId(UUID clientId) {
+        List<ClientDirectory> clientDirectories = repository.findClientDirectoryByClientId(clientId);
+        return clientDirectories.stream()
+                .map(ClientDirectoryConverter::toTransportModel)
+                .toList();
+    }
+
+    private Page<ClientDirectoryDto> getJobsByClientId(UUID clientId, PageRequestDto pageRequestDto) {
+        Pageable pageable = createPageable(pageRequestDto);
+        Page<ClientDirectory> resultPage = repository.findClientDirectoryByClientId(clientId, pageable);
+        return resultPage.map(ClientDirectoryConverter::toTransportModel);
+    }
+
+    private Pageable createPageable(PageRequestDto pageRequestDto) {
+        return PageRequest.of(
+                pageRequestDto.getPage(),
+                pageRequestDto.getSize(),
+                RestUtil.constructSort(pageRequestDto.getSortBy(), pageRequestDto.getSortOrder())
+        );
+    }
+
+    public List<ClientDirectoryDto> findAllByClientId(UUID clientId, String search) {
+        Specification<ClientDirectory> specification = buildClientDirectorySpecification(clientId, search);
+        List<ClientDirectory> entities = repository.findAll(specification);
+        return convertToDtos(entities);
     }
 
 }

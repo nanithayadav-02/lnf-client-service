@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -136,12 +138,12 @@ public class ProjectController {
 
     @GetMapping("/projects/clients/{clientId}")
     @ResponseStatus(HttpStatus.OK)
-    public Page<TimesheetDto> getTimeSheetsByClientId(@PathVariable("clientId") UUID clientId,
-                                                      @RequestParam(value = "projectId", required = false) UUID projectId,
-                                                      @RequestParam(value = "month", required = false) Optional<Integer> month,
-                                                      @RequestParam(value = "year", required = false) Optional<Integer> year,
-                                                      @PageableAsQueryParam PageRequestDto pageRequest) {
-        return service.getTimeSheetsByClientId(clientId, projectId, month, year, pageRequest);
+    public List<Map<String, Object>> getTimeSheetsByClientId(@PathVariable("clientId") UUID clientId,
+                                                             @RequestParam(value = "projectId", required = false) UUID projectId,
+                                                             @RequestParam(value = "month", required = false) Optional<Integer> month,
+                                                             @RequestParam(value = "year", required = false) Optional<Integer> year,
+                                                             @RequestParam(value = "status", required = false) String status) {
+        return service.getTimeSheetsByClientId(clientId, projectId, month, year, status);
     }
 
 
