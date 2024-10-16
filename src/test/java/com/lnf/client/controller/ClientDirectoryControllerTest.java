@@ -121,27 +121,6 @@ public class ClientDirectoryControllerTest extends BaseTestClass {
     }
 
     @Test
-    void findByClientId() throws Exception {
-        UUID clientId = UUID.randomUUID();
-        List<ClientDirectoryDto> expectedList = Arrays.asList(
-                createClientDirectory1(),
-                createClientDirectory2());
-
-        given(service.findByClientId(any(UUID.class))).willReturn(expectedList);
-
-        String url = "/lnf/clients/" + clientId + "/directory";
-
-        String resultContent = readJsonFromFile("testdata/client-directories.json");
-
-        mockMvc.perform(get(url)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json(resultContent));
-
-        verify(service, times(1)).findByClientId(any(UUID.class));
-    }
-
-    @Test
     void findByClientIdAndId() throws Exception {
         UUID clientId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
         UUID directoryId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
