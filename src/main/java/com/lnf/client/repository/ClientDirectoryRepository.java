@@ -25,6 +25,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ClientDirectoryRepository extends JpaRepository<ClientDirectory, UUID>, JpaSpecificationExecutor<ClientDirectory> {
@@ -43,5 +44,8 @@ public interface ClientDirectoryRepository extends JpaRepository<ClientDirectory
 
     @Query("SELECT cd FROM ClientDirectory cd WHERE cd.client.id = :clientId")
     Page<ClientDirectory> findClientDirectoryByClientId(@Param("clientId") UUID clientId, Pageable pageable);
+
+    @Query("select cd from ClientDirectory cd where cd.email = :email")
+    Optional<ClientDirectory> findByEmailId(@Param("email") String email);
 
 }
