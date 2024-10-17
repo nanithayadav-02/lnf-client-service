@@ -58,7 +58,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
 
     public static final String FILE_NAME = "client_directory.pdf";
     private static final String CLIENT_EXCEL_FILE = "client_directory.xlsx";
-    static final String DUPLICATE_EMAIL_ERROR = "There is already an existing ClientDirectory with the same email address [%s]";
+    static final String DUPLICATE_EMAIL_ERROR = "A record already exists with the email address [%s]";
 
     private final ThymeleafDocumentService documentService;
     private final ExcelReportService excelReportService;
