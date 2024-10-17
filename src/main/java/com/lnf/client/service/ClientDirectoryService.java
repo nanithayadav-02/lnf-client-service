@@ -30,7 +30,6 @@ import com.lnf.enums.ReportType;
 import com.lnf.exception.LnFBadRequestException;
 import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
-import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginatedAndSortedService;
 import com.lnf.service.email.ExcelReportService;
 import com.lnf.service.email.ThymeleafDocumentService;
@@ -59,6 +58,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
 
     public static final String FILE_NAME = "client_directory.pdf";
     private static final String CLIENT_EXCEL_FILE = "client_directory.xlsx";
+    static final String DUPLICATE_EMAIL_ERROR = "A record already exists with the email address [%s]";
 
     private final ThymeleafDocumentService documentService;
     private final ExcelReportService excelReportService;
@@ -162,11 +162,22 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
     public void create(UUID clientId, ClientDirectoryDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
                 String.format("Failed to create ClientDirectory for Client [%s] with null payload", clientId));
+
+        var clientByEmail = searchForClientDirectory(resource.getEmail());
+
+        if (clientByEmail != null) {
+            throw new LnFException(String.format(DUPLICATE_EMAIL_ERROR, resource.getEmail()));
+        }
+
         Client client = searchForClient(clientId);
         ClientDirectory entity = ClientDirectoryConverter.toEntityModel(resource);
         entity.setClient(client);
         saveEntity(entity);
         log.debug("ClientDirectory {} successfully created", entity.getId());
+    }
+
+    private ClientDirectory searchForClientDirectory(String email) {
+        return repository.findByEmailId(email).orElse(null);
     }
 
     public void createAll(UUID clientId, List<ClientDirectoryDto> resource) {
