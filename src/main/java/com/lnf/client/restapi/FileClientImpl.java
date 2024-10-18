@@ -125,12 +125,10 @@ public class FileClientImpl extends BaseWebClientService implements FileService,
             WebClient.RequestHeadersSpec<?> spec = webClient.get()
                     .uri(s3Service + "/content" + "?filePath={filePath}", filePath);
             addJwtToken(spec);
-            ResponseEntity<byte[]> response = spec
+            return spec
                     .retrieve()
                     .toEntity(byte[].class)
                     .block();
-            log.info("file is retrieved");
-            return response;
         } catch (Exception ex) {
             log.error("File is not retrieved {}", ex.getMessage());
             throw new LnFException("Failed to retrieve file content due to exception : ", ex);
