@@ -129,7 +129,6 @@ public class FileClientImpl extends BaseWebClientService implements FileService,
                     .retrieve()
                     .toEntity(byte[].class)
                     .block();
-            log.info("file is retrieved");
             return response;
         } catch (Exception ex) {
             log.error("File is not retrieved {}", ex.getMessage());
