@@ -49,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -206,6 +207,10 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                 .flatMap(project ->
                         projectEmployeeService.findEmployeesByProjectId(project.getId())
                                 .getEmployees().stream())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(ClientEmployeeDto::getEmployeeId, Function.identity(), (e1, e2) -> e1))
+                .values()
+                .stream()
                 .toList();
     }
 
