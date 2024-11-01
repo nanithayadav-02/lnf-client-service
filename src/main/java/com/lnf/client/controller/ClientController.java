@@ -16,13 +16,15 @@
 
 package com.lnf.client.controller;
 
-import com.lnf.client.service.DataExportService;
+import com.lnf.client.Exception.DuplicateEntryException;
 import com.lnf.client.service.ClientService;
+import com.lnf.client.service.DataExportService;
 import com.lnf.client.service.ProjectService;
 import com.lnf.dto.client.ClientDto;
 import com.lnf.dto.client.ClientEmployeeDto;
 import com.lnf.dto.client.ProjectOverviewDto;
 import com.lnf.dto.common.PageRequestDto;
+import com.lnf.exception.LnFException;
 import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
@@ -133,8 +135,17 @@ public class ClientController {
      */
     @PostMapping(value = "/clients")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@RequestBody final ClientDto resource) {
-        service.create(resource);
+    public ResponseEntity<String> create(@RequestBody final ClientDto resource) {
+        try {
+            service.create(resource);
+        } catch (RuntimeException ed) {
+            if (ed.getClass().getSimpleName().equalsIgnoreCase("DataIntegrityViolationException")) {
+                throw new DuplicateEntryException("Client with code : " + resource.getCode() + " already exists .");
+            } else {
+                throw new LnFException("Failed to create Client", ed);
+            }
+        }
+        return new ResponseEntity<>("Client created successfully.", HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/clients/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
