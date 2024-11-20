@@ -59,6 +59,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
     public static final String FILE_NAME = "client_directory.pdf";
     private static final String CLIENT_EXCEL_FILE = "client_directory.xlsx";
     static final String DUPLICATE_EMAIL_ERROR = "A record already exists with the email address [%s]";
+    static final String MULTIPLE_DUPLICATE_EMAIL_ERROR = "A record already exist with the following email addresses: [%s]";
 
     private final ThymeleafDocumentService documentService;
     private final ExcelReportService excelReportService;
@@ -176,22 +177,36 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         log.debug("ClientDirectory {} successfully created", entity.getId());
     }
 
-    private ClientDirectory searchForClientDirectory(String email) {
-        return repository.findByEmailId(email).orElse(null);
-    }
-
-    public void createAll(UUID clientId, List<ClientDirectoryDto> resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
+    public void createAll(UUID clientId, List<ClientDirectoryDto> resources) {
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resources,
                 String.format("Failed to create ClientDirectory [%s] with null payload", clientId));
+
+        List<ClientDirectory> existingClientDirectories = resources.stream()
+                .map(resource -> searchForClientDirectory(resource.getEmail()))
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (!existingClientDirectories.isEmpty()) {
+            List<String> duplicateEmails = existingClientDirectories.stream()
+                    .map(ClientDirectory::getEmail)
+                    .toList();
+
+            throw new LnFException(String.format(MULTIPLE_DUPLICATE_EMAIL_ERROR, String.join(", ", duplicateEmails)));
+        }
+
         Client client = searchForClient(clientId);
         List<ClientDirectory> entities = new ArrayList<>();
-        resource.stream().filter(Objects::nonNull).forEach(dto -> {
+        resources.stream().filter(Objects::nonNull).forEach(dto -> {
             ClientDirectory entity = ClientDirectoryConverter.toEntityModel(dto);
             entity.setClient(client);
             entities.add(entity);
         });
         save(entities);
         log.debug("ClientDirectory for Client is {} successfully created", clientId);
+    }
+
+    private ClientDirectory searchForClientDirectory(String email) {
+        return repository.findByEmailId(email);
     }
 
     public void update(UUID clientId, UUID directoryId, ClientDirectoryDto resource) {
