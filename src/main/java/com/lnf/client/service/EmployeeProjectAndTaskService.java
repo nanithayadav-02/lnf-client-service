@@ -29,6 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EmployeeProjectAndTaskService {
 
+    public static final String ACTIVE = "Active";
     private final ProjectTaskEmployeeRepository repository;
 
     private final TaskRepository taskRepository;
@@ -47,7 +48,8 @@ public class EmployeeProjectAndTaskService {
 
         List<String> requiredIds = projectEmployeeRepository.findAllByProjectId(projectId).stream()
                 .map(ProjectEmployee::getEmployeeId)
-                .filter(employeeId -> !repository.findByTask(task).stream().map(ProjectTaskEmployee::getEmployeeId).toList().contains(employeeId))
+                .filter(employeeId -> !repository.findByTask(task)
+                        .stream().map(ProjectTaskEmployee::getEmployeeId).toList().contains(employeeId))
                 .toList();
 
         requiredIds.forEach(employeeId -> {
@@ -58,10 +60,12 @@ public class EmployeeProjectAndTaskService {
                 taskEmployee.setTask(task);
                 taskEmployee.setEmployeeId(employeeId);
                 save(taskEmployee);
-                log.debug("Successfully added the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
+                log.debug("Successfully added the employee {} to the task {} of the project {}",
+                        employeeId, task.getName(), project.getCode());
 
             } else {
-                log.error("Failed to add the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
+                log.error("Failed to add the employee {} to the task {} of the project {}",
+                        employeeId, task.getName(), project.getCode());
             }
 
         });
@@ -69,9 +73,10 @@ public class EmployeeProjectAndTaskService {
 
     public void addAllActiveEmployeeToProject(UUID projectId) {
         Project project = searchForProject(projectId);
-        List<String> statuses = List.of("Active");
+        List<String> statuses = List.of(ACTIVE);
         List<String> requiredIds = new ArrayList<>(employeeService.findByStatuses(statuses));
-        requiredIds.removeAll(projectEmployeeRepository.findAllByProjectId(projectId).stream().map(ProjectEmployee::getEmployeeId).toList());
+        requiredIds.removeAll(projectEmployeeRepository.findAllByProjectId(projectId)
+                .stream().map(ProjectEmployee::getEmployeeId).toList());
 
         requiredIds.parallelStream().forEach(employeeId -> {
 
@@ -86,7 +91,8 @@ public class EmployeeProjectAndTaskService {
     public void removeEmployeeFromProject(UUID projectId) {
         searchForProject(projectId);
         removeAllTasksToEmployee(projectId);
-        List<String> statuses = List.of("Active");
+
+        List<String> statuses = List.of(ACTIVE);
         List<String> employeeIds = new ArrayList<>(employeeService.findByStatuses(statuses));
         employeeIds.forEach(employeeId -> {
             try {
@@ -100,7 +106,7 @@ public class EmployeeProjectAndTaskService {
 
     public void removeEmployeesFromProjectAndTask(UUID projectId, UUID taskId) {
 
-        List<String> statuses = List.of("Active");
+        List<String> statuses = List.of(ACTIVE);
         List<String> employeeIds = new ArrayList<>(employeeService.findByStatuses(statuses));
 
         Project project = searchForProject(projectId);
@@ -116,7 +122,7 @@ public class EmployeeProjectAndTaskService {
     }
 
     public void addAllTasksToEmployee(UUID projectId) {
-        List<String> statuses = List.of("Active");
+        List<String> statuses = List.of(ACTIVE);
         List<String> employeeIds = new ArrayList<>(employeeService.findByStatuses(statuses));
 
         Project project = searchForProject(projectId);
@@ -147,7 +153,8 @@ public class EmployeeProjectAndTaskService {
         try {
             repository.save(entity);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save Project[%s], Task [%s] and employeeId [%s]", entity.getTask().getId(), entity.getEmployeeId());
+            String errorMessage = String.format("Failed to save Project[%s], Task [%s] and employeeId [%s]",
+                    entity.getTask().getId(), entity.getEmployeeId());
             throw new LnFException(errorMessage);
         }
     }
@@ -156,25 +163,32 @@ public class EmployeeProjectAndTaskService {
         try {
             projectEmployeeRepository.save(entity);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save Project [%s] and employeeId [%s]", entity.getProject().getCode(), entity.getEmployeeId());
+            String errorMessage = String.format("Failed to save Project [%s] and employeeId [%s]",
+                    entity.getProject().getCode(), entity.getEmployeeId());
             throw new LnFException(errorMessage);
         }
     }
 
     private ProjectTaskEmployee search(Project project, Task task, String employeeId) {
-        return repository.findByProjectAndTaskAndEmployeeId(project, task, employeeId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("TaskEmployee entity with project [%s], taskId [%s] and employeeId [%s] does not exist", project.getId(), task.getId(), employeeId)));
+        return repository.findByProjectAndTaskAndEmployeeId(project, task, employeeId)
+                .orElseThrow(() -> new LnFEntityNotFoundException(String.format("TaskEmployee entity with project [%s], " +
+                        "taskId [%s] and employeeId [%s] does not exist", project.getId(), task.getId(), employeeId)));
     }
 
     private ProjectEmployee search(UUID projectId, String employeeId) {
-        return projectEmployeeRepository.findByProjectIdAndEmployeeId(projectId, employeeId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("ProjectEmployee entity with projectId [%s] and employeeId [%s] does not exist", projectId, employeeId)));
+        return projectEmployeeRepository.findByProjectIdAndEmployeeId(projectId, employeeId)
+                .orElseThrow(() -> new LnFEntityNotFoundException(String.format("ProjectEmployee entity with projectId" +
+                        " [%s] and employeeId [%s] does not exist", projectId, employeeId)));
     }
 
     private Task searchForTask(UUID taskId) {
-        return taskRepository.findById(taskId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Task with id [%s] does not exist", taskId)));
+        return taskRepository.findById(taskId)
+                .orElseThrow(() -> new LnFEntityNotFoundException(String.format("Task with id [%s] does not exist", taskId)));
     }
 
     private Project searchForProject(UUID projectId) {
-        return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
+        return projectRepository.findById(projectId).orElseThrow(() ->
+                new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
     }
 
 }
