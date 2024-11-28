@@ -125,26 +125,6 @@ class ProjectTaskEmployeeControllerTest extends BaseTestClass {
     }
 
     @Test
-    void addAllEmployeesToProjectAndTask() {
-        List<String> requestedDto = List.of("HRD-FE-TF-1008","HRD-FE-TF-1009");
-
-        String url = "/lnf/projects/" + projectId + "/tasks/" + taskId +"/project-employees";
-
-        doNothing().when(service).addAllEmployeesToProjectAndTask(any((UUID.class)),any((UUID.class)));
-
-        try {
-            mockMvc.perform(MockMvcRequestBuilders.post(url)
-                            .contentType(APPLICATION_JSON)
-                            .content(asJsonString(requestedDto)))
-                    .andExpect(status().isCreated());
-        } catch (Exception e) {
-            fail("Unexpected exception: " + e.getMessage());
-        }
-        verify(service, times(1)).addAllEmployeesToProjectAndTask(any((UUID.class)), any((UUID.class)));
-    }
-
-
-    @Test
     void removeEmployeesFromProjectAndTask() throws Exception {
         List<String> requestedDto = List.of("HRD-FE-TF-1008","HRD-FE-TF-1009");
         String url = "/lnf/projects/" + projectId + "/tasks/" + taskId +"/employees";
@@ -200,7 +180,7 @@ class ProjectTaskEmployeeControllerTest extends BaseTestClass {
         verify(service, times(1)).addAllTasksToEmployee(projectId, employeeId);
     }
 
-    private static String asJsonString(final Object obj) {
+    public static String asJsonString(final Object obj) {
         try {
             return new ObjectMapper()
                     .registerModule(new JavaTimeModule())

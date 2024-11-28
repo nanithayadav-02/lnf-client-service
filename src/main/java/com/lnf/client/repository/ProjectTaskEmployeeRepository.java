@@ -36,4 +36,6 @@ public interface ProjectTaskEmployeeRepository extends JpaRepository<ProjectTask
 
     List<ProjectTaskEmployee> findByTask(Task task);
 
+    List<ProjectTaskEmployee> findByProjectId(UUID projectId);
+
 }
