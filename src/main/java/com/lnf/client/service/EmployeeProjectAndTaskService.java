@@ -78,7 +78,7 @@ public class EmployeeProjectAndTaskService {
         requiredIds.removeAll(projectEmployeeRepository.findAllByProjectId(projectId)
                 .stream().map(ProjectEmployee::getEmployeeId).toList());
 
-        requiredIds.parallelStream().forEach(employeeId -> {
+        requiredIds.forEach(employeeId -> {
 
             ProjectEmployee projectEmployee = new ProjectEmployee();
             projectEmployee.setProject(project);
