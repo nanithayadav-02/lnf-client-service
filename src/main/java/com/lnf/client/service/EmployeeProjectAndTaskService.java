@@ -131,7 +131,12 @@ public class EmployeeProjectAndTaskService {
 
         Set<Task> tasks = project.getTasks();
 
-        employeeIds.forEach(employeeId -> tasks.forEach(task -> {
+        List<String> requiredIds = projectEmployeeRepository.findAllByProjectId(projectId).stream()
+                .map(ProjectEmployee::getEmployeeId)
+                .filter(employeeIds::contains)
+                .toList();
+
+        requiredIds.forEach(employeeId -> tasks.forEach(task -> {
             ProjectTaskEmployee projectTaskEmployee = repository.findByProjectAndTaskAndEmployee(project, task, employeeId);
             if (projectTaskEmployee == null) {
 
