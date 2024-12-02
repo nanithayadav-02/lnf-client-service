@@ -71,12 +71,6 @@ public class ProjectTaskEmployeeController {
         service.addEmployeesToProjectAndTask(projectId, taskId, employeeIds);
     }
 
-    @PostMapping(value = "/projects/{projectId}/tasks/{taskId}/project-employees")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void addAllEmployeesToProjectAndTask(@PathVariable("projectId") final UUID projectId, @PathVariable("taskId") final UUID taskId) {
-        service.addAllEmployeesToProjectAndTask(projectId, taskId);
-    }
-
     /**
      * Remove employees from the task
      *
@@ -97,7 +91,7 @@ public class ProjectTaskEmployeeController {
 
     @PostMapping(value = "/projects/{projectId}/tasks/employees")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addAllTasksToEmployees(@PathVariable("projectId") final UUID projectId, @RequestBody  List<String> employeeIds) {
+    public void addAllTasksToEmployees(@PathVariable("projectId") final UUID projectId, @RequestBody List<String> employeeIds) {
         service.addAllTasksToEmployee(projectId, employeeIds);
     }
 
