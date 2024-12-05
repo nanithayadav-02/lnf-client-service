@@ -16,12 +16,11 @@
 
 package com.lnf.client.service;
 
-import com.lnf.client.repository.ProjectEmployeeRepository;
 import com.lnf.client.converter.ProjectConverter;
 import com.lnf.client.model.Project;
-import com.lnf.client.model.ProjectEmployee;
 import com.lnf.client.model.ProjectTaskEmployee;
 import com.lnf.client.model.Task;
+import com.lnf.client.repository.ProjectEmployeeRepository;
 import com.lnf.client.repository.ProjectRepository;
 import com.lnf.client.repository.ProjectTaskEmployeeRepository;
 import com.lnf.client.repository.TaskRepository;
@@ -227,34 +226,6 @@ public class ProjectTaskEmployeeService {
 
     private Project searchForProject(UUID projectId) {
         return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
-    }
-
-    @CacheEvict(value = "projectTaskEmployees", allEntries = true)
-    public void addAllEmployeesToProjectAndTask(UUID projectId, UUID taskId) {
-
-        Project project = searchForProject(projectId);
-        Task task = searchForTask(taskId);
-
-        List<String> requiredIds = projectEmployeeRepository.findAllByProjectId(projectId).stream()
-                .map(ProjectEmployee::getEmployeeId)
-                .filter(employeeId -> !repository.findByTask(task).stream().map(ProjectTaskEmployee::getEmployeeId).toList().contains(employeeId))
-                .toList();
-
-        requiredIds.forEach(employeeId -> {
-            EmployeeDto employeeDto = employeeService.findOne(employeeId);
-            if (employeeDto != null) {
-                ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
-                taskEmployee.setProject(project);
-                taskEmployee.setTask(task);
-                taskEmployee.setEmployeeId(employeeId);
-                save(taskEmployee);
-                log.debug("Successfully added the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
-
-            } else {
-                log.error("Failed to add the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
-            }
-
-        });
     }
 
     public void addAllTasksToEmployee(UUID projectId, List<String> employeeIds) {
