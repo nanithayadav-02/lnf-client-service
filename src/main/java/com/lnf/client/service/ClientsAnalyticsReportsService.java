@@ -28,16 +28,16 @@ public class ClientsAnalyticsReportsService {
     public Map<String, Object> clientAnalyticsReports(Integer year) {
         Map<String, Object> clientReports = new LinkedHashMap<>();
 
-        long activeClientCount = countActiveEntities(clientRepository.findByStatus(ACTIVE));
-        long activeProjectCount = countActiveEntities(projectRepository.findByStatus(ACTIVE));
-        long activeTaskCount = countActiveEntities(taskRepository.findByStatus(ACTIVE));
+        long activeClientCount = countActiveEntities(clientRepository.findByStatusAndYear(ACTIVE, year));
+        long activeProjectCount = countActiveEntities(projectRepository.findByStatusAndYear(ACTIVE, year));
+        long activeTaskCount = countActiveEntities(taskRepository.findByStatusAndYear(ACTIVE, year));
 
         List<String> labels = Arrays.asList(
                 "Jan", "Feb", "Mar", "April", "May", "Jun", "July", "Aug", "Sep", "Oct", "Nov", "Dec");
 
         // Get counts of projects and clients by month
-        List<Integer> projectCountByMonth = getMonthlyCounts(projectRepository.findAll(), year, Project::getStartDate);
-        List<Integer> clientCountByMonth = getMonthlyCounts(clientRepository.findAll(), year, Client::getWorkingFrom);
+        List<Integer> projectCountByMonth = getMonthlyCounts(projectRepository.findByStatus(ACTIVE), year, Project::getStartDate);
+        List<Integer> clientCountByMonth = getMonthlyCounts(clientRepository.findByStatus(ACTIVE), year, Client::getWorkingFrom);
 
         // Add data to the report
         clientReports.put("totalActiveProjects", activeProjectCount);

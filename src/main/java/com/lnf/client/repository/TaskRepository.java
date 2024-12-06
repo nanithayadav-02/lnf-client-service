@@ -42,7 +42,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID>, JpaSpecificat
             " FROM task AS t GROUP BY year, month, status ORDER BY year, status DESC", nativeQuery = true)
     List<StatisticsSummary> tasksByYearAndStatus();
 
-    @Query("SELECT t FROM Task t WHERE LOWER(t.status) = LOWER(:status)")
-    List<Task> findByStatus(String status);
+    @Query("SELECT t FROM Task t WHERE LOWER(t.status) = LOWER(:status) and YEAR(t.startDate) = :year")
+    List<Task> findByStatusAndYear(String status, Integer year);
 
 }
