@@ -48,4 +48,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID>, JpaSpec
 
     List<Project> findByStatus(String status);
 
+    @Query("select p from Project p where YEAR(p.startDate) = :year and p.status = :status")
+    List<Project> findByStatusAndYear(String status, Integer year);
+
 }
