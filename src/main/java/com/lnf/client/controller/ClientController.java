@@ -16,8 +16,8 @@
 
 package com.lnf.client.controller;
 
-import com.lnf.client.service.DataExportService;
 import com.lnf.client.service.ClientService;
+import com.lnf.client.service.DataExportService;
 import com.lnf.client.service.ProjectService;
 import com.lnf.dto.client.ClientDto;
 import com.lnf.dto.client.ClientEmployeeDto;
@@ -75,7 +75,7 @@ public class ClientController {
      */
     @GetMapping(value = "/clients", params = {"search"})
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> search(@RequestParam(value = "search", required = false) String search,
+    public ResponseEntity<?> search(@RequestParam(required = false) String search,
                                     @PageableAsQueryParam PageRequestDto pageRequest) {
         if (search != null && !search.isEmpty()) {
             if (pageRequest != null && pageRequest.getPage() != null) {
@@ -97,7 +97,7 @@ public class ClientController {
      */
     @GetMapping(value = "/clients/{clientId}")
     @ResponseStatus(HttpStatus.OK)
-    public ClientDto findByClientId(@PathVariable("clientId") final UUID clientId) {
+    public ClientDto findByClientId(@PathVariable final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
@@ -109,7 +109,7 @@ public class ClientController {
      */
     @GetMapping(value = "/clients/{clientId}/projects")
     @ResponseStatus(HttpStatus.OK)
-    public List<ProjectOverviewDto> findProjectsByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<ProjectOverviewDto> findProjectsByClientId(@PathVariable final UUID clientId) {
         return projectService.findProjectsByClientId(clientId);
     }
 
@@ -122,7 +122,7 @@ public class ClientController {
      */
     @GetMapping(value = "/clients/{clientId}/employees")
     @ResponseStatus(HttpStatus.OK)
-    public List<ClientEmployeeDto> findEmployeesByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<ClientEmployeeDto> findEmployeesByClientId(@PathVariable final UUID clientId) {
         return projectService.findEmployeesByClientId(clientId);
     }
 
@@ -138,7 +138,7 @@ public class ClientController {
     }
 
     @PostMapping(value = "/clients/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<String> uploadFile(@RequestParam MultipartFile file) throws IOException {
         dataExportService.uploadFile(file, ClientDto.class, null);
         return ResponseEntity.ok("File uploaded successfully.");
     }
@@ -151,7 +151,7 @@ public class ClientController {
      */
     @PutMapping(value = "/clients/{clientId}")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("clientId") final UUID clientId, @RequestBody final ClientDto resource) {
+    public void update(@PathVariable final UUID clientId, @RequestBody final ClientDto resource) {
         service.update(clientId, resource);
     }
 
@@ -162,7 +162,7 @@ public class ClientController {
      */
     @DeleteMapping(value = "/clients/{clientId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId) {
+    public void delete(@PathVariable final UUID clientId) {
         service.delete(clientId);
     }
 

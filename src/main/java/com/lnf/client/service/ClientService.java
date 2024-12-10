@@ -18,12 +18,11 @@ package com.lnf.client.service;
 
 import com.google.common.collect.Lists;
 import com.lnf.client.converter.ClientConverter;
+import com.lnf.client.model.Client;
 import com.lnf.client.model.enums.DocumentType;
 import com.lnf.client.repository.ClientRepository;
-import com.lnf.client.model.Client;
 import com.lnf.dto.client.ClientDto;
 import com.lnf.dto.client.ClientOverviewDto;
-import com.lnf.dto.client.ProjectDto;
 import com.lnf.dto.client.ProjectOverviewDto;
 import com.lnf.dto.common.PageRequestDto;
 import com.lnf.exception.LnFBadRequestException;
@@ -214,8 +213,8 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
 
     private Page<ClientOverviewDto> validateAndGetPages(int page, Page<Client> resultPage) {
         if (page > resultPage.getTotalPages()) {
-            throw new LnFEntityNotFoundException(String.format("Total number of pages [%d], " +
-                    "requested page [%d] does not exist", resultPage.getTotalPages(), page));
+            throw new LnFEntityNotFoundException(("Total number of pages [%d], " +
+                    "requested page [%d] does not exist").formatted(resultPage.getTotalPages(), page));
         }
         return resultPage.map(ClientConverter::toMiniTransportModel);
     }
@@ -242,7 +241,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      */
     private Client search(UUID clientId) {
         return repository.findById(clientId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
 

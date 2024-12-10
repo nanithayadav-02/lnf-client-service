@@ -43,10 +43,10 @@ public class ProjectTaskEmployeeController {
      */
     @GetMapping(value = "/projects/{projectId}/tasks/{taskId}/employees")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> findEmployees(@PathVariable("projectId") final UUID projectId,
-                                           @PathVariable("taskId") final UUID taskId,
-                                           @RequestParam(name = "page", required = false) Integer page,
-                                           @RequestParam(name = "size", required = false) Integer size) {
+    public ResponseEntity<?> findEmployees(@PathVariable final UUID projectId,
+                                           @PathVariable final UUID taskId,
+                                           @RequestParam(required = false) Integer page,
+                                           @RequestParam(required = false) Integer size) {
         if (page != null && size != null) {
             // Pagination parameters are provided, return paginated result of assigned employees
             Map<String, Object> result = service.findAllAssignedEmployees(projectId, taskId, page, size);
@@ -67,7 +67,7 @@ public class ProjectTaskEmployeeController {
      */
     @PostMapping(value = "/projects/{projectId}/tasks/{taskId}/employees")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addEmployeesToProjectAndTask(@PathVariable("projectId") final UUID projectId, @PathVariable("taskId") final UUID taskId, @RequestBody List<String> employeeIds) {
+    public void addEmployeesToProjectAndTask(@PathVariable final UUID projectId, @PathVariable final UUID taskId, @RequestBody List<String> employeeIds) {
         service.addEmployeesToProjectAndTask(projectId, taskId, employeeIds);
     }
 
@@ -79,7 +79,7 @@ public class ProjectTaskEmployeeController {
      */
     @DeleteMapping(value = "/projects/{projectId}/tasks/{taskId}/employees")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeEmployeesFromProjectAndTask(@PathVariable("projectId") final UUID projectId, @PathVariable("taskId") final UUID taskId, @RequestBody List<String> employeeIds) {
+    public void removeEmployeesFromProjectAndTask(@PathVariable final UUID projectId, @PathVariable final UUID taskId, @RequestBody List<String> employeeIds) {
         service.removeEmployeesFromProjectAndTask(projectId, taskId, employeeIds);
     }
 
@@ -91,13 +91,13 @@ public class ProjectTaskEmployeeController {
 
     @PostMapping(value = "/projects/{projectId}/tasks/employees")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addAllTasksToEmployees(@PathVariable("projectId") final UUID projectId, @RequestBody List<String> employeeIds) {
+    public void addAllTasksToEmployees(@PathVariable final UUID projectId, @RequestBody List<String> employeeIds) {
         service.addAllTasksToEmployee(projectId, employeeIds);
     }
 
     @PostMapping(value = "/projects/{projectId}/employee/{employeeId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addAllTasksToEmployee(@PathVariable("projectId") final UUID projectId, @PathVariable final String employeeId) {
+    public void addAllTasksToEmployee(@PathVariable final UUID projectId, @PathVariable final String employeeId) {
         service.addAllTasksToEmployee(projectId, employeeId);
     }
 

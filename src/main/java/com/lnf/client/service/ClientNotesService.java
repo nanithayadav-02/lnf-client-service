@@ -18,8 +18,8 @@ package com.lnf.client.service;
 
 import com.google.common.collect.Lists;
 import com.lnf.client.converter.ClientNotesConverter;
-import com.lnf.client.model.ClientNotes;
 import com.lnf.client.model.Client;
+import com.lnf.client.model.ClientNotes;
 import com.lnf.client.repository.ClientNotesRepository;
 import com.lnf.client.repository.ClientRepository;
 import com.lnf.dto.client.ClientNotesDto;
@@ -99,8 +99,8 @@ public class ClientNotesService implements PaginatedAndSortedService<ClientNotes
 
     private Page<ClientNotesDto> validateAndGetPages(int page, Page<ClientNotes> resultPage) {
         if (page > resultPage.getTotalPages()) {
-            throw new LnFEntityNotFoundException(String.format("Total number of pages [%d], " +
-                    "requested page [%d] does not exist", resultPage.getTotalPages(), page));
+            throw new LnFEntityNotFoundException(("Total number of pages [%d], " +
+                    "requested page [%d] does not exist").formatted(resultPage.getTotalPages(), page));
         }
         return resultPage.map(ClientNotesConverter::toTransportModel);
     }
@@ -136,7 +136,7 @@ public class ClientNotesService implements PaginatedAndSortedService<ClientNotes
 
     public void create(UUID clientId, List<ClientNotesDto> resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
-                String.format("Failed to create Notes for client [%s] with null payload", clientId));
+                "Failed to create Notes for client [%s] with null payload".formatted(clientId));
         Client client = searchForClient(clientId);
         List<ClientNotes> entities = new ArrayList<>();
         resource.stream().filter(Objects::nonNull).forEach(notesDto -> {
@@ -172,7 +172,7 @@ public class ClientNotesService implements PaginatedAndSortedService<ClientNotes
             repository.delete(entity);
             log.debug("Notes {} for client {} successfully deleted", notesId, clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete Notes[[%s] for client [%s]", notesId, clientId);
+            String errorMessage = "Failed to delete Notes[[%s] for client [%s]".formatted(notesId, clientId);
             throw new LnFException(errorMessage);
         }
     }
@@ -184,7 +184,7 @@ public class ClientNotesService implements PaginatedAndSortedService<ClientNotes
             repository.deleteAll(entities);
             log.debug("Notes for Client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete Notes for client [%s]", clientId);
+            String errorMessage = "Failed to delete Notes for client [%s]".formatted(clientId);
             throw new LnFException(errorMessage);
         }
     }
@@ -209,12 +209,12 @@ public class ClientNotesService implements PaginatedAndSortedService<ClientNotes
 
     private Client searchForClient(UUID clientId) {
         return clientRepository.findByClientId(clientId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
     private ClientNotes searchForNotes(UUID notesId) {
         return repository.findById(notesId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Notes with id [%s] does not exist", notesId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Notes with id [%s] does not exist".formatted(notesId)));
     }
 
 }

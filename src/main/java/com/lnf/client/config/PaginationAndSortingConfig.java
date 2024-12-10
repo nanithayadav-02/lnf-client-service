@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 public class PaginationAndSortingConfig {
 
     @Bean
-    public PaginationAndSortingHandler paginationAndSortingHandler() {
+    PaginationAndSortingHandler paginationAndSortingHandler() {
         return new PaginationAndSortingHandler();
     }
 

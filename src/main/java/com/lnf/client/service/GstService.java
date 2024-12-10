@@ -17,10 +17,10 @@
 package com.lnf.client.service;
 
 import com.lnf.client.converter.GstConverter;
-import com.lnf.client.repository.ClientRepository;
-import com.lnf.client.repository.GstRepository;
 import com.lnf.client.model.Client;
 import com.lnf.client.model.Gst;
+import com.lnf.client.repository.ClientRepository;
+import com.lnf.client.repository.GstRepository;
 import com.lnf.dto.client.GstDto;
 import com.lnf.exception.LnFBadRequestException;
 import com.lnf.exception.LnFEntityNotFoundException;
@@ -75,7 +75,7 @@ public class GstService {
      * @param resource List<GstDto>
      */
     public void create(UUID clientId, List<GstDto> resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create gst for client [%s] with null payload", clientId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create gst for client [%s] with null payload".formatted(clientId));
         Client clientEntity = searchForClient(clientId);
         List<Gst> entities = new ArrayList<>();
         resource.stream().filter(Objects::nonNull).forEach(gstDto -> {
@@ -94,7 +94,7 @@ public class GstService {
      * @param resource GstDto
      */
     public void create(UUID clientId, GstDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create gst for client[%s] with null payload", clientId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create gst for client[%s] with null payload".formatted(clientId));
         Client clientEntity = searchForClient(clientId);
         Gst entity = GstConverter.toEntityModel(resource);
         entity.setClient(clientEntity);
@@ -110,7 +110,7 @@ public class GstService {
      * @param resource GstDto
      */
     public void update(UUID clientId, UUID gstId, GstDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to gst client[%s] with null payload", clientId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to gst client[%s] with null payload".formatted(clientId));
         searchForClient(clientId);
         Gst entity = searchForGst(gstId);
         Gst updatedEntity = GstConverter.toEntityModel(resource, entity);
@@ -130,7 +130,7 @@ public class GstService {
             repository.deleteAll(entities);
             log.debug("Gsts for client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete gsts for client [%s]", clientId);
+            String errorMessage = "Failed to delete gsts for client [%s]".formatted(clientId);
             throw new LnFException(errorMessage);
         }
     }
@@ -148,7 +148,7 @@ public class GstService {
             repository.delete(entity);
             log.debug("Gst {} for client {} successfully deleted", gstId, clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete gst[%s] for client [%s]", gstId, clientId);
+            String errorMessage = "Failed to delete gst[%s] for client [%s]".formatted(gstId, clientId);
             throw new LnFException(errorMessage);
         }
     }
@@ -173,12 +173,12 @@ public class GstService {
 
     private Client searchForClient(UUID clientId) {
         return clientRepository.findById(clientId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
     private Gst searchForGst(UUID gstId) {
         return repository.findById(gstId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Gst with id [%s] does not exist", gstId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Gst with id [%s] does not exist".formatted(gstId)));
     }
 
 }

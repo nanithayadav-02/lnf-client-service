@@ -16,13 +16,13 @@
 
 package com.lnf.client.controller;
 
-import java.util.UUID;
-
 import com.lnf.client.service.EmployeeProjectTaskService;
 import com.lnf.dto.client.EmployeeProjectTaskDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,7 +39,7 @@ public class EmployeeProjectTaskController {
      */
     @GetMapping(value = "/projects/{projectId}/task")
     @ResponseStatus(HttpStatus.OK)
-    public EmployeeProjectTaskDto findTasksByEmployeeIdAndProjectId(@RequestParam("employeeId") final String employeeId, @PathVariable("projectId") final UUID projectId) {
+    public EmployeeProjectTaskDto findTasksByEmployeeIdAndProjectId(@RequestParam final String employeeId, @PathVariable final UUID projectId) {
         return service.findTasksByEmployeeIdAndProjectId(employeeId, projectId);
     }
 

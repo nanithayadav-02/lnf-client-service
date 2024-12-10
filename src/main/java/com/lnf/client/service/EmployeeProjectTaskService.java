@@ -17,11 +17,11 @@
 package com.lnf.client.service;
 
 import com.lnf.client.converter.TaskConverter;
-import com.lnf.client.repository.ProjectRepository;
-import com.lnf.client.repository.ProjectTaskEmployeeRepository;
 import com.lnf.client.model.Project;
 import com.lnf.client.model.ProjectTaskEmployee;
 import com.lnf.client.model.Task;
+import com.lnf.client.repository.ProjectRepository;
+import com.lnf.client.repository.ProjectTaskEmployeeRepository;
 import com.lnf.dto.client.EmployeeProjectTaskDto;
 import com.lnf.dto.client.TaskDto;
 import com.lnf.dto.employee.EmployeeDto;
@@ -77,14 +77,14 @@ public class EmployeeProjectTaskService {
     }
 
     private Project searchForProject(UUID projectId) {
-        return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
+        return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException("Project with id [%s] does not exist".formatted(projectId)));
     }
 
     private EmployeeDto searchForEmployee(String employeeId) {
         try {
             return employeeService.findOne(employeeId);
         } catch (RuntimeException ex) {
-            throw new LnFEntityNotFoundException(String.format("Failed to find the employee [%s] ", employeeId));
+            throw new LnFEntityNotFoundException("Failed to find the employee [%s] ".formatted(employeeId));
         }
     }
 }

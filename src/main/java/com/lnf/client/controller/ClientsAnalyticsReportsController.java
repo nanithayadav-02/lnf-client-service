@@ -16,7 +16,7 @@ public class ClientsAnalyticsReportsController {
 
     @GetMapping("/client/analytics")
     @ResponseStatus(HttpStatus.OK)
-    public Map<String, Object> clientAnalytics(@RequestParam(value = "year") Integer year) {
+    public Map<String, Object> clientAnalytics(@RequestParam Integer year) {
         return service.clientAnalyticsReports(year);
     }
 }

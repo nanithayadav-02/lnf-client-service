@@ -16,8 +16,8 @@
 
 package com.lnf.client.converter;
 
-import com.lnf.client.model.enums.DocumentType;
 import com.lnf.client.model.ClientDocument;
+import com.lnf.client.model.enums.DocumentType;
 import com.lnf.dto.client.DocumentDto;
 import com.lnf.exception.LnFException;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,7 +51,7 @@ public class DocumentConverter {
             return null;
         }
         ClientDocument entity = new ClientDocument();
-        return toEntityModel(transport, entity,awsS3BucketEnabled);
+        return toEntityModel(transport, entity, awsS3BucketEnabled);
 
     }
 
@@ -79,11 +79,11 @@ public class DocumentConverter {
     public static String constructUrlFromType(UUID clientId, DocumentType type) {
         String url = "";
         if (type == DocumentType.agreement) {
-            url = String.format("/lnf/clients/%s/agreement/", clientId);
+            url = "/lnf/clients/%s/agreement/".formatted(clientId);
         } else if (type == DocumentType.image) {
-            url = String.format("/lnf/clients/%s/image/", clientId);
+            url = "/lnf/clients/%s/image/".formatted(clientId);
         } else if (type == DocumentType.others) {
-            url = String.format("/lnf/clients/%s/others/", clientId);
+            url = "/lnf/clients/%s/others/".formatted(clientId);
         } else {
             throw new LnFException("Unknown document type");
         }
