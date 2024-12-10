@@ -37,7 +37,7 @@ public class EmployeeProjectController {
      */
     @GetMapping(value = "/project")
     @ResponseStatus(HttpStatus.OK)
-    public EmployeeProjectDto findProjectsByEmployeeId(@RequestParam("employeeId") final String employeeId) {
+    public EmployeeProjectDto findProjectsByEmployeeId(@RequestParam final String employeeId) {
         return service.findProjectsByEmployeeId(employeeId);
     }
 

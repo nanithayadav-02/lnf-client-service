@@ -35,7 +35,7 @@ public class ClientDetailsController {
 
     @GetMapping(value = "/clients/{clientId}/details")
     @ResponseStatus(HttpStatus.OK)
-    public ClientDetailsDto findByClientId(@PathVariable("clientId") UUID clientId) {
+    public ClientDetailsDto findByClientId(@PathVariable UUID clientId) {
         return clientDetailsService.findByClientId(clientId);
     }
 

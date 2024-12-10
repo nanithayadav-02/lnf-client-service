@@ -16,14 +16,14 @@
 
 package com.lnf.client.controller;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.lnf.client.service.ClientContactService;
 import com.lnf.dto.client.ContactDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,7 +40,7 @@ public class ClientContactController {
      */
     @GetMapping(value = "/clients/{clientId}/contact")
     @ResponseStatus(HttpStatus.OK)
-    public List<ContactDto> findByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<ContactDto> findByClientId(@PathVariable final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
@@ -53,7 +53,7 @@ public class ClientContactController {
      */
     @GetMapping(value = "/clients/{clientId}/contact/{contactId}")
     @ResponseStatus(HttpStatus.OK)
-    public ContactDto findById(@PathVariable("clientId") final UUID clientId, @PathVariable("contactId") final UUID contactId) {
+    public ContactDto findById(@PathVariable final UUID clientId, @PathVariable final UUID contactId) {
         return service.findById(clientId, contactId);
     }
 
@@ -65,7 +65,7 @@ public class ClientContactController {
      */
     @PostMapping(value = "/clients/{clientId}/contact")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable("clientId") final UUID clientId, @RequestBody final ContactDto resource) {
+    public void create(@PathVariable final UUID clientId, @RequestBody final ContactDto resource) {
         service.create(clientId, resource);
     }
 
@@ -78,7 +78,7 @@ public class ClientContactController {
      */
     @PutMapping(value = "/clients/{clientId}/contact/{contactId}")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("clientId") final UUID clientId, @PathVariable("contactId") final UUID contactId, @RequestBody final ContactDto resource) {
+    public void update(@PathVariable final UUID clientId, @PathVariable final UUID contactId, @RequestBody final ContactDto resource) {
         service.update(clientId, contactId, resource);
     }
 
@@ -89,7 +89,7 @@ public class ClientContactController {
      */
     @DeleteMapping(value = "/clients/{clientId}/contact")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId) {
+    public void delete(@PathVariable final UUID clientId) {
         service.deleteByClientId(clientId);
     }
 
@@ -101,7 +101,7 @@ public class ClientContactController {
      */
     @DeleteMapping(value = "/clients/{clientId}/contact/{contactId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId, @PathVariable("contactId") final UUID contactId) {
+    public void delete(@PathVariable final UUID clientId, @PathVariable final UUID contactId) {
         service.deleteById(clientId, contactId);
     }
 }

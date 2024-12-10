@@ -183,31 +183,31 @@ public class EmployeeProjectAndTaskService {
 
     private ProjectTaskEmployee search(Project project, Task task, String employeeId) {
         return repository.findByProjectAndTaskAndEmployeeId(project, task, employeeId)
-                .orElseThrow(() -> new LnFEntityNotFoundException(String.format("TaskEmployee entity with project [%s], " +
-                        "taskId [%s] and employeeId [%s] does not exist", project.getId(), task.getId(), employeeId)));
+                .orElseThrow(() -> new LnFEntityNotFoundException(("TaskEmployee entity with project [%s], " +
+                        "taskId [%s] and employeeId [%s] does not exist").formatted(project.getId(), task.getId(), employeeId)));
     }
 
     private ProjectEmployee search(UUID projectId, String employeeId) {
         return projectEmployeeRepository.findByProjectIdAndEmployeeId(projectId, employeeId)
-                .orElseThrow(() -> new LnFEntityNotFoundException(String.format("ProjectEmployee entity with projectId" +
-                        " [%s] and employeeId [%s] does not exist", projectId, employeeId)));
+                .orElseThrow(() -> new LnFEntityNotFoundException(("ProjectEmployee entity with projectId" +
+                        " [%s] and employeeId [%s] does not exist").formatted(projectId, employeeId)));
     }
 
     private Task searchForTask(UUID taskId) {
         return taskRepository.findById(taskId)
-                .orElseThrow(() -> new LnFEntityNotFoundException(String.format("Task with id [%s] does not exist", taskId)));
+                .orElseThrow(() -> new LnFEntityNotFoundException("Task with id [%s] does not exist".formatted(taskId)));
     }
 
     private Project searchForProject(UUID projectId) {
         return projectRepository.findById(projectId).orElseThrow(() ->
-                new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
+                new LnFEntityNotFoundException("Project with id [%s] does not exist".formatted(projectId)));
     }
 
     private boolean searchForProjectEmployee(UUID projectId) {
         if (projectEmployeeRepository.existsByProjectId(projectId))
             return true;
         else
-            throw new LnFEntityNotFoundException(String.format("Project with id [%s] does not Allocated to Employees", projectId));
+            throw new LnFEntityNotFoundException("Project with id [%s] does not Allocated to Employees".formatted(projectId));
     }
 
 }

@@ -33,46 +33,46 @@ public class ClientDirectoryController {
 
     @PostMapping(value = "/clients/{clientId}/directory")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable("clientId") UUID clientId, @RequestBody final ClientDirectoryDto resource) {
+    public void create(@PathVariable UUID clientId, @RequestBody final ClientDirectoryDto resource) {
         service.create(clientId, resource);
     }
 
     @PutMapping(value = "/clients/{clientId}/directory/{directoryId}")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("clientId") UUID clientId, @PathVariable("directoryId") UUID directoryId,
+    public void update(@PathVariable UUID clientId, @PathVariable UUID directoryId,
                        @RequestBody final ClientDirectoryDto resource) {
         service.update(clientId, directoryId, resource);
     }
 
     @GetMapping(value = "/clients/{clientId}/directory/{directoryId}")
-    public ClientDirectoryDto findByClientIdAndId(@PathVariable("clientId") final UUID clientId,
-                                                  @PathVariable("directoryId") final UUID directoryId) {
+    public ClientDirectoryDto findByClientIdAndId(@PathVariable final UUID clientId,
+                                                  @PathVariable final UUID directoryId) {
         return service.findByClientIdAndDirectoryId(clientId, directoryId);
     }
 
     @DeleteMapping(value = "/clients/{clientId}/directory")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteByClientId(@PathVariable("clientId") UUID clientId) {
+    public void deleteByClientId(@PathVariable UUID clientId) {
         service.deleteByClientId(clientId);
     }
 
     @DeleteMapping(value = "/clients/{clientId}/directory/{directoryId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteByClientIdAndId(@PathVariable("clientId") UUID clientId,
-                                      @PathVariable("directoryId") UUID directoryId) {
+    public void deleteByClientIdAndId(@PathVariable UUID clientId,
+                                      @PathVariable UUID directoryId) {
         service.deleteByClientIdAndDirectoryId(clientId, directoryId);
     }
 
     @GetMapping("/clients/directory/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<ClientDirectoryDto> searchByEmail(@RequestParam("email") String email) {
+    public List<ClientDirectoryDto> searchByEmail(@RequestParam String email) {
         return service.findByEmail(email);
     }
 
     @GetMapping("/clients/{clientId}/directory/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<ClientDirectoryDto> searchByClientIdAndEmail(@PathVariable("clientId") UUID clientId,
-                                                             @RequestParam("email") String email) {
+    public List<ClientDirectoryDto> searchByClientIdAndEmail(@PathVariable UUID clientId,
+                                                             @RequestParam String email) {
         return service.findByClientIdAndEmail(clientId, email);
     }
 
