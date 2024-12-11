@@ -57,8 +57,7 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(Customizer.withDefaults()))
-                .build();
+                        .jwt(Customizer.withDefaults()));
 
         http.addFilterBefore(
                 (servletRequest, servletResponse, chain) -> {
