@@ -73,7 +73,7 @@ public class DocumentService {
     public DocumentDto findByClientId(UUID clientId, String type) {
         try {
             if (awsS3BucketEnabled) {
-                var filePath = String.format(S_S_S, folderName, clientId, type);
+                var filePath = S_S_S.formatted(folderName, clientId, type);
                 List<FileDto> filePaths = fileFolderService.findFiles(filePath);
                 if (filePaths == null || filePaths.isEmpty()) {
                     log.error("Document not found for client {} ", clientId);
@@ -117,7 +117,7 @@ public class DocumentService {
     public ResponseEntity<byte[]> findClientAgreement(UUID clientId, DocumentType type, String fileName) {
         try {
             if (awsS3BucketEnabled) {
-                var filePath = String.format(S_S_S_S, folderName, clientId, type, fileName);
+                var filePath = S_S_S_S.formatted(folderName, clientId, type, fileName);
                 return fileService.findFileContent(filePath);
             } else {
                 searchForClient(clientId);
@@ -128,7 +128,7 @@ public class DocumentService {
                         .body(file.getContent());
             }
         } catch (RuntimeException e) {
-            String errorMessage = String.format("file not found for Client[%s]", clientId);
+            String errorMessage = "file not found for Client[%s]".formatted(clientId);
             throw new com.lnf.exception.LnFException(errorMessage, e);
         }
     }
@@ -143,7 +143,7 @@ public class DocumentService {
     public ResponseEntity<byte[]> findById(UUID clientId, UUID documentId, DocumentType type, String fileName) {
         try {
             if (awsS3BucketEnabled) {
-                var filePath = String.format(S_S_S_S, folderName, clientId, type, fileName);
+                var filePath = S_S_S_S.formatted(folderName, clientId, type, fileName);
                 return fileService.findFileContent(filePath);
             } else {
                 searchForClient(clientId);
@@ -153,7 +153,7 @@ public class DocumentService {
                         .body(file.getContent());
             }
         } catch (RuntimeException e) {
-            String errorMessage = String.format("file not found for client[%s]", clientId);
+            String errorMessage = "file not found for client[%s]".formatted(clientId);
             throw new LnFException(errorMessage, e);
         }
     }
@@ -168,7 +168,7 @@ public class DocumentService {
     public void create(UUID clientId, DocumentType type, MultipartFile file) {
         try {
             if (awsS3BucketEnabled) {
-                var folder = String.format(S_S_S, folderName, clientId, type);
+                var folder = S_S_S.formatted(folderName, clientId, type);
                 String filePath = uploadFile(folder, file);
                 log.debug("File uploaded successfully to S3 bucket: " + filePath);
             } else {
@@ -178,7 +178,7 @@ public class DocumentService {
                 if (entityOptional.isPresent()) {
                     documentId = entityOptional.get().getId();
                 }
-                LnFBadRequestException.throwOnCondition(Objects::isNull, file, String.format("Failed to create Document of type [%s] for client [%s] with null payload", type, client));
+                LnFBadRequestException.throwOnCondition(Objects::isNull, file, "Failed to create Document of type [%s] for client [%s] with null payload".formatted(type, client));
                 ClientDocument entity = DocumentConverter.toEntityModel(file, false);
                 if (documentId != null) {
                     entity.setId(documentId);
@@ -190,7 +190,7 @@ public class DocumentService {
             }
         } catch (RuntimeException | IOException e) {
 
-            String errorMessage = String.format("Failed to create document[%s] for client [%s]", clientId, file.getOriginalFilename());
+            String errorMessage = "Failed to create document[%s] for client [%s]".formatted(clientId, file.getOriginalFilename());
             throw new LnFException(errorMessage, e);
         }
     }
@@ -203,10 +203,10 @@ public class DocumentService {
      * @param file       Document in MultipartFile format
      */
     public void update(UUID clientId, UUID documentId, DocumentType type, MultipartFile file) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, file, String.format("Failed to update document for client [%s] with null payload", clientId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, file, "Failed to update document for client [%s] with null payload".formatted(clientId));
         try {
             if (awsS3BucketEnabled) {
-                var folder = String.format(S_S_S, folderName, clientId, type);
+                var folder = S_S_S.formatted(folderName, clientId, type);
                 String filePath = uploadFile(folder, file);
                 log.debug("File {} for client  successfully updated in S3", filePath);
             } else {
@@ -216,7 +216,7 @@ public class DocumentService {
                 save(updatedEntity);
             }
         } catch (RuntimeException | IOException e) {
-            String errorMessage = String.format("Failed to update document[%s] for client [%s]", documentId, clientId);
+            String errorMessage = "Failed to update document[%s] for client [%s]".formatted(documentId, clientId);
             throw new LnFException(errorMessage, e);
         }
         log.debug("Document {} for Client {} successfully updated", documentId, clientId);
@@ -230,7 +230,7 @@ public class DocumentService {
      */
     public void deleteByClientId(UUID clientId, DocumentType type, String fileName) {
         if (awsS3BucketEnabled) {
-            var filePath = String.format(S_S_S_S, folderName, clientId, type, fileName);
+            var filePath = S_S_S_S.formatted(folderName, clientId, type, fileName);
             List<String> filePaths = Collections.singletonList(filePath);
             fileService.delete(filePaths);
             log.debug("S3 object deleted for client");
@@ -240,7 +240,7 @@ public class DocumentService {
             try {
                 repository.delete(entity);
             } catch (RuntimeException e) {
-                String errorMessage = String.format("Failed to delete document for client [%s]", clientId);
+                String errorMessage = "Failed to delete document for client [%s]".formatted(clientId);
                 throw new LnFException(errorMessage, e);
             }
         }
@@ -259,7 +259,7 @@ public class DocumentService {
             repository.delete(entity);
             log.debug("Document {} for client {} successfully deleted", documentId, clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete Document[[%s] for client [%s]", documentId, clientId);
+            String errorMessage = "Failed to delete Document[[%s] for client [%s]".formatted(documentId, clientId);
             throw new LnFException(errorMessage);
         }
     }
@@ -274,15 +274,15 @@ public class DocumentService {
     }
 
     private Client searchForClient(UUID clientId) {
-        return clientRepository.findById(clientId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
+        return clientRepository.findById(clientId).orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
     private ClientDocument searchForDocument(UUID documentId) {
-        return repository.findById(documentId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Document with id [%s] does not exist", documentId)));
+        return repository.findById(documentId).orElseThrow(() -> new LnFEntityNotFoundException("Document with id [%s] does not exist".formatted(documentId)));
     }
 
     private ClientDocument searchForDocument(UUID clientId, DocumentType type) {
-        return repository.findByClientIdAndType(clientId, type).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Document with clientId [%s] and type [%s] does not exist", clientId, type)));
+        return repository.findByClientIdAndType(clientId, type).orElseThrow(() -> new LnFEntityNotFoundException("Document with clientId [%s] and type [%s] does not exist".formatted(clientId, type)));
     }
 
     private String uploadFile(String folder, MultipartFile file) {

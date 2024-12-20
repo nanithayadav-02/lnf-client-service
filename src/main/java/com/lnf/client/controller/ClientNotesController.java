@@ -38,7 +38,7 @@ public class ClientNotesController {
     private final PaginationAndSortingHandler paginationAndSortingHandler;
 
     @GetMapping(value = "/clients/notes")
-    public ResponseEntity<?> findAll(@RequestParam(value = "search", required = false) String search,
+    public ResponseEntity<?> findAll(@RequestParam(required = false) String search,
                                      @PageableAsQueryParam PageRequestDto pageRequest) {
         if (search != null && !search.isEmpty()) {
             if (pageRequest != null && pageRequest.getPage() != null) {
@@ -52,37 +52,37 @@ public class ClientNotesController {
     }
 
     @GetMapping(value = "/clients/{clientId}/notes")
-    public List<ClientNotesDto> findByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<ClientNotesDto> findByClientId(@PathVariable final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
     @GetMapping(value = "/clients/{clientId}/notes/{notesId}")
-    public ClientNotesDto findById(@PathVariable("clientId") final UUID clientId, @PathVariable("notesId") final UUID notesId) {
+    public ClientNotesDto findById(@PathVariable final UUID clientId, @PathVariable final UUID notesId) {
         return service.findById(clientId, notesId);
     }
 
     @PostMapping(value = "/clients/{clientId}/notes")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable("clientId") final UUID clientId, @RequestBody final List<ClientNotesDto> resource) {
+    public void create(@PathVariable final UUID clientId, @RequestBody final List<ClientNotesDto> resource) {
         service.create(clientId, resource);
     }
 
     @PutMapping(value = "/clients/{clientId}/notes/{notesId}")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("clientId") final UUID clientId, @PathVariable("notesId") final UUID notesId,
+    public void update(@PathVariable final UUID clientId, @PathVariable final UUID notesId,
                        @RequestBody final ClientNotesDto resource) {
         service.update(clientId, notesId, resource);
     }
 
     @DeleteMapping(value = "/clients/{clientId}/notes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId) {
+    public void delete(@PathVariable final UUID clientId) {
         service.deleteByClientId(clientId);
     }
 
     @DeleteMapping(value = "/clients/{clientId}/notes/{notesId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId, @PathVariable("notesId") final UUID notesId) {
+    public void delete(@PathVariable final UUID clientId, @PathVariable final UUID notesId) {
         service.deleteById(clientId, notesId);
     }
 

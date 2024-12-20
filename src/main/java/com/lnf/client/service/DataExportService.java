@@ -16,13 +16,13 @@
 
 package com.lnf.client.service;
 
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-import com.opencsv.exceptions.CsvException;
 import com.lnf.dto.client.ClientDto;
 import com.lnf.dto.client.ProjectDto;
 import com.lnf.dto.client.TaskDto;
 import com.lnf.exception.LnFException;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +41,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -70,7 +70,7 @@ public class DataExportService {
         try {
             parsedData = extractData(csvFile, dtoClass, optionalId.orElse(null), absoluteFilePath);
         } catch (Exception e) {
-            throw new IOException(String.format("Error processing file %s: %s", absoluteFilePath, e.getMessage()), e);
+            throw new IOException("Error processing file %s: %s".formatted(absoluteFilePath, e.getMessage()), e);
         } finally {
             deleteFile(absoluteFilePath);
         }
@@ -124,7 +124,7 @@ public class DataExportService {
 
     private void deleteFile(String absoluteFilePath) {
         try {
-            Files.deleteIfExists(Paths.get(absoluteFilePath));
+            Files.deleteIfExists(Path.of(absoluteFilePath));
         } catch (IOException e) {
             log.error("Could not delete file {}: {}", absoluteFilePath, e.getMessage());
         }
@@ -225,7 +225,7 @@ public class DataExportService {
     }
 
     private <T> void trimAndSetInteger(String[] rowData, T object, int index, BiConsumer<T, Integer> setter) {
-        Integer value = (int)Double.parseDouble(StringUtils.trim(rowData[index]));
+        Integer value = (int) Double.parseDouble(StringUtils.trim(rowData[index]));
         setter.accept(object, value);
     }
 

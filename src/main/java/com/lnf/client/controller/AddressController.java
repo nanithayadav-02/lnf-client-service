@@ -40,7 +40,7 @@ public class AddressController {
      */
     @GetMapping(value = "/clients/{clientId}/address")
     @ResponseStatus(HttpStatus.OK)
-    public List<AddressDto> findByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<AddressDto> findByClientId(@PathVariable final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
@@ -53,7 +53,7 @@ public class AddressController {
      */
     @GetMapping(value = "/clients/{clientId}/address/{addressId}")
     @ResponseStatus(HttpStatus.OK)
-    public AddressDto findById(@PathVariable("clientId") final UUID clientId, @PathVariable("addressId") final UUID addressId) {
+    public AddressDto findById(@PathVariable final UUID clientId, @PathVariable final UUID addressId) {
         return service.findById(clientId, addressId);
     }
 
@@ -65,7 +65,7 @@ public class AddressController {
      */
     @PostMapping(value = "/clients/{clientId}/address")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable("clientId") final UUID clientId, @RequestBody final AddressDto resource) {
+    public void create(@PathVariable final UUID clientId, @RequestBody final AddressDto resource) {
         service.create(clientId, resource);
     }
 
@@ -78,7 +78,7 @@ public class AddressController {
      */
     @PutMapping(value = "/clients/{clientId}/address/{addressId}")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("clientId") final UUID clientId, @PathVariable("addressId") final UUID addressId, @RequestBody final AddressDto resource) {
+    public void update(@PathVariable final UUID clientId, @PathVariable final UUID addressId, @RequestBody final AddressDto resource) {
         service.update(clientId, addressId, resource);
     }
 
@@ -89,7 +89,7 @@ public class AddressController {
      */
     @DeleteMapping(value = "/clients/{clientId}/address")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId) {
+    public void delete(@PathVariable final UUID clientId) {
         service.deleteByClientId(clientId);
     }
 
@@ -101,7 +101,7 @@ public class AddressController {
      */
     @DeleteMapping(value = "/clients/{clientId}/address/{addressId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId, @PathVariable("addressId") final UUID addressId) {
+    public void delete(@PathVariable final UUID clientId, @PathVariable final UUID addressId) {
         service.deleteById(clientId, addressId);
     }
 

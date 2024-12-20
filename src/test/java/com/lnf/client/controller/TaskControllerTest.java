@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -87,7 +87,7 @@ class TaskControllerTest extends BaseTestClass {
 
         when(service.findPaginatedByProjectId(projectId, page, size)).thenReturn(leavePage);
 
-        mockMvc.perform(get("/lnf/projects/"+projectId+"/tasks")
+        mockMvc.perform(get("/lnf/projects/" + projectId + "/tasks")
                         .param("page", String.valueOf(page))
                         .param("size", String.valueOf(size)))
                 .andExpect(status().isOk());
@@ -102,7 +102,7 @@ class TaskControllerTest extends BaseTestClass {
         List<TaskDto> leaveList = Arrays.asList(new TaskDto(), new TaskDto());
         when(service.findAllSortedByProjectId(projectId, sortBy, sortOrder)).thenReturn(leaveList);
 
-        mockMvc.perform(get("/lnf/projects/"+projectId+"/tasks")
+        mockMvc.perform(get("/lnf/projects/" + projectId + "/tasks")
                         .param("sortBy", sortBy)
                         .param("sortOrder", sortOrder))
                 .andExpect(status().isOk())
@@ -123,7 +123,7 @@ class TaskControllerTest extends BaseTestClass {
 
         when(service.findPaginatedAndSortedByProjectId(projectId, page, size, sortBy, sortOrder)).thenReturn(leavePage);
 
-        mockMvc.perform(get("/lnf/projects/"+projectId+"/tasks")
+        mockMvc.perform(get("/lnf/projects/" + projectId + "/tasks")
                         .param("page", String.valueOf(page))
                         .param("size", String.valueOf(size))
                         .param("sortBy", sortBy)
@@ -143,7 +143,7 @@ class TaskControllerTest extends BaseTestClass {
         String url = "/lnf/projects/" + projectId + "/tasks";
 
         String resultContent = new String(Files
-                .readAllBytes(Paths.get(ClassLoader.getSystemResource("testdata/client-task.json")
+                .readAllBytes(Path.of(ClassLoader.getSystemResource("testdata/client-task.json")
                         .toURI())));
 
         mockMvc.perform(get(url)
@@ -207,8 +207,8 @@ class TaskControllerTest extends BaseTestClass {
     @Test
     void update() {
         // Arrange
-        UUID taskId = UUID.fromString ("cfe94b9f-c86f-4733-be96-a9b619f7bca7");
-        TaskDto updatedTasks = mockTask1 ();
+        UUID taskId = UUID.fromString("cfe94b9f-c86f-4733-be96-a9b619f7bca7");
+        TaskDto updatedTasks = mockTask1();
         updatedTasks.setId(taskId);
 
         Mockito.doNothing().when(service).update(Mockito.eq(projectId), Mockito.eq(taskId), Mockito.any(TaskDto.class));
@@ -230,7 +230,7 @@ class TaskControllerTest extends BaseTestClass {
         TaskDto actualTask = captor.getValue();
 
         assertEquals(updatedTasks.getId(), actualTask.getId(), "Task IDs should match");
-        assertEquals(updatedTasks.getDescription (), actualTask.getDescription (), "description  should match");
+        assertEquals(updatedTasks.getDescription(), actualTask.getDescription(), "description  should match");
     }
 
     @Test
@@ -247,7 +247,7 @@ class TaskControllerTest extends BaseTestClass {
     @Test
     void deleteByProjectIdAndTaskId() throws Exception {
         UUID id = UUID.randomUUID();
-        String urlTemplate = String.format("/lnf/projects/%s/tasks/%s", projectId, id);
+        String urlTemplate = "/lnf/projects/%s/tasks/%s".formatted(projectId, id);
 
         mockMvc.perform(delete(urlTemplate)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -258,11 +258,11 @@ class TaskControllerTest extends BaseTestClass {
 
     private TaskDto mockTask1() {
         return createTask("cfe94b9f-c86f-4733-be96-a9b619f7bca7", "Data Analytics", "Power BI", "Active",
-                          "Development", "2022-11-01", "2023-12-31");
+                "Development", "2022-11-01", "2023-12-31");
     }
 
     private TaskDto mockTask2() {
-        return createTask("019d9f96-8f91-4725-9056-ed022b4cb65f",  "Testing", "QA", "InActive",
+        return createTask("019d9f96-8f91-4725-9056-ed022b4cb65f", "Testing", "QA", "InActive",
                 "Testing", "2022-10-01", "2023-11-30");
     }
 

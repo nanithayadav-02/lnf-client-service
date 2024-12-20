@@ -193,7 +193,7 @@ public class ProjectTaskEmployeeService {
             repository.deleteAll(projectTaskEmployees);
             log.debug("projectTaskEmployees is successfully removed from the Task {}", task.getId());
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to remove projectTaskEmployees from the Task[%s]", task.getId());
+            String errorMessage = "Failed to remove projectTaskEmployees from the Task[%s]".formatted(task.getId());
             throw new LnFException(errorMessage, e);
         }
     }
@@ -217,15 +217,15 @@ public class ProjectTaskEmployeeService {
     }
 
     private ProjectTaskEmployee search(Project project, Task task, String employeeId) {
-        return repository.findByProjectAndTaskAndEmployeeId(project, task, employeeId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("TaskEmployee entity with project [%s], taskId [%s] and employeeId [%s] does not exist", project.getId(), task.getId(), employeeId)));
+        return repository.findByProjectAndTaskAndEmployeeId(project, task, employeeId).orElseThrow(() -> new LnFEntityNotFoundException("TaskEmployee entity with project [%s], taskId [%s] and employeeId [%s] does not exist".formatted(project.getId(), task.getId(), employeeId)));
     }
 
     private Task searchForTask(UUID taskId) {
-        return taskRepository.findById(taskId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Task with id [%s] does not exist", taskId)));
+        return taskRepository.findById(taskId).orElseThrow(() -> new LnFEntityNotFoundException("Task with id [%s] does not exist".formatted(taskId)));
     }
 
     private Project searchForProject(UUID projectId) {
-        return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
+        return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException("Project with id [%s] does not exist".formatted(projectId)));
     }
 
     public void addAllTasksToEmployee(UUID projectId, List<String> employeeIds) {

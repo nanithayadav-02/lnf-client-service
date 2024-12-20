@@ -36,7 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -115,7 +115,7 @@ class ClientNotesControllerTest extends BaseTestClass {
         String url = "/lnf/clients/" + clientId + "/notes";
 
         String resultContent = new String(Files
-                .readAllBytes(Paths.get(ClassLoader.getSystemResource("testdata/client-notes.json")
+                .readAllBytes(Path.of(ClassLoader.getSystemResource("testdata/client-notes.json")
                         .toURI())));
 
         mockMvc.perform(get(url)
@@ -219,7 +219,7 @@ class ClientNotesControllerTest extends BaseTestClass {
     @Test
     void testDeleteByClientIdAndId() throws Exception {
         UUID id = UUID.randomUUID();
-        String urlTemplate = String.format("/lnf/clients/%s/notes/%s", clientId, id);
+        String urlTemplate = "/lnf/clients/%s/notes/%s".formatted(clientId, id);
 
         mockMvc.perform(delete(urlTemplate)
                         .contentType(MediaType.APPLICATION_JSON))

@@ -21,7 +21,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.lnf.client.BaseTestClass;
 import com.lnf.client.service.AddressService;
 import com.lnf.dto.client.AddressDto;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,7 +156,7 @@ class AddressControllerTest extends BaseTestClass {
     @Test
     void testDeleteByClientIdAndId() throws Exception {
         UUID id = UUID.randomUUID();
-        String urlTemplate = String.format("/lnf/clients/%s/address/%s", clientId, id);
+        String urlTemplate = "/lnf/clients/%s/address/%s".formatted(clientId, id);
 
         mockMvc.perform(delete(urlTemplate)
                         .contentType(MediaType.APPLICATION_JSON))

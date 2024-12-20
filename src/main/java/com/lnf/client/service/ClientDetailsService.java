@@ -17,8 +17,8 @@
 package com.lnf.client.service;
 
 import com.lnf.client.converter.ClientDetailsConverter;
-import com.lnf.client.repository.ClientRepository;
 import com.lnf.client.model.Client;
+import com.lnf.client.repository.ClientRepository;
 import com.lnf.dto.client.ClientDetailsDto;
 import com.lnf.exception.LnFEntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,7 @@ public class ClientDetailsService {
 
     private Client search(UUID clientId) {
         return clientRepository.findById(clientId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
 }
