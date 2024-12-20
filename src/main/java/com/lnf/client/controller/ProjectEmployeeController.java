@@ -48,9 +48,9 @@ public class ProjectEmployeeController {
     @GetMapping(value = "/projects/{projectId}/employees")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> findEmployees(
-            @PathVariable("projectId") final UUID projectId,
-            @RequestParam(name = "page", required = false) Integer page,
-            @RequestParam(name = "size", required = false) Integer size) {
+            @PathVariable final UUID projectId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
 
         if (page != null && size != null) {
             // Pagination parameters are provided, return paginated result of assigned employees
@@ -71,14 +71,14 @@ public class ProjectEmployeeController {
      * @param type        The type of employee addition. Default is "specific".
      * @param identifiers The list of identifiers for the employees to be added. If 'type' is "active",
      *                    treat the identifiers as statuses and add all active employees based on these
-     * statuses. If 'type' is not "active", treat the identifiers as employee IDs and add them to the project.
+     *                    statuses. If 'type' is not "active", treat the identifiers as employee IDs and add them to the project.
      * @return A ResponseEntity representing the result of the operation.
      */
     @PostMapping(value = "/projects/{projectId}/employees")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> addEmployeesToProject(
-            @PathVariable("projectId") final String projectId,
-            @RequestParam(name = "type", required = false, defaultValue = "specific") String type,
+            @PathVariable final String projectId,
+            @RequestParam(required = false, defaultValue = "specific") String type,
             @RequestBody List<String> identifiers) {
 
         UUID projectUUID = UUID.fromString(projectId);
@@ -98,12 +98,12 @@ public class ProjectEmployeeController {
     /**
      * Remove employees to the project
      *
-     * @param projectId Project Id
+     * @param projectId   Project Id
      * @param employeeIds List of Strings
      */
     @DeleteMapping(value = "/projects/{projectId}/employees")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeEmployeesFromProject(@PathVariable("projectId") final UUID projectId, @RequestBody List<String> employeeIds) {
+    public void removeEmployeesFromProject(@PathVariable final UUID projectId, @RequestBody List<String> employeeIds) {
         service.removeEmployeeFromProject(projectId, employeeIds);
     }
 

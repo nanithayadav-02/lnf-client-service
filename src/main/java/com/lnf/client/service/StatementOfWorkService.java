@@ -58,14 +58,14 @@ public class StatementOfWorkService {
     @Value("${aws.s3.bucket.folderName}")
     private String folderName;
 
-    public List<StatementOfWorkDto> findByProjectIdAndClientId( UUID clientId, UUID projectId) {
-        String filePath =  String.format(S_S_S_S_S, folderName, clientId, PROJECT, projectId, SOW);
+    public List<StatementOfWorkDto> findByProjectIdAndClientId(UUID clientId, UUID projectId) {
+        String filePath = S_S_S_S_S.formatted(folderName, clientId, PROJECT, projectId, SOW);
         List<FileDto> files = fileFolderService.findFiles(filePath);
         List<StatementOfWorkDto> statementOfWorkDtos = new ArrayList<>();
         files.forEach(file -> {
             String fileName = StringUtils.substringAfterLast(file.getFileName(), "/");
             String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path(String.format("/lnf/clients/%s/project/%s/%s/%s", clientId, projectId, SOW, fileName))
+                    .path("/lnf/clients/%s/project/%s/%s/%s".formatted(clientId, projectId, SOW, fileName))
                     .toUriString();
             setStatementOfWork(statementOfWorkDtos, file, fileName, downloadURL);
         });
@@ -86,16 +86,16 @@ public class StatementOfWorkService {
     public ResponseEntity<byte[]> findById(UUID clientId, UUID projectId, String fileName) {
         try {
             searchForFileName(fileName);
-            String filePath = String.format("%s/%s/%s/%s/%s/%s", folderName, clientId, PROJECT, projectId, SOW, fileName);
+            String filePath = "%s/%s/%s/%s/%s/%s".formatted(folderName, clientId, PROJECT, projectId, SOW, fileName);
             return fileService.findFileContent(filePath);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("file not found for sows[%s]", projectId);
+            String errorMessage = "file not found for sows[%s]".formatted(projectId);
             throw new LnFException(errorMessage, e);
         }
     }
 
     public void create(UUID clientId, UUID projectId, MultipartFile[] files, List<StatementOfWorkDto> resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("failed to create sows with null payload [%s]", projectId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "failed to create sows with null payload [%s]".formatted(projectId));
         Project project = searchForProjectIdAndClientId(projectId, clientId);
 
         List<StatementOfWork> entities = new ArrayList<>();
@@ -108,11 +108,11 @@ public class StatementOfWorkService {
                 entities.add(entity);
                 save(entities);
 
-                var folder = String.format(S_S_S_S_S, folderName, clientId, PROJECT, projectId, SOW);
+                var folder = S_S_S_S_S.formatted(folderName, clientId, PROJECT, projectId, SOW);
                 String filePath = fileService.uploadFile(folder, file);
                 log.debug("File uploaded successfully to S3 bucket: " + filePath);
             } catch (RuntimeException e) {
-                String errorMessage = String.format("Failed to create sows[%s] for project [%s]", file.getName(), projectId);
+                String errorMessage = "Failed to create sows[%s] for project [%s]".formatted(file.getName(), projectId);
                 throw new LnFException(errorMessage, e);
             }
         });
@@ -120,24 +120,24 @@ public class StatementOfWorkService {
 
     public void update(UUID clientId, UUID projectId, String fileName, MultipartFile file, StatementOfWorkDto resource) {
         com.lnf.exception.LnFBadRequestException.throwOnCondition(Objects::isNull, file,
-                String.format("Failed to update file for sows [%s] with null payload", fileName));
+                "Failed to update file for sows [%s] with null payload".formatted(fileName));
         try {
             StatementOfWork entity = searchForFileName(fileName);
             StatementOfWork updatedEntity = StatementOfWorkConverter.toEntityModel(resource, entity);
             save(updatedEntity);
-            String s3ObjectKey = String.format("%s/%s/%s/%s/%s/%s", folderName, clientId, PROJECT, projectId, SOW, fileName);
+            String s3ObjectKey = "%s/%s/%s/%s/%s/%s".formatted(folderName, clientId, PROJECT, projectId, SOW, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
             log.debug("S3 object deleted for sows file");
 
             //Before Updating the file we are deleting from the s3 bucket
-            var folder = String.format(S_S_S_S_S, folderName, clientId, PROJECT, projectId, SOW);
+            var folder = S_S_S_S_S.formatted(folderName, clientId, PROJECT, projectId, SOW);
             String filePath = fileService.uploadFile(folder, file);
 
             log.debug("File uploaded successfully to S3 bucket: " + filePath);
             log.debug("fileName {} for sows {} successfully updated", fileName, projectId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to update fileName[%s] for sows [%s]", fileName, projectId);
+            String errorMessage = "Failed to update fileName[%s] for sows [%s]".formatted(fileName, projectId);
             throw new LnFException(errorMessage, e);
         }
     }
@@ -146,14 +146,14 @@ public class StatementOfWorkService {
         searchForProjectIdAndClientId(projectId, clientId);
         StatementOfWork entity = searchForFileName(fileName);
         try {
-            String s3ObjectKey = String.format("%s/%s/%s/%s/%s/%s", folderName, clientId, PROJECT, projectId, SOW, fileName);
+            String s3ObjectKey = "%s/%s/%s/%s/%s/%s".formatted(folderName, clientId, PROJECT, projectId, SOW, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
             log.debug("S3 object deleted for sows file");
             repository.delete(entity);
             log.debug("file {} for sows {} successfully deleted", fileName, projectId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete File[[%s] for sows [%s]", fileName, projectId);
+            String errorMessage = "Failed to delete File[[%s] for sows [%s]".formatted(fileName, projectId);
             throw new LnFException(errorMessage);
         }
     }
@@ -171,7 +171,7 @@ public class StatementOfWorkService {
         try {
             repository.save(entities);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save sows for project [%s]", entities.getId());
+            String errorMessage = "Failed to save sows for project [%s]".formatted(entities.getId());
             throw new LnFException(errorMessage);
         }
     }
@@ -179,12 +179,12 @@ public class StatementOfWorkService {
     private StatementOfWork searchForFileName(String fileName) {
         return repository.findByFileName(fileName).
                 orElseThrow(() -> new LnFEntityNotFoundException(
-                        String.format("sows file with fileName [%s] does not exist", fileName)));
+                        "sows file with fileName [%s] does not exist".formatted(fileName)));
     }
 
     private Project searchForProjectIdAndClientId(UUID projectId, UUID clientId) {
         return projectRepository.findByProjectIdAndClientId(projectId, clientId)
-                .orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
+                .orElseThrow(() -> new LnFEntityNotFoundException("Project with id [%s] does not exist".formatted(projectId)));
     }
 
 }

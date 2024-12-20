@@ -291,7 +291,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
 
     private Page<ProjectOverviewDto> validateAndGetPages(int page, Page<Project> resultPage) {
         if (page > resultPage.getTotalPages()) {
-            throw new LnFEntityNotFoundException(String.format("Total number of pages [%d], requested page [%d] does not exist", resultPage.getTotalPages(), page));
+            throw new LnFEntityNotFoundException("Total number of pages [%d], requested page [%d] does not exist".formatted(resultPage.getTotalPages(), page));
         }
         return resultPage.map(ProjectConverter::toMiniTransportModel);
     }
@@ -307,12 +307,12 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
 
     private Client searchForClient(UUID clientId) {
         return clientRepository.findById(clientId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
     private Project search(UUID projectId) {
         return repository.findById(projectId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Project with id [%s] does not exist".formatted(projectId)));
     }
 
     public List<Map<String, Object>> getTimeSheetsByClientId(UUID clientId, UUID projectId,

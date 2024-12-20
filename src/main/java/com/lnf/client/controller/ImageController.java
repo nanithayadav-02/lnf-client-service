@@ -45,7 +45,7 @@ public class ImageController {
      */
     @GetMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.OK)
-    public DocumentDto findByClientId(@PathVariable("clientId") final UUID clientId) throws IOException {
+    public DocumentDto findByClientId(@PathVariable final UUID clientId) throws IOException {
         return service.findByClientId(clientId, DocumentType.image.getLabel());
     }
 
@@ -53,11 +53,11 @@ public class ImageController {
      * Returns ResponseEntity with byte[] for the client agreement
      *
      * @param clientId Client Id
-     * @return ResponseEntity<byte []>
+     * @return ResponseEntity<byte [ ]>
      */
     @GetMapping(value = "/clients/{clientId}/image/download")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<byte[]> findClientAgreement(@PathVariable("clientId") final UUID clientId, @RequestParam("fileName") String fileName) {
+    public ResponseEntity<byte[]> findClientAgreement(@PathVariable final UUID clientId, @RequestParam String fileName) {
         return service.findClientAgreement(clientId, DocumentType.image, fileName);
     }
 
@@ -70,10 +70,10 @@ public class ImageController {
      */
     @GetMapping(value = "/clients/{clientId}/image/{fileName}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<byte[]> findById(@PathVariable("clientId") final UUID clientId, @RequestParam(value = "imageId",required = false) final UUID imageId,
-                                           @PathVariable("fileName") String fileName) {
+    public ResponseEntity<byte[]> findById(@PathVariable final UUID clientId, @RequestParam(required = false) final UUID imageId,
+                                           @PathVariable String fileName) {
 
-        return service.findById(clientId, imageId ,DocumentType.image, fileName);
+        return service.findById(clientId, imageId, DocumentType.image, fileName);
     }
 
     /**
@@ -84,7 +84,7 @@ public class ImageController {
      */
     @PostMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable("clientId") final UUID clientId, @RequestParam MultipartFile image) {
+    public void create(@PathVariable final UUID clientId, @RequestParam MultipartFile image) {
         service.create(clientId, DocumentType.image, image);
     }
 
@@ -98,7 +98,7 @@ public class ImageController {
      */
     @PutMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("clientId") final UUID clientId, @RequestParam(value = "imageId", required = false) final UUID imageId,
+    public void update(@PathVariable final UUID clientId, @RequestParam(required = false) final UUID imageId,
                        @RequestParam MultipartFile image) throws IOException {
         service.update(clientId, imageId, DocumentType.image, image);
     }
@@ -110,7 +110,7 @@ public class ImageController {
      */
     @DeleteMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId, @RequestParam("fileName") String fileName) {
+    public void delete(@PathVariable final UUID clientId, @RequestParam String fileName) {
         service.deleteByClientId(clientId, DocumentType.image, fileName);
     }
 
@@ -122,7 +122,7 @@ public class ImageController {
      */
     @DeleteMapping(value = "/clients/{clientId}/image/{imageId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId, @PathVariable("imageId") final UUID imageId) {
+    public void delete(@PathVariable final UUID clientId, @PathVariable final UUID imageId) {
         service.deleteById(clientId, imageId);
     }
 }

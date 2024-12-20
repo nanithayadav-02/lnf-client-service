@@ -46,4 +46,9 @@ public interface ProjectRepository extends JpaRepository<Project, UUID>, JpaSpec
     @Query(value = "select p from Project p where p.id = :id And p.client.id = :clientId")
     Optional<Project> findByProjectIdAndClientId(@Param("id") UUID id, @Param("clientId") UUID clientId);
 
+    List<Project> findByStatus(String status);
+
+    @Query("select p from Project p where YEAR(p.startDate) = :year and p.status = :status")
+    List<Project> findByStatusAndYear(String status, Integer year);
+
 }

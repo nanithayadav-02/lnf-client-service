@@ -17,9 +17,9 @@
 package com.lnf.client.service;
 
 import com.lnf.client.converter.AddressConverter;
-import com.lnf.client.model.enums.AddressType;
 import com.lnf.client.model.Client;
 import com.lnf.client.model.ClientAddress;
+import com.lnf.client.model.enums.AddressType;
 import com.lnf.client.repository.ClientAddressRepository;
 import com.lnf.client.repository.ClientRepository;
 import com.lnf.dto.client.AddressDto;
@@ -76,7 +76,7 @@ public class AddressService {
      * @param resource AddressDto
      */
     public void create(UUID clientId, List<AddressDto> resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create Addresses for client[%s] with null payload", clientId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create Addresses for client[%s] with null payload".formatted(clientId));
         Client client = searchForClient(clientId);
         List<ClientAddress> entities = new ArrayList<>();
         resource.stream().filter(Objects::nonNull).forEach(addressDto -> {
@@ -103,14 +103,14 @@ public class AddressService {
                         .anyMatch(address -> address.getAddressType() == AddressType.Primary);
 
                 if (primaryExists) {
-                    throw new LnFBadRequestException(String.format("Client[%s] already has a Primary address", clientId));
+                    throw new LnFBadRequestException("Client[%s] already has a Primary address".formatted(clientId));
                 }
             }
         }
     }
 
     public void create(UUID clientId, AddressDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create Address for client[%s] with null payload", clientId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create Address for client[%s] with null payload".formatted(clientId));
         Client clientEntity = searchForClient(clientId);
         checkIfPrimaryAddressExists(clientId, clientEntity, resource);
         ClientAddress entity = AddressConverter.toEntityModel(resource);
@@ -127,7 +127,7 @@ public class AddressService {
      * @param resource  AddressDto
      */
     public void update(UUID clientId, UUID addressId, AddressDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to update Address for client[%s] with null payload", clientId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to update Address for client[%s] with null payload".formatted(clientId));
         Client clientEntity = searchForClient(clientId);
         ClientAddress entity = searchForAddress(addressId);
         boolean primaryExists = clientEntity.getClientAddresses().stream()
@@ -135,7 +135,7 @@ public class AddressService {
 
         if (primaryExists && entity.getAddressType() != AddressType.Primary
                 && resource.getAddressType().equals(AddressType.Primary.name())) {
-            throw new LnFException("Primary AddressType already exists for addressId  : "+addressId);
+            throw new LnFException("Primary AddressType already exists for addressId  : " + addressId);
         }
         ClientAddress updatedEntity = AddressConverter.toEntityModel(resource, entity);
         save(updatedEntity);
@@ -154,7 +154,7 @@ public class AddressService {
             repository.deleteAll(entities);
             log.debug("Addresses for Client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete Addresses for client [%s]", clientId);
+            String errorMessage = "Failed to delete Addresses for client [%s]".formatted(clientId);
             throw new LnFException(errorMessage);
         }
 
@@ -173,7 +173,7 @@ public class AddressService {
             repository.delete(entity);
             log.debug("Address {} for client {} successfully deleted", addressId, clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete Address[[%s] for client [%s]", addressId, clientId);
+            String errorMessage = "Failed to delete Address[[%s] for client [%s]".formatted(addressId, clientId);
             throw new LnFException(errorMessage);
         }
     }
@@ -191,19 +191,19 @@ public class AddressService {
         try {
             repository.saveAll(entities);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save Address for client [%s]", entities.get(0).getId());
+            String errorMessage = "Failed to save Address for client [%s]".formatted(entities.get(0).getId());
             throw new LnFException(errorMessage);
         }
     }
 
     private Client searchForClient(UUID clientId) {
         return clientRepository.findById(clientId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
     private ClientAddress searchForAddress(UUID addressId) {
         return repository.findById(addressId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Address with id [%s] does not exist", addressId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Address with id [%s] does not exist".formatted(addressId)));
     }
 
 }

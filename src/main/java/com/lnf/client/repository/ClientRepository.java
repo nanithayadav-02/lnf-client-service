@@ -40,4 +40,10 @@ public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecif
 
     @Query("select e from Client e where e.workingFrom >= :fromDate")
     List<Client> findByDateAfter(@Param("fromDate") LocalDate fromDate);
+
+    List<Client> findByStatus(String status);
+
+    @Query("select e from Client e where YEAR(e.workingFrom) = :year and e.status = :status")
+    List<Client> findByStatusAndYear(String status, Integer year);
+
 }

@@ -16,14 +16,14 @@
 
 package com.lnf.client.controller;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.lnf.client.service.EscalationService;
 import com.lnf.dto.client.EscalationDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,7 +40,7 @@ public class EscalationController {
      */
     @GetMapping(value = "/clients/{clientId}/escalation")
     @ResponseStatus(HttpStatus.OK)
-    public List<EscalationDto> findByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<EscalationDto> findByClientId(@PathVariable final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
@@ -53,7 +53,7 @@ public class EscalationController {
      */
     @GetMapping(value = "/clients/{clientId}/escalation/{escalationId}")
     @ResponseStatus(HttpStatus.OK)
-    public EscalationDto findById(@PathVariable("clientId") final UUID clientId, @PathVariable("escalationId") final UUID escalationId) {
+    public EscalationDto findById(@PathVariable final UUID clientId, @PathVariable final UUID escalationId) {
         return service.findById(clientId, escalationId);
     }
 
@@ -65,7 +65,7 @@ public class EscalationController {
      */
     @PostMapping(value = "/clients/{clientId}/escalation")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable("clientId") final UUID clientId, @RequestBody final List<EscalationDto> resource) {
+    public void create(@PathVariable final UUID clientId, @RequestBody final List<EscalationDto> resource) {
         service.create(clientId, resource);
     }
 
@@ -78,7 +78,7 @@ public class EscalationController {
      */
     @PutMapping(value = "/clients/{clientId}/escalation/{escalationId}")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("clientId") final UUID clientId, @PathVariable("escalationId") final UUID escalationId, @RequestBody final EscalationDto resource) {
+    public void update(@PathVariable final UUID clientId, @PathVariable final UUID escalationId, @RequestBody final EscalationDto resource) {
         service.update(clientId, escalationId, resource);
     }
 
@@ -89,7 +89,7 @@ public class EscalationController {
      */
     @DeleteMapping(value = "/clients/{clientId}/escalation")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId) {
+    public void delete(@PathVariable final UUID clientId) {
         service.deleteByClientId(clientId);
     }
 
@@ -101,7 +101,7 @@ public class EscalationController {
      */
     @DeleteMapping(value = "/clients/{clientId}/escalation/{escalationId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId, @PathVariable("escalationId") final UUID escalationId) {
+    public void delete(@PathVariable final UUID clientId, @PathVariable final UUID escalationId) {
         service.deleteById(clientId, escalationId);
     }
 }

@@ -16,14 +16,14 @@
 
 package com.lnf.client.controller;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.lnf.client.service.GstService;
 import com.lnf.dto.client.GstDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,7 +40,7 @@ public class GstController {
      */
     @GetMapping(value = "/clients/{clientId}/gst")
     @ResponseStatus(HttpStatus.OK)
-    public List<GstDto> findByClientId(@PathVariable("clientId") final UUID clientId) {
+    public List<GstDto> findByClientId(@PathVariable final UUID clientId) {
         return service.findByClientId(clientId);
     }
 
@@ -53,7 +53,7 @@ public class GstController {
      */
     @GetMapping(value = "/clients/{clientId}/gst/{gstId}")
     @ResponseStatus(HttpStatus.OK)
-    public GstDto findById(@PathVariable("clientId") final UUID clientId, @PathVariable("gstId") final UUID gstId) {
+    public GstDto findById(@PathVariable final UUID clientId, @PathVariable final UUID gstId) {
         return service.findById(clientId, gstId);
     }
 
@@ -65,7 +65,7 @@ public class GstController {
      */
     @PostMapping(value = "/clients/{clientId}/gst")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable("clientId") final UUID clientId, @RequestBody final GstDto resource) {
+    public void create(@PathVariable final UUID clientId, @RequestBody final GstDto resource) {
         service.create(clientId, resource);
     }
 
@@ -78,7 +78,7 @@ public class GstController {
      */
     @PutMapping(value = "/clients/{clientId}/gst/{gstId}")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("clientId") final UUID clientId, @PathVariable("gstId") final UUID gstId, @RequestBody final GstDto resource) {
+    public void update(@PathVariable final UUID clientId, @PathVariable final UUID gstId, @RequestBody final GstDto resource) {
         service.update(clientId, gstId, resource);
     }
 
@@ -89,7 +89,7 @@ public class GstController {
      */
     @DeleteMapping(value = "/clients/{clientId}/gst")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId) {
+    public void delete(@PathVariable final UUID clientId) {
         service.deleteByClientId(clientId);
     }
 
@@ -101,7 +101,7 @@ public class GstController {
      */
     @DeleteMapping(value = "/clients/{clientId}/gst/{gstId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("clientId") final UUID clientId, @PathVariable("gstId") final UUID gstId) {
+    public void delete(@PathVariable final UUID clientId, @PathVariable final UUID gstId) {
         service.deleteById(clientId, gstId);
     }
 }

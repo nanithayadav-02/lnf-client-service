@@ -19,7 +19,6 @@ package com.lnf.client.config;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,23 +54,23 @@ public class WebClientConfiguration {
 
 
     @Bean
-    public WebClient employeeWebClient() {
+    WebClient employeeWebClient() {
         return createWebClient(employeeServiceUrl);
     }
 
     @Bean
     @Primary
-    public WebClient fileServiceWebClient() {
+    WebClient fileServiceWebClient() {
         return createWebClient(fileServiceUrl);
     }
 
     @Bean
-    public WebClient timesheetServiceWebClient() {
+    WebClient timesheetServiceWebClient() {
         return createWebClient(timesheetServiceUrl);
     }
 
     @Bean
-    public WebClient emailServiceWebClient() {
+    WebClient emailServiceWebClient() {
         return createWebClient(emailServiceUrl);
     }
 

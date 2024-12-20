@@ -34,7 +34,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -76,7 +76,7 @@ class ClientContactControllerTest extends BaseTestClass {
         given(service.findByClientId(any(UUID.class))).willReturn(expectedDto);
 
         String resultContent = new String(Files
-                .readAllBytes(Paths.get(ClassLoader.getSystemResource("testdata/client-contact.json")
+                .readAllBytes(Path.of(ClassLoader.getSystemResource("testdata/client-contact.json")
                         .toURI())));
 
         mockMvc.perform(get(url)
@@ -167,7 +167,7 @@ class ClientContactControllerTest extends BaseTestClass {
     @Test
     void testDelete() throws Exception {
         UUID id = UUID.randomUUID();
-        String urlTemplate = String.format("/lnf/clients/%s/contact/%s", clientId, id);
+        String urlTemplate = "/lnf/clients/%s/contact/%s".formatted(clientId, id);
 
         mockMvc.perform(delete(urlTemplate)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -187,7 +187,7 @@ class ClientContactControllerTest extends BaseTestClass {
     }
 
     private ContactDto createContactDto(String id, String name, String phoneNumber, String email,
-                                                          String designation, String department) {
+                                        String designation, String department) {
         ContactDto dto = new ContactDto();
         dto.setId(UUID.fromString(id));
         dto.setName(name);

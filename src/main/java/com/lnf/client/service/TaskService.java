@@ -143,7 +143,7 @@ public class TaskService {
      * @param resource  TaskDto object
      */
     public void create(UUID projectId, TaskDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create Task for project[%s] with null payload", projectId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create Task for project[%s] with null payload".formatted(projectId));
         Project projectEntity = searchForProject(projectId);
         Task entity = TaskConverter.toEntityModel(resource);
         entity.setProject(projectEntity);
@@ -159,7 +159,7 @@ public class TaskService {
      * @param resource  TaskDto
      */
     public void update(UUID projectId, UUID taskId, TaskDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to update Task for project[%s] with null payload", projectId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to update Task for project[%s] with null payload".formatted(projectId));
         searchForProject(projectId);
         Task entity = search(taskId);
         Task updatedEntity = TaskConverter.toEntityModel(resource, entity);
@@ -187,7 +187,7 @@ public class TaskService {
             repository.deleteAll(tasks);
             log.debug("Tasks for project {} successfully deleted", projectId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete tasks for project[%s]", projectId);
+            String errorMessage = "Failed to delete tasks for project[%s]".formatted(projectId);
             throw new LnFException(errorMessage);
         }
     }
@@ -205,14 +205,14 @@ public class TaskService {
             repository.delete(entity);
             log.debug("Task {} for project {} successfully deleted", taskId, projectId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete Task[[%s] for project [%s]", taskId, projectId);
+            String errorMessage = "Failed to delete Task[[%s] for project [%s]".formatted(taskId, projectId);
             throw new LnFException(errorMessage);
         }
     }
 
     private Page<TaskDto> validateAndGetPages(int page, Page<Task> resultPage) {
         if (page > resultPage.getTotalPages()) {
-            throw new LnFEntityNotFoundException(String.format("Total number of pages [%d], requested page [%d] does not exist", resultPage.getTotalPages(), page));
+            throw new LnFEntityNotFoundException("Total number of pages [%d], requested page [%d] does not exist".formatted(resultPage.getTotalPages(), page));
         }
         return resultPage.map(TaskConverter::toTransportModel);
     }
@@ -228,12 +228,12 @@ public class TaskService {
 
     private Project searchForProject(UUID projectId) {
         return projectRepository.findById(projectId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Project with id [%s] does not exist".formatted(projectId)));
     }
 
     private Task search(UUID taskId) {
         return repository.findById(taskId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Task with id [%s] does not exist", taskId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Task with id [%s] does not exist".formatted(taskId)));
     }
 }
 

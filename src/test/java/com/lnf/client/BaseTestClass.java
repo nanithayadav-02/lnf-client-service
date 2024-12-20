@@ -83,4 +83,7 @@ public abstract class BaseTestClass {
     @MockBean
     private ClientDetailsService clientDetailsService;
 
+    @MockBean
+    private EmployeeProjectAndTaskService employeeProjectAndTaskService;
+
 }

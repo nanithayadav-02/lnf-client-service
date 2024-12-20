@@ -21,6 +21,8 @@ import com.lnf.client.model.ProjectTaskEmployee;
 import com.lnf.client.model.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,10 +32,18 @@ public interface ProjectTaskEmployeeRepository extends JpaRepository<ProjectTask
 
     Optional<ProjectTaskEmployee> findByProjectAndTaskAndEmployeeId(Project project, Task task, String employeeId);
 
+    @Query("SELECT pte FROM ProjectTaskEmployee pte WHERE pte.project = :project AND pte.task = :task AND pte.employeeId = :employeeId")
+    ProjectTaskEmployee findByProjectAndTaskAndEmployee(@Param("project") Project project,
+                                                        @Param("task") Task task,
+                                                        @Param("employeeId") String employeeId);
+
+
     List<ProjectTaskEmployee> findByProjectAndTask(Project project, Task task);
 
     List<ProjectTaskEmployee> findByProjectAndEmployeeId(Project project, String employeeId);
 
     List<ProjectTaskEmployee> findByTask(Task task);
+
+    List<ProjectTaskEmployee> findByProjectId(UUID projectId);
 
 }

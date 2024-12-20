@@ -17,9 +17,9 @@
 package com.lnf.client.service;
 
 import com.lnf.client.converter.ProjectConverter;
-import com.lnf.client.repository.ProjectEmployeeRepository;
 import com.lnf.client.model.Project;
 import com.lnf.client.model.ProjectEmployee;
+import com.lnf.client.repository.ProjectEmployeeRepository;
 import com.lnf.dto.client.EmployeeProjectDto;
 import com.lnf.dto.client.ProjectDto;
 import com.lnf.dto.employee.EmployeeDto;
@@ -74,7 +74,7 @@ public class EmployeeProjectService {
         try {
             return employeeService.findOne(employeeId);
         } catch (RuntimeException ex) {
-            throw new LnFEntityNotFoundException(String.format("Failed to find the employee [%s] ", employeeId));
+            throw new LnFEntityNotFoundException("Failed to find the employee [%s] ".formatted(employeeId));
         }
     }
 

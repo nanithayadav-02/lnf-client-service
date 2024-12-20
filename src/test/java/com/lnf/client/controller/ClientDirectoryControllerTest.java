@@ -32,14 +32,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -181,7 +179,7 @@ public class ClientDirectoryControllerTest extends BaseTestClass {
     }
 
     private String readJsonFromFile(String filePath) throws Exception {
-        return new String(Files.readAllBytes(Paths.get(ClassLoader.getSystemResource(filePath).toURI())));
+        return new String(Files.readAllBytes(Path.of(ClassLoader.getSystemResource(filePath).toURI())));
     }
 
     private ClientDirectoryDto createClientDirectory1() {

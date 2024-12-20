@@ -20,7 +20,6 @@ import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.service.timesheet.TimesheetService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -39,7 +38,6 @@ public class TimesheetClientImpl extends BaseWebClientService implements Timeshe
     private static final String TIMESHEET_ERROR_MSG = "Error occurred while fetching the timesheet";
     private static final String TIMESHEET_WARN_MSG = "Failed to get the timesheet [{}]";
 
-    @Autowired
     public TimesheetClientImpl(@Qualifier("timesheetServiceWebClient") WebClient webClient) {
         this.webClient = webClient;
     }

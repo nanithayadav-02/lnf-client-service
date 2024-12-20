@@ -66,6 +66,7 @@ public class Client extends AuditableEntity {
     private String clientDetails;
 
     @ToString.Exclude
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<ClientAddress> clientAddresses = new HashSet<>();
 
@@ -104,6 +105,7 @@ public class Client extends AuditableEntity {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<Agreement> agreements = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<ClientDirectory> clientDirectories = new HashSet<>();
 
