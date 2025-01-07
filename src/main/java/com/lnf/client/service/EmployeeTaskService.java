@@ -18,7 +18,6 @@ package com.lnf.client.service;
 
 import com.lnf.dto.client.EmployeeProjectDto;
 import com.lnf.dto.client.EmployeeProjectTaskDto;
-import com.lnf.dto.client.EmployeeProjectTasksDto;
 import com.lnf.dto.client.ProjectTasksDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -39,30 +39,53 @@ public class EmployeeTaskService {
     private final EmployeeProjectTaskService employeeProjectTaskService;
     private static final String ACTIVE = "Active";
 
-    public EmployeeProjectTasksDto findTasksByEmployeeId(final String employeeId) {
+    public Map<String, Object> findTasksByEmployeeId(final String employeeId, int page, int size) {
 
-        EmployeeProjectTasksDto employeeProjectTasksDto = new EmployeeProjectTasksDto();
-        employeeProjectTasksDto.setEmployeeId(employeeId);
-        EmployeeProjectDto employeeProjectDto =  employeeProjectService.findProjectsByEmployeeId(employeeId);
-        List<ProjectTasksDto> projectTaskDtos = new ArrayList<>();
-        employeeProjectDto.getProjects().stream()
+        EmployeeProjectDto employeeProjectDto = employeeProjectService.findProjectsByEmployeeId(employeeId);
+        List<ProjectTasksDto> projectTaskDtos = employeeProjectDto.getProjects().stream()
                 .filter(projectDto -> ACTIVE.equalsIgnoreCase(projectDto.getStatus()))
-                .forEach(projectDto -> {
+                .map(projectDto -> {
                     ProjectTasksDto projectTaskDto = new ProjectTasksDto();
                     projectTaskDto.setProjectId(projectDto.getId());
                     projectTaskDto.setProjectCode(projectDto.getCode());
                     projectTaskDto.setProjectName(projectDto.getName());
                     projectTaskDto.setProjectType(projectDto.getType());
+
                     EmployeeProjectTaskDto employeeProjectTaskDto =
                             employeeProjectTaskService.findTasksByEmployeeIdAndProjectId(employeeId, projectDto.getId());
-                    if (!CollectionUtils.isEmpty(employeeProjectTaskDto.getTasks())) {
-                        projectTaskDto.getTasks().addAll(employeeProjectTaskDto.getTasks());
-                    }
-                    projectTaskDtos.add(projectTaskDto);
-                });
-        employeeProjectTasksDto.setProjectTasks(projectTaskDtos);
-        return employeeProjectTasksDto;
 
+                    if (!CollectionUtils.isEmpty(employeeProjectTaskDto.getTasks())) {
+                        projectTaskDto.setTasks(employeeProjectTaskDto.getTasks());
+                    }
+                    return projectTaskDto;
+                })
+                .toList();
+
+        Map<String, Object> paginatedResult = applyPagination(projectTaskDtos, page, size);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("employeeId", employeeId);
+        result.put("projectTasks", paginatedResult.get("data"));
+        result.put("totalPages", paginatedResult.get("totalPages"));
+        result.put("totalElements", paginatedResult.get("totalElements"));
+        return result;
     }
+
+    private Map<String, Object> applyPagination(List<ProjectTasksDto> projectTaskDtos, int page, int size) {
+        int totalElements = projectTaskDtos.size();
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, totalElements);
+
+        List<ProjectTasksDto> paginatedTasks = projectTaskDtos.subList(
+                Math.min(startIndex, totalElements),
+                endIndex);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", paginatedTasks);
+        result.put("totalElements", totalElements);
+        result.put("totalPages", (int) Math.ceil((double) totalElements / size));
+        return result;
+    }
+
 
 }
