@@ -16,6 +16,10 @@
 
 package com.lnf.client.service;
 
+import com.lnf.client.converter.ProjectConverter;
+import com.lnf.client.converter.TaskConverter;
+import com.lnf.client.model.ProjectTaskEmployee;
+import com.lnf.client.repository.ProjectTaskEmployeeRepository;
 import com.lnf.dto.client.EmployeeProjectDto;
 import com.lnf.dto.client.EmployeeProjectTaskDto;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -37,6 +39,7 @@ public class EmployeeTaskService {
 
     private final EmployeeProjectService employeeProjectService;
     private final EmployeeProjectTaskService employeeProjectTaskService;
+    private final ProjectTaskEmployeeRepository projectTaskEmployeeRepository;
     private static final String ACTIVE = "Active";
 
     public Map<String, Object> findTasksByEmployeeId(final String employeeId, int page, int size) {
@@ -51,6 +54,10 @@ public class EmployeeTaskService {
                     if (!CollectionUtils.isEmpty(employeeProjectTaskDto.getTasks())) {
                         return employeeProjectTaskDto.getTasks().stream()
                                 .map(task -> {
+                                    ProjectTaskEmployee projectTaskEmployee = projectTaskEmployeeRepository
+                                            .findByProjectAndTaskAndEmployee(ProjectConverter.toEntityModel(projectDto)
+                                                    , TaskConverter.toEntityModel(task), employeeProjectTaskDto.getEmployeeId());
+
                                     Map<String, Object> taskMap = new HashMap<>();
                                     taskMap.put("id", task.getId());
                                     taskMap.put("name", task.getName());
@@ -63,13 +70,16 @@ public class EmployeeTaskService {
                                     taskMap.put("projectCode", projectDto.getCode());
                                     taskMap.put("projectName", projectDto.getName());
                                     taskMap.put("projectType", projectDto.getType());
+                                    taskMap.put("createdTime", projectTaskEmployee.getCreatedTime());
                                     return taskMap;
                                 });
                     }
                     return Stream.empty();
                 })
                 .toList();
-        Map<String, Object> paginatedResult = applyPagination(allTasks, page, size);
+        List<Map<String, Object>> sortedTasks = new ArrayList<>(allTasks);
+        sortedTasks.sort(Comparator.comparing(task -> (Date) task.get("createdTime"), Comparator.reverseOrder()));
+        Map<String, Object> paginatedResult = applyPagination(sortedTasks, page, size);
         Map<String, Object> result = new HashMap<>();
         result.put("employeeId", employeeId);
         result.put("tasks", paginatedResult.get("data"));
