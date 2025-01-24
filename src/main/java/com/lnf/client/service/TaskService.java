@@ -202,10 +202,11 @@ public class TaskService {
         searchForProject(projectId);
         Task entity = search(taskId);
         try {
+            deleteTasks(projectId, (List.of(entity)));
             repository.delete(entity);
             log.debug("Task {} for project {} successfully deleted", taskId, projectId);
         } catch (RuntimeException e) {
-            String errorMessage = "Failed to delete Task[[%s] for project [%s]".formatted(taskId, projectId);
+            String errorMessage = "Failed to delete Task [%s] for project [%s]".formatted(taskId, projectId);
             throw new LnFException(errorMessage);
         }
     }
@@ -235,6 +236,7 @@ public class TaskService {
         return repository.findById(taskId).
                 orElseThrow(() -> new LnFEntityNotFoundException("Task with id [%s] does not exist".formatted(taskId)));
     }
+
 }
 
 
