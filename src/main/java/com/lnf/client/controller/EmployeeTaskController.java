@@ -17,10 +17,11 @@
 package com.lnf.client.controller;
 
 import com.lnf.client.service.EmployeeTaskService;
-import com.lnf.dto.client.EmployeeProjectTasksDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,8 +38,12 @@ public class EmployeeTaskController {
      */
     @GetMapping(value = "/tasks")
     @ResponseStatus(HttpStatus.OK)
-    public EmployeeProjectTasksDto findTasksByEmployeeId(@RequestParam final String employeeId) {
-        return service.findTasksByEmployeeId(employeeId);
+    public Map<String, Object> findTasksByEmployeeId(
+            @RequestParam final String employeeId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return service.findTasksByEmployeeId(employeeId, page, size);
     }
+
 
 }
