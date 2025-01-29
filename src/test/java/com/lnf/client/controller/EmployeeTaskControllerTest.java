@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.lnf.client.BaseTestClass;
 import com.lnf.client.service.EmployeeTaskService;
-import com.lnf.dto.client.EmployeeProjectTasksDto;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.any;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -56,17 +60,23 @@ class EmployeeTaskControllerTest extends BaseTestClass {
 
     @Test
     void findTasksByEmployeeId() throws Exception {
-        EmployeeProjectTasksDto expectedDto = new EmployeeProjectTasksDto();
+        Map<String, Object> expectedDto = new HashMap<>();
+        expectedDto.put("employeeId", "HRD-CE-TF-3042");
+        expectedDto.put("projectTasks", new ArrayList<>());
+        expectedDto.put("totalPages", 1);
+        expectedDto.put("totalElements", 0);
 
-        given(service.findTasksByEmployeeId(any(String.class))).willReturn(expectedDto);
+        given(service.findTasksByEmployeeId(anyString(), anyInt(), anyInt())).willReturn(expectedDto);
 
         mockMvc.perform(get("/lnf/tasks")
-                        .param("employeeId", employeeId))
+                        .param("employeeId", "HRD-CE-TF-3042")
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(expectedDto)));
 
-        verify(service, times(1)).findTasksByEmployeeId(any(String.class));
+        verify(service, times(1)).findTasksByEmployeeId(anyString(), anyInt(), anyInt());
     }
 
     private static String asJsonString(final Object obj) {
