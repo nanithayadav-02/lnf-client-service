@@ -191,7 +191,7 @@ public class TaskController {
     }
 
     @GetMapping(value = "/tasks/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file) throws IOException {
         return ResponseEntity.ok(dataExportService.retrieveFile(file));
     }
