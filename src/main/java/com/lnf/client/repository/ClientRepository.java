@@ -46,4 +46,7 @@ public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecif
     @Query("select e from Client e where YEAR(e.workingFrom) = :year and e.status = :status")
     List<Client> findByStatusAndYear(String status, Integer year);
 
+    @Query("SELECT c FROM Client c WHERE c.uploadTime = (SELECT MAX(c.uploadTime) FROM Client c)")
+    List<Client> findByUploadedTime();
+
 }

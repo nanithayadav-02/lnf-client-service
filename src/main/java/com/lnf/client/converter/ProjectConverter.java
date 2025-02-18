@@ -22,7 +22,9 @@ import com.lnf.dto.client.ProjectDto;
 import com.lnf.dto.client.ProjectOverviewDto;
 import com.lnf.dto.employee.EmployeeDto;
 
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ProjectConverter {
 
@@ -49,10 +51,17 @@ public class ProjectConverter {
         dto.setType(entity.getType());
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
+        dto.setUploadTime(entity.getUploadTime());
         dto.setClientId(entity.getClient() != null ? entity.getClient().getId() : null);
         dto.setClientCode(entity.getClient() != null ? entity.getClient().getCode() : null);
         dto.setClientName(entity.getClient() != null ? entity.getClient().getName() : null);
-        dto.getTasks().addAll(entity.getTasks().stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).toList());
+        dto.getTasks().addAll(
+                Optional.ofNullable(entity.getTasks())
+                        .orElse(Collections.emptySet())
+                        .stream()
+                        .map(TaskConverter::toTransportModel)
+                        .filter(Objects::nonNull)
+                        .toList());
         return dto;
     }
 
@@ -125,6 +134,7 @@ public class ProjectConverter {
         entity.setType(transport.getType());
         entity.setStartDate(transport.getStartDate());
         entity.setEndDate(transport.getEndDate());
+        entity.setUploadTime(transport.getUploadTime());
 
         return entity;
     }
