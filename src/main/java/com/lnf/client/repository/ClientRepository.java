@@ -49,4 +49,7 @@ public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecif
     @Query("SELECT c FROM Client c WHERE c.uploadTime = (SELECT MAX(c.uploadTime) FROM Client c)")
     List<Client> findByUploadedTime();
 
+    @Query("SELECT MIN(c.workingFrom), MAX(c.agreementExpiryDate) FROM Client c")
+    Object findClientDateLimits();
+
 }
