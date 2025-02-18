@@ -5,6 +5,8 @@ import com.lnf.client.model.Project;
 import com.lnf.client.repository.ClientRepository;
 import com.lnf.client.repository.ProjectRepository;
 import com.lnf.client.repository.TaskRepository;
+import com.lnf.client.utils.FinancialYearDateCalculator;
+import com.lnf.dto.common.DateRangeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,11 @@ public class ClientsAnalyticsReportsService {
         clientReports.put("ProjectData", projectCountByMonth);
 
         return clientReports;
+    }
+
+    public DateRangeDto getClientDateRanges() {
+        Object result = clientRepository.findClientDateLimits();
+        return FinancialYearDateCalculator.getDateRanges(result);
     }
 
     /**
