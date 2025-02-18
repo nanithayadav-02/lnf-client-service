@@ -276,5 +276,18 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
         return SpecificationUtil.getFieldClass(Client.class, fieldName);
     }
 
+    public void deleteLastUploadFile() {
+        List<Client> client = repository.findByUploadedTime();
+        repository.deleteAll(client);
+    }
+
+    public void deleteClientList(List<UUID> clientIds) {
+        List<Client> clientList = clientIds.stream()
+                .map(id -> repository.findById(id)
+                        .orElseThrow(() -> new LnFException("Client not found for id: " + id)))
+                .toList();
+        repository.deleteAll(clientList);
+    }
+
 }
 

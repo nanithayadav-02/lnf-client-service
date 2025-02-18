@@ -237,6 +237,19 @@ public class TaskService {
                 orElseThrow(() -> new LnFEntityNotFoundException("Task with id [%s] does not exist".formatted(taskId)));
     }
 
+    public void deleteLastUploadFile() {
+        List<Task> tasks = repository.findByUploadedTime();
+        repository.deleteAll(tasks);
+    }
+
+    public void deleteTaskList(List<UUID> taskIds) {
+        List<Task> taskList = taskIds.stream()
+                .map(id -> repository.findById(id)
+                        .orElseThrow(() -> new LnFException("Task not found for id: " + id)))
+                .toList();
+        repository.deleteAll(taskList);
+    }
+
 }
 
 

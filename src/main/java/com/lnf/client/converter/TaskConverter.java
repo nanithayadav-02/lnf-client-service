@@ -37,6 +37,7 @@ public class TaskConverter {
         dto.setType(entity.getType());
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
+        dto.setUploadTime(entity.getUploadTime());
 
         return dto;
     }
@@ -61,6 +62,7 @@ public class TaskConverter {
         entity.setType(transport.getType());
         entity.setStartDate(transport.getStartDate());
         entity.setEndDate(transport.getEndDate());
+        entity.setUploadTime(transport.getUploadTime());
 
         return entity;
     }

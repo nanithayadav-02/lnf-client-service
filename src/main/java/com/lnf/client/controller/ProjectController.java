@@ -144,5 +144,23 @@ public class ProjectController {
         return service.getTimeSheetsByClientId(clientId, projectId, month, year, status);
     }
 
+    @GetMapping(value = "/projects/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file) throws IOException {
+        return ResponseEntity.ok(dataExportService.retrieveProjectFile(file));
+    }
+
+    @DeleteMapping("/projects/last-upload")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLastUpload() {
+        service.deleteLastUploadFile();
+    }
+
+    @DeleteMapping("/projects")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteProjects(@RequestBody List<UUID> projectIds) {
+        service.deleteProjectList(projectIds);
+    }
+
 
 }

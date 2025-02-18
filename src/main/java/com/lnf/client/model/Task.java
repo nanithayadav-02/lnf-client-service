@@ -16,11 +16,12 @@
 
 package com.lnf.client.model;
 
-import java.time.LocalDate;
-
 import com.lnf.model.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @ToString
 @Entity
@@ -50,8 +51,11 @@ public class Task extends AuditableEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "upload_time")
+    private LocalDateTime uploadTime;
+
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "project_id", referencedColumnName="id", nullable = false)
+    @JoinColumn(name = "project_id", referencedColumnName = "id", nullable = false)
     private Project project;
 }

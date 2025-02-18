@@ -190,5 +190,23 @@ public class TaskController {
         service.deleteByProjectIdAndTaskId(projectId, taskId);
     }
 
+    @GetMapping(value = "/tasks/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file) throws IOException {
+        return ResponseEntity.ok(dataExportService.retrieveFile(file));
+    }
+
+    @DeleteMapping("/tasks/last-upload")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLastUpload() {
+        service.deleteLastUploadFile();
+    }
+
+    @DeleteMapping("/tasks")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTasks(@RequestBody List<UUID> taskIds) {
+        service.deleteTaskList(taskIds);
+    }
+
 }
 

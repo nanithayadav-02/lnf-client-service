@@ -22,10 +22,7 @@ import com.lnf.dto.client.AddressDto;
 import com.lnf.dto.client.ClientDto;
 import com.lnf.dto.client.ClientOverviewDto;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ClientConverter {
 
@@ -49,25 +46,67 @@ public class ClientConverter {
         dto.setAgreementExpiryDate(entity.getAgreementExpiryDate());
         dto.setServiceType(entity.getServiceType());
         dto.setClientDetails(entity.getClientDetails());
-        dto.getContacts().addAll(entity.getClientContacts().stream().map(ContactConverter::toTransportModel).filter(Objects::nonNull).toList());
-        dto.getEscalations().addAll(entity.getEscalations().stream().map(EscalationConverter::toTransportModel).filter(Objects::nonNull).toList());
-        dto.getGst().addAll(entity.getGst().stream().map(GstConverter::toTransportModel).filter(Objects::nonNull).toList());
+        dto.setUploadTime(entity.getUploadTime());
+        Optional.ofNullable(entity.getClientContacts())
+                .ifPresent(clientContacts ->
+                        dto.getContacts().addAll(
+                                clientContacts.stream()
+                                        .map(ContactConverter::toTransportModel)
+                                        .filter(Objects::nonNull)
+                                        .toList()
+                        )
+                );
+        Optional.ofNullable(entity.getEscalations())
+                .ifPresent(escalations ->
+                        dto.getEscalations().addAll(
+                                escalations.stream()
+                                        .map(EscalationConverter::toTransportModel)
+                                        .filter(Objects::nonNull)
+                                        .toList()
+                        )
+                );
+
+        Optional.ofNullable(entity.getGst())
+                .ifPresent(gst ->
+                        dto.getGst().addAll(
+                                gst.stream()
+                                        .map(GstConverter::toTransportModel)
+                                        .filter(Objects::nonNull)
+                                        .toList()
+                        )
+                );
         dto.setNotes(new ArrayList<>());
         dto.setAddresses(new ArrayList<>());
-        dto.getNotes().addAll(entity.getNotes().stream()
-                .map(ClientNotesConverter::toTransportModel).filter(Objects::nonNull).toList());
+        Optional.ofNullable(entity.getNotes())
+                .ifPresent(notes ->
+                        dto.getNotes().addAll(
+                                notes.stream()
+                                        .map(ClientNotesConverter::toTransportModel)
+                                        .filter(Objects::nonNull)
+                                        .toList()
+                        )
+                );
 
-        List<AddressDto> sortedAddresses = entity.getClientAddresses().stream()
-                .map(AddressConverter::toTransportModel)
-                .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt(address ->
-                        address.getAddressType() != null && address.getAddressType().equals(AddressType.Primary.name()) ? 0 : 1))
-                .toList();
+        List<AddressDto> sortedAddresses = Optional.ofNullable(entity.getClientAddresses())
+                .map(addresses -> addresses.stream()
+                        .map(AddressConverter::toTransportModel)
+                        .filter(Objects::nonNull)
+                        .sorted(Comparator.comparingInt(address ->
+                                address.getAddressType() != null && address.getAddressType().equals(AddressType.Primary.name()) ? 0 : 1))
+                        .toList())
+                .orElse(new ArrayList<>());
 
         dto.getAddresses().addAll(sortedAddresses);
 
-        dto.getClientDirectoryDtos().addAll(entity.getClientDirectories().stream().map(ClientDirectoryConverter::toTransportModel)
-                .filter(Objects::nonNull).toList());
+        Optional.ofNullable(entity.getClientDirectories())
+                .ifPresent(clientDirectories ->
+                        dto.getClientDirectoryDtos().addAll(
+                                clientDirectories.stream()
+                                        .map(ClientDirectoryConverter::toTransportModel)
+                                        .filter(Objects::nonNull)
+                                        .toList()
+                        )
+                );
 
         return dto;
     }
@@ -124,6 +163,7 @@ public class ClientConverter {
         entity.setAgreementExpiryDate(transport.getAgreementExpiryDate());
         entity.setServiceType(transport.getServiceType());
         entity.setClientDetails(transport.getClientDetails());
+        entity.setUploadTime(transport.getUploadTime());
 
         return entity;
     }
