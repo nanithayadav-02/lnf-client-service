@@ -64,15 +64,14 @@ public class AgreementController {
     /**
      * Returns ResponseEntity with byte[] of the Client Agreement
      *
-     * @param clientId    Client Id
-     * @param agreementId Agreement Id
+     * @param clientId Client Id
      * @return ResponseEntity<byte [ ]>
      */
     @GetMapping(value = "/clients/{clientId}/agreement/{fileName}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<byte[]> findById(@PathVariable final UUID clientId, @RequestParam(required = false) final UUID agreementId,
+    public ResponseEntity<byte[]> findById(@PathVariable final UUID clientId,
                                            @PathVariable String fileName) {
-        return service.findById(clientId, agreementId, DocumentType.agreement, fileName);
+        return service.findById(clientId, DocumentType.agreement, fileName);
     }
 
     /**
@@ -90,16 +89,14 @@ public class AgreementController {
     /**
      * Updates the agreement with the client
      *
-     * @param clientId    Client id
-     * @param agreementId Agreement Id
-     * @param agreement   Agreement in MutipartFile format
+     * @param clientId  Client id
+     * @param agreement Agreement in MutipartFile format
      * @throws IOException IOException
      */
     @PutMapping(value = "/clients/{clientId}/agreement")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable final UUID clientId, @RequestParam(required = false) final UUID agreementId,
-                       @RequestParam MultipartFile agreement) throws IOException {
-        service.update(clientId, agreementId, DocumentType.agreement, agreement);
+    public void update(@PathVariable final UUID clientId, @RequestParam MultipartFile agreement) throws IOException {
+        service.update(clientId, DocumentType.agreement, agreement);
     }
 
     /**
@@ -113,15 +110,4 @@ public class AgreementController {
         service.deleteByClientId(clientId, DocumentType.agreement, fileName);
     }
 
-    /**
-     * Delete the client agreement by agreement id
-     *
-     * @param clientId    Client Id
-     * @param agreementId Agreement Id
-     */
-    @DeleteMapping(value = "/clients/{clientId}/agreement")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable final UUID clientId, @RequestParam final UUID agreementId) {
-        service.deleteById(clientId, agreementId);
-    }
 }
