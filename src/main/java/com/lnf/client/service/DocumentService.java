@@ -72,20 +72,17 @@ public class DocumentService {
      */
     public DocumentDto findByClientId(UUID clientId, String type) {
         try {
-            if (awsS3BucketEnabled) {
-                var filePath = S_S_S.formatted(folderName, clientId, type);
-                List<FileDto> filePaths = fileFolderService.findFiles(filePath);
-                if (filePaths == null || filePaths.isEmpty()) {
-                    log.error("Document not found for client {} ", clientId);
-                    return null;
-                }
-
-                return setDocumentDto(clientId, type, filePaths);
+            var filePath = S_S_S.formatted(folderName, clientId, type);
+            List<FileDto> filePaths = fileFolderService.findFiles(filePath);
+            if (filePaths == null || filePaths.isEmpty()) {
+                log.error("Document not found for client {} ", clientId);
+                return null;
             }
+
+            return setDocumentDto(clientId, type, filePaths);
         } catch (Exception e) {
             throw new LnFException("file not found for clientId:" + e.getMessage());
         }
-        return null;
     }
 
     private static DocumentDto setDocumentDto(UUID clientId, String type, List<FileDto> filePaths) {
@@ -111,15 +108,12 @@ public class DocumentService {
      */
     public ResponseEntity<byte[]> findClientAgreement(UUID clientId, DocumentType type, String fileName) {
         try {
-            if (awsS3BucketEnabled) {
-                var filePath = S_S_S_S.formatted(folderName, clientId, type, fileName);
-                return fileService.findFileContent(filePath);
-            }
+            var filePath = S_S_S_S.formatted(folderName, clientId, type, fileName);
+            return fileService.findFileContent(filePath);
         } catch (RuntimeException e) {
             String errorMessage = "file not found for Client[%s]".formatted(clientId);
             throw new com.lnf.exception.LnFException(errorMessage, e);
         }
-        return null;
     }
 
     /**
@@ -130,15 +124,12 @@ public class DocumentService {
      */
     public ResponseEntity<byte[]> findById(UUID clientId, DocumentType type, String fileName) {
         try {
-            if (awsS3BucketEnabled) {
-                var filePath = S_S_S_S.formatted(folderName, clientId, type, fileName);
-                return fileService.findFileContent(filePath);
-            }
+            var filePath = S_S_S_S.formatted(folderName, clientId, type, fileName);
+            return fileService.findFileContent(filePath);
         } catch (RuntimeException e) {
             String errorMessage = "file not found for client[%s]".formatted(clientId);
             throw new LnFException(errorMessage, e);
         }
-        return null;
     }
 
     /**
@@ -150,12 +141,10 @@ public class DocumentService {
      */
     public void create(UUID clientId, DocumentType type, MultipartFile file) {
         try {
-            if (awsS3BucketEnabled) {
-                searchForClient(clientId);
-                var folder = S_S_S.formatted(folderName, clientId, type);
-                String filePath = uploadFile(folder, file);
-                log.debug("File uploaded successfully to S3 bucket: " + filePath);
-            }
+            searchForClient(clientId);
+            var folder = S_S_S.formatted(folderName, clientId, type);
+            String filePath = uploadFile(folder, file);
+            log.debug("File uploaded successfully to S3 bucket: " + filePath);
         } catch (RuntimeException e) {
             String errorMessage = "Failed to create document[%s] for client [%s]".formatted(clientId, file.getOriginalFilename());
             throw new LnFException(errorMessage, e);
@@ -172,12 +161,10 @@ public class DocumentService {
         LnFBadRequestException.throwOnCondition(Objects::isNull, file,
                 "Failed to update document for client [%s] with null payload".formatted(clientId));
         try {
-            if (awsS3BucketEnabled) {
-                searchForClient(clientId);
-                var folder = S_S_S.formatted(folderName, clientId, type);
-                String filePath = uploadFile(folder, file);
-                log.debug("File {} for client successfully updated in S3", filePath);
-            }
+            searchForClient(clientId);
+            var folder = S_S_S.formatted(folderName, clientId, type);
+            String filePath = uploadFile(folder, file);
+            log.debug("File {} for client successfully updated in S3", filePath);
         } catch (RuntimeException e) {
             String errorMessage = "Failed to update document for client [%s]".formatted(clientId);
             throw new LnFException(errorMessage, e);
@@ -191,21 +178,11 @@ public class DocumentService {
      * @param type     Enum DocumentType
      */
     public void deleteByClientId(UUID clientId, DocumentType type, String fileName) {
-        if (awsS3BucketEnabled) {
-            var filePath = S_S_S_S.formatted(folderName, clientId, type, fileName);
-            List<String> filePaths = Collections.singletonList(filePath);
-            fileService.delete(filePaths);
-            log.debug("S3 object deleted for client");
-        } else {
-            searchForClient(clientId);
-            ClientDocument entity = searchForDocument(clientId, type);
-            try {
-                repository.delete(entity);
-            } catch (RuntimeException e) {
-                String errorMessage = "Failed to delete document for client [%s]".formatted(clientId);
-                throw new LnFException(errorMessage, e);
-            }
-        }
+        searchForClient(clientId);
+        var filePath = S_S_S_S.formatted(folderName, clientId, type, fileName);
+        List<String> filePaths = Collections.singletonList(filePath);
+        fileService.delete(filePaths);
+        log.debug("S3 object deleted for client");
     }
 
     private void save(ClientDocument entity) {
