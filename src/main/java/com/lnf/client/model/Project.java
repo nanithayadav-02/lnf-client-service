@@ -22,6 +22,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -74,9 +75,12 @@ public class Project extends AuditableEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "upload_time")
+    private LocalDateTime uploadTime;
+
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", referencedColumnName="id")
+    @JoinColumn(name = "client_id", referencedColumnName = "id")
     private Client client;
 
     @ToString.Exclude

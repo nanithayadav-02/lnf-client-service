@@ -334,4 +334,17 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         return timesheetService.findTimeSheetsByEmployeeIds(employeeIds, projectIds, month, year, status);
     }
 
+    public void deleteLastUploadFile() {
+        List<Project> projects = repository.findByUploadedTime();
+        repository.deleteAll(projects);
+    }
+
+    public void deleteProjectList(List<UUID> taskIds) {
+        List<Project> projectList = taskIds.stream()
+                .map(id -> repository.findById(id)
+                        .orElseThrow(() -> new LnFException("Project not found for id: " + id)))
+                .toList();
+        repository.deleteAll(projectList);
+    }
+
 }

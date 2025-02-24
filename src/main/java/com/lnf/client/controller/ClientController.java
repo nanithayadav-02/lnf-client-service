@@ -172,4 +172,22 @@ public class ClientController {
         service.clearClientsCache();
     }
 
+    @GetMapping(value = "/clients/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file) throws IOException {
+        return ResponseEntity.ok(dataExportService.retrieveClientFile(file));
+    }
+
+    @DeleteMapping("/clients/last-upload")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLastUpload() {
+        service.deleteLastUploadFile();
+    }
+
+    @DeleteMapping("/clients")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteClients(@RequestBody List<UUID> clientIds) {
+        service.deleteClientList(clientIds);
+    }
+
 }
