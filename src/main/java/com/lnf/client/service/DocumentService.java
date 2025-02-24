@@ -188,21 +188,8 @@ public class DocumentService {
         log.debug("S3 object deleted for client");
     }
 
-    private void save(ClientDocument entity) {
-        try {
-            repository.save(entity);
-        } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save Document for employee [%s]", entity.getClient().getId());
-            throw new LnFException(errorMessage);
-        }
-    }
-
     private Client searchForClient(UUID clientId) {
         return clientRepository.findById(clientId).orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
-    }
-
-    private ClientDocument searchForDocument(UUID documentId) {
-        return repository.findById(documentId).orElseThrow(() -> new LnFEntityNotFoundException("Document with id [%s] does not exist".formatted(documentId)));
     }
 
     private ClientDocument searchForDocument(UUID clientId, DocumentType type) {
