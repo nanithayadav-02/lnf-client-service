@@ -109,6 +109,7 @@ public class DocumentService {
      */
     public ResponseEntity<byte[]> findClientAgreement(UUID clientId, DocumentType type, String fileName) {
         try {
+            searchForClient(clientId);
             var filePath = S_S_S_S.formatted(folderName, clientId, type, fileName);
             return fileService.findFileContent(filePath);
         } catch (RuntimeException e) {
@@ -125,6 +126,7 @@ public class DocumentService {
      */
     public ResponseEntity<byte[]> findById(UUID clientId, DocumentType type, String fileName) {
         try {
+            searchForClient(clientId);
             var filePath = S_S_S_S.formatted(folderName, clientId, type, fileName);
             return fileService.findFileContent(filePath);
         } catch (RuntimeException e) {
