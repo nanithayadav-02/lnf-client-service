@@ -144,7 +144,7 @@ public class ProjectController {
         return service.getTimeSheetsByClientId(clientId, projectId, month, year, status);
     }
 
-    @GetMapping(value = "/projects/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/projects/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file) throws IOException {
         return ResponseEntity.ok(dataExportService.retrieveProjectFile(file));
