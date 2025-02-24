@@ -72,6 +72,7 @@ public class DocumentService {
      */
     public DocumentDto findByClientId(UUID clientId, String type) {
         try {
+            searchForClient(clientId);
             var filePath = S_S_S.formatted(folderName, clientId, type);
             List<FileDto> filePaths = fileFolderService.findFiles(filePath);
             if (filePaths == null || filePaths.isEmpty()) {
