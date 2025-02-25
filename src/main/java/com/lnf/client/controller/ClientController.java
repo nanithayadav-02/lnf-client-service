@@ -190,4 +190,10 @@ public class ClientController {
         service.deleteClientList(clientIds);
     }
 
+    @GetMapping("/clients/last-upload")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ClientDto> getLastUpload() {
+        return service.getLastUploadData();
+    }
+
 }

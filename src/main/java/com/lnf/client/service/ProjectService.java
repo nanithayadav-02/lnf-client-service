@@ -347,4 +347,9 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         repository.deleteAll(projectList);
     }
 
+    public List<ProjectDto> getLastUploadData() {
+        List<Project> entities = repository.findByUploadedTime();
+        return convertToDtos(entities);
+    }
+
 }

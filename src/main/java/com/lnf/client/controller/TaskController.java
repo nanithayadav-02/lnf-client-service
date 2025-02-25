@@ -208,5 +208,11 @@ public class TaskController {
         service.deleteTaskList(taskIds);
     }
 
+    @GetMapping("/tasks/last-upload")
+    @ResponseStatus(HttpStatus.OK)
+    public List<TaskDto> getLastUpload() {
+        return service.getLastUploadData();
+    }
+
 }
 

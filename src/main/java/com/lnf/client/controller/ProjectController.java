@@ -162,5 +162,10 @@ public class ProjectController {
         service.deleteProjectList(projectIds);
     }
 
+    @GetMapping("/projects/last-upload")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProjectDto> getLastUpload() {
+        return service.getLastUploadData();
+    }
 
 }
