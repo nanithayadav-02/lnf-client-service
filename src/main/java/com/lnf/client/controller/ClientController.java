@@ -172,7 +172,7 @@ public class ClientController {
         service.clearClientsCache();
     }
 
-    @GetMapping(value = "/clients/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/clients/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file) throws IOException {
         return ResponseEntity.ok(dataExportService.retrieveClientFile(file));
