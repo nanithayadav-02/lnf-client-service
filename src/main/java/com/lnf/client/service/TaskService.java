@@ -250,6 +250,11 @@ public class TaskService {
         repository.deleteAll(taskList);
     }
 
+    public List<TaskDto> getLastUploadData() {
+        List<Task> entities = repository.findByUploadedTime();
+        return entities.stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).toList();
+    }
+
 }
 
 

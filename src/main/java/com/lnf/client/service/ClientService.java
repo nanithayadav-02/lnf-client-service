@@ -289,5 +289,10 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
         repository.deleteAll(clientList);
     }
 
+    public List<ClientDto> getLastUploadData() {
+        List<Client> entities = repository.findByUploadedTime();
+        return convertToDtos(entities);
+    }
+
 }
 
