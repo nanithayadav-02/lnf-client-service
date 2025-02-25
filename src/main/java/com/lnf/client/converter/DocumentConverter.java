@@ -21,7 +21,6 @@ import com.lnf.client.model.enums.DocumentType;
 import com.lnf.dto.client.DocumentDto;
 import com.lnf.exception.LnFException;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -45,36 +44,27 @@ public class DocumentConverter {
         return dto;
     }
 
-    public static ClientDocument toEntityModel(MultipartFile transport, boolean awsS3BucketEnabled)
+    public static ClientDocument toEntityModel(MultipartFile transport)
             throws IOException {
         if (transport == null) {
             return null;
         }
         ClientDocument entity = new ClientDocument();
-        return toEntityModel(transport, entity, awsS3BucketEnabled);
+        return toEntityModel(transport, entity);
 
     }
 
-    public static ClientDocument toEntityModel(MultipartFile transport, ClientDocument entity,
-                                               boolean awsS3BucketEnabled) throws IOException {
+    public static ClientDocument toEntityModel(MultipartFile transport, ClientDocument entity) throws IOException {
         if (transport == null || entity == null) {
             return null;
         }
         entity.setName(transport.getOriginalFilename() != null ? transport.getOriginalFilename() : transport.getName());
         entity.setContentType(transport.getContentType());
         entity.setSize(transport.getSize());
-        entity.setContent(awsS3BucketEnabled ? new byte[0] : transport.getBytes());
+        entity.setContent(transport.getBytes());
 
         return entity;
     }
-
-    public static String getDocumentUrl(UUID clientId, UUID documentId, DocumentType type) {
-        return ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path(constructUrlFromType(clientId, type))
-                .path(documentId.toString())
-                .toUriString();
-    }
-
 
     public static String constructUrlFromType(UUID clientId, DocumentType type) {
         String url = "";

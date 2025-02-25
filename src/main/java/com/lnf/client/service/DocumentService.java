@@ -57,9 +57,6 @@ public class DocumentService {
     private final FileFolderService fileFolderService;
     private final FileService fileService;
 
-    @Value("${aws.s3.bucket.enabled}")
-    private boolean awsS3BucketEnabled;
-
     @Value("${aws.s3.bucket.folderName}")
     private String folderName;
 
