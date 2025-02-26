@@ -23,6 +23,7 @@ import com.lnf.dto.common.PageRequestDto;
 import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -164,8 +165,8 @@ public class ProjectController {
 
     @GetMapping("/projects/last-upload")
     @ResponseStatus(HttpStatus.OK)
-    public List<ProjectDto> getLastUpload() {
-        return service.getLastUploadData();
+    public Page<ProjectDto> getLastUpload(@PageableAsQueryParam PageRequestDto pageRequest) {
+        return service.getLastUploadData(pageRequest);
     }
 
 }
