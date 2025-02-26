@@ -27,6 +27,7 @@ import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -192,8 +193,8 @@ public class ClientController {
 
     @GetMapping("/clients/last-upload")
     @ResponseStatus(HttpStatus.OK)
-    public List<ClientDto> getLastUpload() {
-        return service.getLastUploadData();
+    public Page<ClientDto> getLastUpload(@PageableAsQueryParam PageRequestDto pageRequest) {
+        return service.getLastUploadData(pageRequest);
     }
 
 }

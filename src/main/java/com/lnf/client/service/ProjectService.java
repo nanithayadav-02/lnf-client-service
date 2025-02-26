@@ -39,10 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -347,9 +344,27 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         repository.deleteAll(projectList);
     }
 
-    public List<ProjectDto> getLastUploadData() {
+    public Page<ProjectDto> getLastUploadData(PageRequestDto pageRequest) {
+        Pageable pageable = createPageable(pageRequest);
         List<Project> entities = repository.findByUploadedTime();
-        return convertToDtos(entities);
+        return paginateProjectDetails(convertToDtos(entities), pageable);
+    }
+
+    private Pageable createPageable(PageRequestDto pageRequest) {
+        return PageRequest.of(
+                pageRequest.getPage(),
+                pageRequest.getSize(),
+                RestUtil.constructSort(pageRequest.getSortBy(), pageRequest.getSortOrder())
+        );
+    }
+
+    private Page<ProjectDto> paginateProjectDetails(List<ProjectDto> projectDtos, Pageable pageable) {
+        int totalRecords = projectDtos.size();
+        int start = pageable.getPageSize() * pageable.getPageNumber();
+        int end = Math.min(start + pageable.getPageSize(), totalRecords);
+        List<ProjectDto> paginatedProjectDetails = projectDtos.subList(start, end);
+
+        return new PageImpl<>(paginatedProjectDetails, pageable, totalRecords);
     }
 
 }
