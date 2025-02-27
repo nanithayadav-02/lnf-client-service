@@ -16,7 +16,6 @@
 
 package com.lnf.client.service;
 
-import com.lnf.client.converter.DocumentConverter;
 import com.lnf.client.model.Client;
 import com.lnf.client.model.ClientDocument;
 import com.lnf.client.model.enums.DocumentType;
@@ -83,16 +82,27 @@ public class DocumentService {
         }
     }
 
+    public static String constructUrlFromType(UUID clientId, DocumentType type) {
+        String url = "";
+        switch (type) {
+            case DocumentType.agreement -> "/lnf/clients/%s/agreement/".formatted(clientId);
+            case DocumentType.image -> "/lnf/clients/%s/image/".formatted(clientId);
+            case DocumentType.others -> "/lnf/clients/%s/others/".formatted(clientId);
+            default -> throw new LnFException("Unknown document type");
+        }
+        return url;
+    }
+
     private static DocumentDto setDocumentDto(UUID clientId, String type, List<FileDto> filePaths) {
-        var fileName = StringUtils.substringAfterLast(filePaths.get(0).getFileName(), "/");
+        var fileName = StringUtils.substringAfterLast(filePaths.getFirst().getFileName(), "/");
         String url = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path(DocumentConverter.constructUrlFromType(clientId, DocumentType.valueOf(type)))
+                .path(constructUrlFromType(clientId, DocumentType.valueOf(type)))
                 .path(fileName)
                 .toUriString();
 
         DocumentDto documentDto = new DocumentDto();
         documentDto.setName(fileName);
-        documentDto.setSize(filePaths.get(0).getFileSize());
+        documentDto.setSize(filePaths.getFirst().getFileSize());
         documentDto.setUrl(url);
         return documentDto;
     }

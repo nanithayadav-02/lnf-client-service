@@ -202,7 +202,7 @@ public class ClientNotesService implements PaginatedAndSortedService<ClientNotes
         try {
             repository.saveAll(entities);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save Notes for client [%s]", entities.get(0).getClient().getId());
+            String errorMessage = String.format("Failed to save Notes for client [%s]", entities.getFirst().getClient().getId());
             throw new LnFException(errorMessage);
         }
     }
