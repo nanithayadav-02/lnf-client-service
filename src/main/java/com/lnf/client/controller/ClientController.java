@@ -27,6 +27,7 @@ import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -188,6 +189,12 @@ public class ClientController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteClients(@RequestBody List<UUID> clientIds) {
         service.deleteClientList(clientIds);
+    }
+
+    @GetMapping("/clients/last-upload")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<ClientDto> getLastUpload(@PageableAsQueryParam PageRequestDto pageRequest) {
+        return service.getLastUploadData(pageRequest);
     }
 
 }

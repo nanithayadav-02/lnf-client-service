@@ -37,10 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -287,6 +284,29 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
                         .orElseThrow(() -> new LnFException("Client not found for id: " + id)))
                 .toList();
         repository.deleteAll(clientList);
+    }
+
+    public Page<ClientDto> getLastUploadData(PageRequestDto pageRequest) {
+        Pageable pageable = createPageable(pageRequest);
+        List<Client> entities = repository.findByUploadedTime();
+        return paginateClientDetails(convertToDtos(entities), pageable);
+    }
+
+    private Pageable createPageable(PageRequestDto pageRequest) {
+        return PageRequest.of(
+                pageRequest.getPage(),
+                pageRequest.getSize(),
+                RestUtil.constructSort(pageRequest.getSortBy(), pageRequest.getSortOrder())
+        );
+    }
+
+    private Page<ClientDto> paginateClientDetails(List<ClientDto> clientDtos, Pageable pageable) {
+        int totalRecords = clientDtos.size();
+        int start = pageable.getPageSize() * pageable.getPageNumber();
+        int end = Math.min(start + pageable.getPageSize(), totalRecords);
+        List<ClientDto> paginatedClientDetails = clientDtos.subList(start, end);
+
+        return new PageImpl<>(paginatedClientDetails, pageable, totalRecords);
     }
 
 }

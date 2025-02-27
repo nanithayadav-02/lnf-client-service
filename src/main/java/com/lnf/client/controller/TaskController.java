@@ -19,6 +19,8 @@ package com.lnf.client.controller;
 import com.lnf.client.service.DataExportService;
 import com.lnf.client.service.TaskService;
 import com.lnf.dto.client.TaskDto;
+import com.lnf.dto.common.PageRequestDto;
+import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.util.QueryConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -206,6 +208,12 @@ public class TaskController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTasks(@RequestBody List<UUID> taskIds) {
         service.deleteTaskList(taskIds);
+    }
+
+    @GetMapping("/tasks/last-upload")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<TaskDto> getLastUpload(@PageableAsQueryParam PageRequestDto pageRequest) {
+        return service.getLastUploadData(pageRequest);
     }
 
 }
