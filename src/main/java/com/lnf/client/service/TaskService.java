@@ -23,15 +23,14 @@ import com.lnf.client.model.Task;
 import com.lnf.client.repository.ProjectRepository;
 import com.lnf.client.repository.TaskRepository;
 import com.lnf.dto.client.TaskDto;
+import com.lnf.dto.common.PageRequestDto;
 import com.lnf.exception.LnFBadRequestException;
 import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
 import com.lnf.util.RestUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -248,6 +247,30 @@ public class TaskService {
                         .orElseThrow(() -> new LnFException("Task not found for id: " + id)))
                 .toList();
         repository.deleteAll(taskList);
+    }
+
+    public Page<TaskDto> getLastUploadData(PageRequestDto pageRequest) {
+        Pageable pageable = createPageable(pageRequest);
+        List<Task> entities = repository.findByUploadedTime();
+        List<TaskDto> dtoList = entities.stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).toList();
+        return paginateTaskDetails(dtoList, pageable);
+    }
+
+    private Pageable createPageable(PageRequestDto pageRequest) {
+        return PageRequest.of(
+                pageRequest.getPage(),
+                pageRequest.getSize(),
+                RestUtil.constructSort(pageRequest.getSortBy(), pageRequest.getSortOrder())
+        );
+    }
+
+    private Page<TaskDto> paginateTaskDetails(List<TaskDto> taskDtos, Pageable pageable) {
+        int totalRecords = taskDtos.size();
+        int start = pageable.getPageSize() * pageable.getPageNumber();
+        int end = Math.min(start + pageable.getPageSize(), totalRecords);
+        List<TaskDto> paginatedTaskDetails = taskDtos.subList(start, end);
+
+        return new PageImpl<>(paginatedTaskDetails, pageable, totalRecords);
     }
 
 }
