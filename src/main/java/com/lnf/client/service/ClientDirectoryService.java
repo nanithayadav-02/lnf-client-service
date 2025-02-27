@@ -274,7 +274,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
             repository.saveAll(entities);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to save ClientDirectory for Client [%s]",
-                    entities.get(0).getClient().getId());
+                    entities.getFirst().getClient().getId());
             throw new LnFException(errorMessage);
         }
     }

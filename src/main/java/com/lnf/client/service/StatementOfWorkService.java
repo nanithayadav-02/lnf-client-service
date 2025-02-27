@@ -162,7 +162,7 @@ public class StatementOfWorkService {
         try {
             repository.saveAll(entities);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save sows for project [%s]", entities.get(0).getProject().getId());
+            String errorMessage = String.format("Failed to save sows for project [%s]", entities.getFirst().getProject().getId());
             throw new LnFException(errorMessage);
         }
     }

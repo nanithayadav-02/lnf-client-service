@@ -65,15 +65,14 @@ public class ImageController {
      * Returns ResponseEntity with byte[] of the Client Agreement
      *
      * @param clientId Client Id
-     * @param imageId  Image Id
      * @return ResponseEntity<byte [ ]>
      */
     @GetMapping(value = "/clients/{clientId}/image/{fileName}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<byte[]> findById(@PathVariable final UUID clientId, @RequestParam(required = false) final UUID imageId,
+    public ResponseEntity<byte[]> findById(@PathVariable final UUID clientId,
                                            @PathVariable String fileName) {
 
-        return service.findById(clientId, imageId, DocumentType.image, fileName);
+        return service.findById(clientId, DocumentType.image, fileName);
     }
 
     /**
@@ -92,15 +91,14 @@ public class ImageController {
      * Updates the agreement with the client
      *
      * @param clientId Client id
-     * @param imageId  Image Id
      * @param image    image in MutipartFile format
      * @throws IOException IOException
      */
     @PutMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable final UUID clientId, @RequestParam(required = false) final UUID imageId,
+    public void update(@PathVariable final UUID clientId,
                        @RequestParam MultipartFile image) throws IOException {
-        service.update(clientId, imageId, DocumentType.image, image);
+        service.update(clientId, DocumentType.image, image);
     }
 
     /**
@@ -114,15 +112,4 @@ public class ImageController {
         service.deleteByClientId(clientId, DocumentType.image, fileName);
     }
 
-    /**
-     * Delete the client image by image id
-     *
-     * @param clientId Client Id
-     * @param imageId  Image Id
-     */
-    @DeleteMapping(value = "/clients/{clientId}/image/{imageId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable final UUID clientId, @PathVariable final UUID imageId) {
-        service.deleteById(clientId, imageId);
-    }
 }
