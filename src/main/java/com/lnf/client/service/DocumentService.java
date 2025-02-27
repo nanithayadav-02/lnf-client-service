@@ -153,8 +153,7 @@ public class DocumentService {
         try {
             searchForClient(clientId);
             var folder = S_S_S.formatted(folderName, clientId, type);
-            String filePath = uploadFile(folder, file);
-            log.debug("File uploaded successfully to S3 bucket: " + filePath);
+            uploadFile(folder, file);
         } catch (RuntimeException e) {
             String errorMessage = "Failed to create document[%s] for client [%s]".formatted(clientId, file.getOriginalFilename());
             throw new LnFException(errorMessage, e);
@@ -173,8 +172,7 @@ public class DocumentService {
         try {
             searchForClient(clientId);
             var folder = S_S_S.formatted(folderName, clientId, type);
-            String filePath = uploadFile(folder, file);
-            log.debug("File {} for client successfully updated in S3", filePath);
+            uploadFile(folder, file);
         } catch (RuntimeException e) {
             String errorMessage = "Failed to update document for client [%s]".formatted(clientId);
             throw new LnFException(errorMessage, e);
@@ -203,7 +201,9 @@ public class DocumentService {
         return repository.findByClientIdAndType(clientId, type).orElseThrow(() -> new LnFEntityNotFoundException("Document with clientId [%s] and type [%s] does not exist".formatted(clientId, type)));
     }
 
-    private String uploadFile(String folder, MultipartFile file) {
-        return fileService.uploadFile(folder, file);
+    private void uploadFile(String folder, MultipartFile file) {
+        String filePath = fileService.uploadFile(folder, file);
+        log.debug("File uploaded successfully to S3 bucket: {}", filePath);
     }
+
 }
