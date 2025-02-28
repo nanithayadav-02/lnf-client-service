@@ -194,8 +194,8 @@ public class TaskController {
 
     @PostMapping(value = "/tasks/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file) throws IOException {
-        return ResponseEntity.ok(dataExportService.retrieveFile(file));
+    public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file, @RequestParam final UUID projectId) throws IOException {
+        return ResponseEntity.ok(dataExportService.retrieveFile(file, projectId));
     }
 
     @DeleteMapping("/tasks/last-upload")

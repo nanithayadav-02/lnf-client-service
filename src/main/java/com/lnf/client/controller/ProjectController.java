@@ -147,8 +147,8 @@ public class ProjectController {
 
     @PostMapping(value = "/projects/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file) throws IOException {
-        return ResponseEntity.ok(dataExportService.retrieveProjectFile(file));
+    public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file, @RequestParam final UUID clientId) throws IOException {
+        return ResponseEntity.ok(dataExportService.retrieveProjectFile(file, clientId));
     }
 
     @DeleteMapping("/projects/last-upload")
@@ -171,8 +171,8 @@ public class ProjectController {
 
     @PostMapping(value = "projects/data-upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@RequestBody final List<ProjectDto> resources) {
-        service.create(resources);
+    public void create(@RequestBody final List<ProjectDto> resources, @RequestParam final UUID clientId) {
+        service.create(resources, clientId);
     }
 
 }
