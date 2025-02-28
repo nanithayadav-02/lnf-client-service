@@ -367,4 +367,30 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         return new PageImpl<>(paginatedProjectDetails, pageable, totalRecords);
     }
 
+    public void create(List<ProjectDto> resources) {
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resources, "Failed to create Project with null payload");
+        List<Project> entities = resources.stream()
+                .map(resource -> {
+                    Project project = ProjectConverter.toEntityModel(resource);
+                    if (resource.getClientId() != null) {
+                        Client client = searchForClient(resource.getClientId());
+                        project.setClient(client);
+                    }
+                    return project;
+                })
+                .toList();
+
+        save(entities);
+        log.debug("Project entities successfully created");
+    }
+
+    private void save(List<Project> entities) {
+        try {
+            repository.saveAll(entities);
+        } catch (RuntimeException e) {
+            String errorMessage = "Failed to save Projects";
+            throw new LnFException(errorMessage);
+        }
+    }
+
 }

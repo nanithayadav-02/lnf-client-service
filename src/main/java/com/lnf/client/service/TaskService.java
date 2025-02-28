@@ -273,6 +273,28 @@ public class TaskService {
         return new PageImpl<>(paginatedTaskDetails, pageable, totalRecords);
     }
 
+    public void create(UUID projectId, List<TaskDto> resources) {
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resources, "Failed to create Task for project[%s] with null payload".formatted(projectId));
+        Project projectEntity = searchForProject(projectId);
+        List<Task> entities = resources.stream().map(resource -> {
+            Task entity = TaskConverter.toEntityModel(resource);
+            entity.setProject(projectEntity);
+            return entity;
+        }).toList();
+
+        save(entities);
+        log.debug("Tasks for Project {} successfully created", projectId);
+    }
+
+    private void save(List<Task> entity) {
+        try {
+            repository.saveAll(entity);
+        } catch (RuntimeException e) {
+            String errorMessage = "Failed to save Task for project";
+            throw new LnFException(errorMessage);
+        }
+    }
+
 }
 
 
