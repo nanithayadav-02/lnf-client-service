@@ -307,7 +307,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                 orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
-    private Project search(UUID projectId) {
+    public Project search(UUID projectId) {
         return repository.findById(projectId).
                 orElseThrow(() -> new LnFEntityNotFoundException("Project with id [%s] does not exist".formatted(projectId)));
     }
@@ -367,13 +367,13 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         return new PageImpl<>(paginatedProjectDetails, pageable, totalRecords);
     }
 
-    public void create(List<ProjectDto> resources) {
+    public void create(List<ProjectDto> resources, UUID clientId) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resources, "Failed to create Project with null payload");
         List<Project> entities = resources.stream()
                 .map(resource -> {
                     Project project = ProjectConverter.toEntityModel(resource);
-                    if (resource.getClientId() != null) {
-                        Client client = searchForClient(resource.getClientId());
+                    if (clientId != null) {
+                        Client client = searchForClient(clientId);
                         project.setClient(client);
                     }
                     return project;

@@ -38,6 +38,7 @@ public class TaskConverter {
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
         dto.setUploadTime(entity.getUploadTime());
+        dto.setProjectId(entity.getProject().getId());
 
         return dto;
     }

@@ -236,7 +236,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @param clientId Client Id
      * @return Client object
      */
-    private Client search(UUID clientId) {
+    public Client search(UUID clientId) {
         return repository.findById(clientId).
                 orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
