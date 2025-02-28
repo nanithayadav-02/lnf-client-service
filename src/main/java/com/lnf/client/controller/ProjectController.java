@@ -169,4 +169,10 @@ public class ProjectController {
         return service.getLastUploadData(pageRequest);
     }
 
+    @PostMapping(value = "projects/data-upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void create(@RequestBody final List<ProjectDto> resources) {
+        service.create(resources);
+    }
+
 }

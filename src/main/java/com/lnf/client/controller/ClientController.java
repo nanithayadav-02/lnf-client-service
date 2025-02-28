@@ -197,4 +197,11 @@ public class ClientController {
         return service.getLastUploadData(pageRequest);
     }
 
+    @PostMapping(value = "/clients/data-upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void create(@RequestBody final List<ClientDto> resources) {
+        service.create(resources);
+    }
+
+
 }
