@@ -367,7 +367,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         return new PageImpl<>(paginatedProjectDetails, pageable, totalRecords);
     }
 
-    public void create(List<ProjectDto> resources, UUID clientId) {
+    public List<ProjectDto> create(List<ProjectDto> resources, UUID clientId) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resources, "Failed to create Project with null payload");
         List<Project> entities = resources.stream()
                 .map(resource -> {
@@ -380,17 +380,28 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                 })
                 .toList();
 
-        save(entities);
-        log.debug("Project entities successfully created");
+        return save(entities);
     }
 
-    private void save(List<Project> entities) {
-        try {
-            repository.saveAll(entities);
-        } catch (RuntimeException e) {
-            String errorMessage = "Failed to save Projects";
-            throw new LnFException(errorMessage);
+    private List<ProjectDto> save(List<Project> entities) {
+        Set<String> existingCodes = repository.findAll().stream()
+                .map(Project::getCode).collect(Collectors.toSet());
+
+        List<ProjectDto> invalidData = new ArrayList<>();
+
+        for (Project project : entities) {
+            if (existingCodes.contains(project.getCode())) {
+                invalidData.add(ProjectConverter.toTransportModel(project));
+            } else {
+                try {
+                    repository.save(project);
+                } catch (RuntimeException e) {
+                    String errorMessage = "Failed to save Projects";
+                    throw new LnFException(errorMessage, e);
+                }
+            }
         }
+        return invalidData;
     }
 
 }

@@ -171,8 +171,8 @@ public class ProjectController {
 
     @PostMapping(value = "projects/data-upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@RequestBody final List<ProjectDto> resources, @RequestParam final UUID clientId) {
-        service.create(resources, clientId);
+    public List<ProjectDto> create(@RequestBody final List<ProjectDto> resources, @RequestParam final UUID clientId) {
+        return service.create(resources, clientId);
     }
 
 }

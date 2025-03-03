@@ -42,10 +42,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -309,21 +308,32 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
         return new PageImpl<>(paginatedClientDetails, pageable, totalRecords);
     }
 
-    public void create(List<ClientDto> resources) {
+    public List<ClientDto> create(List<ClientDto> resources) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resources,
                 "Failed to create Client with null payload");
         List<Client> entities = resources.stream().map(ClientConverter::toEntityModel).toList();
-        save(entities);
-        log.debug("Clients successfully created");
+        return save(entities);
     }
 
-    private void save(List<Client> entities) {
-        try {
-            repository.saveAll(entities);
-        } catch (RuntimeException e) {
-            String errorMessage = "Failed to save client";
-            throw new LnFException(errorMessage, e);
+    private List<ClientDto> save(List<Client> entities) {
+        Set<String> existingCodes = repository.findAll().stream()
+                .map(Client::getCode).collect(Collectors.toSet());
+
+        List<ClientDto> invalidData = new ArrayList<>();
+
+        for (Client client : entities) {
+            if (existingCodes.contains(client.getCode())) {
+                invalidData.add(ClientConverter.toTransportModel(client));
+            } else {
+                try {
+                    repository.save(client);
+                } catch (RuntimeException e) {
+                    String errorMessage = "Failed to save Projects";
+                    throw new LnFException(errorMessage, e);
+                }
+            }
         }
+        return invalidData;
     }
 
 }
