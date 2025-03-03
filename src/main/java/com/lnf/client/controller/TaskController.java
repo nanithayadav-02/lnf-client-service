@@ -218,8 +218,8 @@ public class TaskController {
 
     @PostMapping(value = "/projects/{projectId}/tasks/data-upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable final UUID projectId, @RequestBody final List<TaskDto> resources) {
-        service.create(projectId, resources);
+    public List<TaskDto> create(@PathVariable final UUID projectId, @RequestBody final List<TaskDto> resources) {
+        return service.create(projectId, resources);
     }
 
 }

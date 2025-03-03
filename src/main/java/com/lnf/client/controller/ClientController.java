@@ -199,9 +199,8 @@ public class ClientController {
 
     @PostMapping(value = "/clients/data-upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@RequestBody final List<ClientDto> resources) {
-        service.create(resources);
+    public List<ClientDto> create(@RequestBody final List<ClientDto> resources) {
+        return service.create(resources);
     }
-
 
 }

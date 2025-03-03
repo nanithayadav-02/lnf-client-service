@@ -34,6 +34,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -273,7 +274,7 @@ public class TaskService {
         return new PageImpl<>(paginatedTaskDetails, pageable, totalRecords);
     }
 
-    public void create(UUID projectId, List<TaskDto> resources) {
+    public List<TaskDto> create(UUID projectId, List<TaskDto> resources) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resources, "Failed to create Task for project[%s] with null payload".formatted(projectId));
         Project projectEntity = searchForProject(projectId);
         List<Task> entities = resources.stream().map(resource -> {
@@ -282,17 +283,19 @@ public class TaskService {
             return entity;
         }).toList();
 
-        save(entities);
-        log.debug("Tasks for Project {} successfully created", projectId);
+        return save(entities);
     }
 
-    private void save(List<Task> entity) {
-        try {
-            repository.saveAll(entity);
-        } catch (RuntimeException e) {
-            String errorMessage = "Failed to save Task for project";
-            throw new LnFException(errorMessage);
+    private List<TaskDto> save(List<Task> entities) {
+        List<TaskDto> invalidTask = new ArrayList<>();
+        for (Task task : entities) {
+            try {
+                save(task);
+            } catch (RuntimeException e) {
+                invalidTask.add(TaskConverter.toTransportModel(task));
+            }
         }
+        return invalidTask;
     }
 
 }

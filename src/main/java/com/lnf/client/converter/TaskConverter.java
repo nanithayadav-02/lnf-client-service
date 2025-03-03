@@ -19,6 +19,8 @@ package com.lnf.client.converter;
 import com.lnf.client.model.Task;
 import com.lnf.dto.client.TaskDto;
 
+import java.time.LocalDateTime;
+
 public class TaskConverter {
 
     private TaskConverter() {
@@ -63,7 +65,7 @@ public class TaskConverter {
         entity.setType(transport.getType());
         entity.setStartDate(transport.getStartDate());
         entity.setEndDate(transport.getEndDate());
-        entity.setUploadTime(transport.getUploadTime());
+        entity.setUploadTime(transport.getUploadTime() != null ? transport.getUploadTime() : LocalDateTime.now());
 
         return entity;
     }
