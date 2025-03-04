@@ -164,7 +164,6 @@ public class ClientConverter {
         entity.setAgreementExpiryDate(transport.getAgreementExpiryDate());
         entity.setServiceType(transport.getServiceType());
         entity.setClientDetails(transport.getClientDetails());
-        entity.setUploadTime(transport.getUploadTime() != null ? transport.getUploadTime() : LocalDateTime.now());
 
         return entity;
     }

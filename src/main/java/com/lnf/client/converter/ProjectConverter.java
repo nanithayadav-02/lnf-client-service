@@ -135,7 +135,6 @@ public class ProjectConverter {
         entity.setType(transport.getType());
         entity.setStartDate(transport.getStartDate());
         entity.setEndDate(transport.getEndDate());
-        entity.setUploadTime(transport.getUploadTime() != null ? transport.getUploadTime() : LocalDateTime.now());
 
         return entity;
     }

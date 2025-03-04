@@ -34,6 +34,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -288,8 +289,10 @@ public class TaskService {
 
     private List<TaskDto> save(List<Task> entities) {
         List<TaskDto> invalidTask = new ArrayList<>();
+        LocalDateTime uploadTime =LocalDateTime.now();
         for (Task task : entities) {
             try {
+                task.setUploadTime(uploadTime);
                 save(task);
             } catch (RuntimeException e) {
                 invalidTask.add(TaskConverter.toTransportModel(task));
