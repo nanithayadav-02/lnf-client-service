@@ -44,6 +44,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -388,12 +389,14 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                 .map(Project::getCode).collect(Collectors.toSet());
 
         List<ProjectDto> invalidData = new ArrayList<>();
+        LocalDateTime uploadTime =LocalDateTime.now();
 
         for (Project project : entities) {
             if (existingCodes.contains(project.getCode())) {
                 invalidData.add(ProjectConverter.toTransportModel(project));
             } else {
                 try {
+                    project.setUploadTime(uploadTime);
                     repository.save(project);
                 } catch (RuntimeException e) {
                     String errorMessage = "Failed to save Projects";
