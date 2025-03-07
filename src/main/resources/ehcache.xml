@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns="http://www.ehcache.org/v3"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.0.xsd">
+
+    <!-- Default cache configuration -->
+    <cache alias="defaultCache">
+        <!-- Use an in-memory heap cache -->
+        <heap unit="entries">1000</heap> <!-- Max 1000 entries in heap -->
+        <expiry>
+            <ttl unit="minutes">10</ttl> <!-- TTL (Time to Live) for cache entries, 10 minutes -->
+        </expiry>
+        <eviction>
+            <lru/> <!-- Use Least Recently Used eviction strategy -->
+        </eviction>
+    </cache>
+
+    <!-- Cache for storing user sessions -->
+    <cache alias="userSessionCache">
+        <heap unit="entries">5000</heap> <!-- Max 5000 entries in heap -->
+        <expiry>
+            <ttl unit="minutes">30</ttl> <!-- TTL for session data, 30 minutes -->
+        </expiry>
+        <eviction>
+            <lru/> <!-- Evict using LRU strategy -->
+        </eviction>
+    </cache>
+
+    <!-- Cache for storing product details -->
+    <cache alias="productCache">
+        <heap unit="entries">2000</heap> <!-- Max 2000 entries in heap -->
+        <expiry>
+            <ttl unit="minutes">5</ttl> <!-- TTL for product data, 5 minutes -->
+        </expiry>
+        <eviction>
+            <lru/> <!-- Use LRU eviction -->
+        </eviction>
+    </cache>
+
+    <!-- Example of a disk-based cache with overflow -->
+    <cache alias="largeFileCache">
+        <disk persistent="true" directory="target/ehcache" size="500000" unit="MB"/> <!-- Cache files to disk if heap size is exceeded -->
+        <heap unit="entries">5000</heap> <!-- Max 5000 entries in heap -->
+        <expiry>
+            <ttl unit="minutes">60</ttl> <!-- TTL for large files, 60 minutes -->
+        </expiry>
+        <eviction>
+            <lru/> <!-- Use LRU eviction strategy -->
+        </eviction>
+    </cache>
+
+</ehcache>

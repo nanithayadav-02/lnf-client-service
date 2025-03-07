@@ -168,6 +168,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param projectId Project Id
      * @return ProjectDto object
      */
+    @Cacheable(value = "projects", key = "#projectId")
     public ProjectDto findByProjectId(UUID projectId) {
         Project entity = search(projectId);
         return ProjectConverter.toTransportModel(entity);
