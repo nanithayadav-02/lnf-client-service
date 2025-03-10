@@ -25,6 +25,8 @@ import com.lnf.dto.client.ProjectOverviewDto;
 import com.lnf.dto.common.PageRequestDto;
 import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,6 +52,7 @@ public class ClientController {
     private final ProjectService projectService;
     private final PaginationAndSortingHandler paginationAndSortingHandler;
     private final DataExportService dataExportService;
+    private static final String CLIENT_SERVICE = "clientService";
 
     /**
      * Return requested page with list of ClientDto objects with requested sortBy and sortOrder and size and page.Raises LnFEntityNotFoundException
@@ -121,10 +125,17 @@ public class ClientController {
      * @param clientId Client Id
      * @return List of all employeeDto objects.
      */
+    @CircuitBreaker(name = CLIENT_SERVICE, fallbackMethod = "fallbackFindEmployeesByClientId")
+    @Retry(name = CLIENT_SERVICE)
     @GetMapping(value = "/clients/{clientId}/employees")
     @ResponseStatus(HttpStatus.OK)
     public List<ClientEmployeeDto> findEmployeesByClientId(@PathVariable final UUID clientId) {
         return projectService.findEmployeesByClientId(clientId);
+    }
+
+    public List<ClientEmployeeDto> fallbackFindEmployeesByClientId(UUID clientId, Throwable throwable) {
+        log.error("Circuit breaker triggered for clientId: {}. Reason: {}", clientId, throwable.getMessage());
+        return Collections.emptyList();
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.lnf.client.controller;
 
 import com.lnf.client.service.EmployeeProjectAndTaskService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import java.util.UUID;
 public class EmployeeProjectAndTaskController {
 
     private final EmployeeProjectAndTaskService service;
+    private static final String CLIENT_SERVICE = "clientService";
 
     @PostMapping(value = "/project/{projectId}/employees")
     @ResponseStatus(HttpStatus.CREATED)
@@ -31,10 +34,17 @@ public class EmployeeProjectAndTaskController {
         service.removeEmployeeFromProject(projectId);
     }
 
+    @CircuitBreaker(name = "CLIENT_SERVICE", fallbackMethod = "fallbackAddAllEmployeesToProjectAndTask")
+    @Retry(name = CLIENT_SERVICE)
     @PostMapping(value = "/projects/{projectId}/tasks/{taskId}/project-employees")
     @ResponseStatus(HttpStatus.CREATED)
     public void addAllEmployeesToProjectAndTask(@PathVariable final UUID projectId, @PathVariable final UUID taskId) {
         service.addAllEmployeesToProjectAndTask(projectId, taskId);
+    }
+
+    public void fallbackAddAllEmployeesToProjectAndTask(UUID projectId, UUID taskId, Throwable throwable) {
+        log.error("Circuit breaker triggered for projectId: {}, taskId: {}. Reason: {}",
+                projectId, taskId, throwable.getMessage());
     }
 
     @DeleteMapping(value = "/project/{projectId}/task/{taskId}/employees")

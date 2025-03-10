@@ -17,18 +17,24 @@
 package com.lnf.client.controller;
 
 import com.lnf.client.service.EmployeeTaskService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/lnf")
+@Slf4j
 public class EmployeeTaskController {
 
     private final EmployeeTaskService service;
+    private static final String CLIENT_SERVICE = "clientService";
 
     /**
      * Get tasks associated to the employee
@@ -36,6 +42,8 @@ public class EmployeeTaskController {
      * @param employeeId EmployeeId
      * @return EmployeeProjectTasksDto
      */
+    @CircuitBreaker(name = CLIENT_SERVICE, fallbackMethod = "fallbackFindTasksByEmployeeId")
+    @Retry(name = CLIENT_SERVICE)
     @GetMapping(value = "/tasks")
     @ResponseStatus(HttpStatus.OK)
     public Map<String, Object> findTasksByEmployeeId(
@@ -45,5 +53,7 @@ public class EmployeeTaskController {
         return service.findTasksByEmployeeId(employeeId, page, size);
     }
 
-
+    public Map<String, Object> fallbackFindTasksByEmployeeId(String employeeId, int page, int size, Throwable throwable) {
+        return Collections.singletonMap("message", "Service is temporarily unavailable. Please try again later.");
+    }
 }

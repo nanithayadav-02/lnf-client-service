@@ -18,11 +18,15 @@ package com.lnf.client.controller;
 
 import com.lnf.client.service.ProjectEmployeeService;
 import com.lnf.dto.client.ProjectEmployeeDto;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -33,9 +37,11 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/lnf")
+@Slf4j
 public class ProjectEmployeeController {
 
     private final ProjectEmployeeService service;
+    private static final String CLIENT_SERVICE = "clientService";
 
     /**
      * Find employees assigned to a project.
@@ -45,6 +51,8 @@ public class ProjectEmployeeController {
      * @param size      The number of employees per page for pagination (optional).
      * @return ResponseEntity representing the result of the operation.
      */
+    @CircuitBreaker(name = CLIENT_SERVICE, fallbackMethod = "fallbackFindEmployees")
+    @Retry(name = CLIENT_SERVICE)
     @GetMapping(value = "/projects/{projectId}/employees")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> findEmployees(
@@ -63,6 +71,18 @@ public class ProjectEmployeeController {
         }
     }
 
+    private ResponseEntity<?> fallbackFindEmployees(UUID projectId, Integer page, Integer size, Throwable t) {
+        //       log.error("Fallback triggered for projectId: {} with exception: {}", projectId, t.getMessage());
+
+        String errorMessage = "Unable to fetch employees for project " + projectId;
+        if (page != null && size != null) {
+            // If pagination parameters are present, return an empty page response
+            return ResponseEntity.ok(Map.of("content", Collections.emptyList(), "totalElements", 0));
+        } else {
+            // If no pagination, return an empty list response
+            return ResponseEntity.ok(new ProjectEmployeeDto());
+        }
+    }
 
     /**
      * Add employees to a project.

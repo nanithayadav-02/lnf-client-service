@@ -10,6 +10,10 @@ spring:
   application:
     name: lnf-client-service
 
+  cloud:
+      compatibility-verifier:
+        enabled: ${SPRING_CLOUD_COMPATIBILITY_VERIFIER_ENABLED:false}
+
 server:
   port: 8081
   servlet:
@@ -47,18 +51,37 @@ email:
 # Metrics Configuration
 management:
   endpoint:
-    prometheus:
-      enabled: true
+    health:
+      show-details: always
   endpoints:
-    jmx:
-      exposure:
-        exclude: shutdown
-        include: "*"
     web:
       exposure:
-        exclude:
         include: "*"
-  prometheus.metrics.export.enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
+  metrics:
+    enable:
+      all: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      clientService:
+        registerHealthIndicator: ${RESILIENCE4J_CIRCUITBREAKER_INSTANCES_CLIENTSERVICE_REGISTERHEALTHINDICATOR:true}
+        eventConsumerBufferSize: ${RESILIENCE4J_CIRCUITBREAKER_INSTANCES_CLIENTSERVICE_EVENTCONSUMERBUFFERSIZE:10}
+        failureRateThreshold: ${RESILIENCE4J_CIRCUITBREAKER_INSTANCES_CLIENTSERVICE_FAILURERATETHRESHOLD:50}
+        minimumNumberOfCalls: ${RESILIENCE4J_CIRCUITBREAKER_INSTANCES_CLIENTSERVICE_MINIMUMNUMBEROFCALLS:5}
+        automaticTransitionFromOpenToHalfOpenEnabled: ${RESILIENCE4J_CIRCUITBREAKER_INSTANCES_CLIENTSERVICE_AUTOMATICTRANSITIONFROMOPENTOHALFOPENENABLED:true}
+        waitDurationInOpenState: ${RESILIENCE4J_CIRCUITBREAKER_INSTANCES_CLIENTSERVICE_WAITDURATIONINOPENSTATE:5s}
+        permittedNumberOfCallsInHalfOpenState: ${RESILIENCE4J_CIRCUITBREAKER_INSTANCES_CLIENTSERVICE_PERMITTEDNUMBEROFCALLSINHALFOPENSTATE:3}
+        slidingWindowSize: ${RESILIENCE4J_CIRCUITBREAKER_INSTANCES_CLIENTSERVICE_SLIDINGWINDOWSIZE:10}
+        slidingWindowType: ${RESILIENCE4J_CIRCUITBREAKER_INSTANCES_CLIENTSERVICE_SLIDINGWINDOWTYPE:COUNT_BASED}
+  retry:
+    instances:
+      clientService:
+        maxRetryAttempts: ${RESILIENCE4J_RETRY_INSTANCES_CLIENTSERVICE_MAXRETRYATTEMPTS:5}
+        waitDuration: ${RESILIENCE4J_RETRY_INSTANCES_CLIENTSERVICE_WAITDURATION:2s}
 logging:
   level:
     org:

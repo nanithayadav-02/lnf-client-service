@@ -18,11 +18,15 @@ package com.lnf.client.controller;
 
 import com.lnf.client.service.ProjectTaskEmployeeService;
 import com.lnf.dto.client.ProjectTaskEmployeeDto;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -30,9 +34,11 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/lnf")
+@Slf4j
 public class ProjectTaskEmployeeController {
 
     private final ProjectTaskEmployeeService service;
+    private static final String CLIENT_SERVICE = "clientService";
 
     /**
      * Get employees associated to the Task
@@ -41,6 +47,8 @@ public class ProjectTaskEmployeeController {
      * @param taskId    Task Id
      * @return ProjectTaskDto
      */
+    @CircuitBreaker(name = CLIENT_SERVICE, fallbackMethod = "fallbackFindEmployees")
+    @Retry(name = CLIENT_SERVICE)
     @GetMapping(value = "/projects/{projectId}/tasks/{taskId}/employees")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> findEmployees(@PathVariable final UUID projectId,
@@ -58,6 +66,11 @@ public class ProjectTaskEmployeeController {
         }
     }
 
+    public ResponseEntity<?> fallbackFindEmployees(UUID projectId, UUID taskId, Integer page, Integer size, Throwable throwable) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Collections.singletonMap("message", "Service is temporarily unavailable. Please try again later."));
+    }
+
     /**
      * Add employees to the task
      *
@@ -67,8 +80,14 @@ public class ProjectTaskEmployeeController {
      */
     @PostMapping(value = "/projects/{projectId}/tasks/{taskId}/employees")
     @ResponseStatus(HttpStatus.CREATED)
+    @Retry(name = CLIENT_SERVICE, fallbackMethod = "fallbackAddEmployeesToProjectAndTask")
     public void addEmployeesToProjectAndTask(@PathVariable final UUID projectId, @PathVariable final UUID taskId, @RequestBody List<String> employeeIds) {
         service.addEmployeesToProjectAndTask(projectId, taskId, employeeIds);
+    }
+
+    public void fallbackAddEmployeesToProjectAndTask(UUID projectId, UUID taskId, List<String> employeeIds, Throwable throwable) {
+        log.error("Circuit breaker triggered while adding employees to projectId: {}, taskId: {}. Reason: {}",
+                projectId, taskId, throwable.getMessage());
     }
 
     /**

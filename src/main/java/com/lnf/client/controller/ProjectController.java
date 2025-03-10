@@ -22,6 +22,8 @@ import com.lnf.dto.client.ProjectDto;
 import com.lnf.dto.common.PageRequestDto;
 import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -44,6 +46,7 @@ public class ProjectController {
     private final ProjectService service;
     private final PaginationAndSortingHandler paginationAndSortingHandler;
     private final DataExportService dataExportService;
+    private static final String CLIENT_SERVICE = "clientService";
 
     /**
      * Return requested page with list of ProjectDto objects with requested sortBy and sortOrder and size and page.  Raises LnFEntityNotFoundException
@@ -135,6 +138,8 @@ public class ProjectController {
         service.clearProjectsCache();
     }
 
+    @CircuitBreaker(name = CLIENT_SERVICE, fallbackMethod = "fallbackGetTimeSheetsByClientId")
+    @Retry(name = CLIENT_SERVICE)
     @GetMapping("/projects/clients/{clientId}")
     @ResponseStatus(HttpStatus.OK)
     public List<Map<String, Object>> getTimeSheetsByClientId(@PathVariable UUID clientId,
@@ -143,6 +148,15 @@ public class ProjectController {
                                                              @RequestParam(required = false) Optional<Integer> year,
                                                              @RequestParam(required = false) String status) {
         return service.getTimeSheetsByClientId(clientId, projectId, month, year, status);
+    }
+
+    public List<Map<String, Object>> fallbackGetTimeSheetsByClientId(UUID clientId, UUID projectId,
+                                                                     Optional<Integer> month, Optional<Integer> year,
+                                                                     String status, Throwable throwable) {
+        return List.of(Map.of(
+                "message", "Service is temporarily unavailable. Please try again later.",
+                "clientId", clientId
+        ));
     }
 
     @PostMapping(value = "/projects/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
