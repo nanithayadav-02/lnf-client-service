@@ -17,7 +17,6 @@
 package com.lnf.client.restapi;
 
 import com.lnf.dto.file.FileDto;
-import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
 import com.lnf.service.file.FileFolderService;
 import com.lnf.service.file.FileService;
@@ -148,7 +147,7 @@ public class FileClientImpl extends BaseWebClientService implements FileService,
                     })
                     .block();
 
-        } catch (LnFEntityNotFoundException ex) {
+        } catch (Exception ex) {
             log.error("Failed to get the files in the folder with error message : {}", ex.getMessage());
         }
         return files;
