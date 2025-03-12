@@ -35,7 +35,6 @@ import com.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -67,7 +66,6 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @return A Page object with clientDtos
      */
     @Override
-    @Cacheable(value = "clients")
     public Page<ClientOverviewDto> findPaginated(final int page, final int size) {
         Page<Client> resultPage = repository.findAll(PageRequest.of(page, size));
         return validateAndGetPages(page, resultPage);
@@ -84,7 +82,6 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @return A Page object with sorted clientDtos
      */
     @Override
-    @Cacheable(value = "clients")
     public Page<ClientOverviewDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         Page<Client> resultPage = repository.findAll(PageRequest.of(page, size, sortInfo));
@@ -99,7 +96,6 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @return Sorted list of all ClientDto objects.
      */
     @Override
-    @Cacheable(value = "clients")
     public List<ClientOverviewDto> findAllSorted(String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Client> entities = Lists.newArrayList(repository.findAll(sortInfo));
@@ -114,7 +110,6 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @return List of all ClientDto objects.
      */
     @Override
-    @Cacheable(value = "clients")
     public List<ClientOverviewDto> findAll() {
         List<Client> entities = repository.findAll();
         return entities.stream().map(ClientConverter::toMiniTransportModel)
@@ -122,7 +117,6 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
                 .toList();
     }
 
-    @Cacheable(value = "clients")
     public List<ClientDto> findAll(String search) {
         Specification<Client> specification = buildClientSpecification(search);
         List<Client> entities = repository.findAll(specification);
@@ -132,11 +126,10 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
     /**
      * Returns clientDto from the clientId. Raises LnFEntityNotFoundException
      * if there is no client with the input clientId
-     *
+
      * @param clientId Client Id
      * @return ClientDto object
      */
-    @Cacheable(value = "clients")
     public ClientDto findByClientId(UUID clientId) {
         Client entity = search(clientId);
         return findClientWithDocument(entity);
@@ -155,7 +148,6 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      *
      * @param resource clientDto object
      */
-    @CacheEvict(value = "clients", allEntries = true)
     public void create(ClientDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
                 "Failed to create Client with null payload");
@@ -171,7 +163,6 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @param resource ClientDto
      */
     @Transactional
-    @CacheEvict(value = "clients", allEntries = true)
     public void update(UUID clientId, ClientDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
                 "Failed to update Client with null payload");
@@ -186,7 +177,6 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      *
      * @param clientId Client Id
      */
-    @CacheEvict(value = "clients", allEntries = true)
     public void delete(UUID clientId) {
         Client entity = search(clientId);
         List<ProjectOverviewDto> projectList = projectService.findProjectsByClientId(clientId);
@@ -321,7 +311,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
                 .map(Client::getCode).collect(Collectors.toSet());
 
         List<ClientDto> invalidData = new ArrayList<>();
-        LocalDateTime uploadTime =LocalDateTime.now();
+        LocalDateTime uploadTime = LocalDateTime.now();
 
         for (Client client : entities) {
             if (existingCodes.contains(client.getCode())) {
