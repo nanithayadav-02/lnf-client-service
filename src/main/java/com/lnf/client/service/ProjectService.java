@@ -39,14 +39,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -310,7 +308,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                 orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
-    private Project search(UUID projectId) {
+    public Project search(UUID projectId) {
         return repository.findById(projectId).
                 orElseThrow(() -> new LnFEntityNotFoundException("Project with id [%s] does not exist".formatted(projectId)));
     }
@@ -345,6 +343,68 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                         .orElseThrow(() -> new LnFException("Project not found for id: " + id)))
                 .toList();
         repository.deleteAll(projectList);
+    }
+
+    public Page<ProjectDto> getLastUploadData(PageRequestDto pageRequest) {
+        Pageable pageable = createPageable(pageRequest);
+        List<Project> entities = repository.findByUploadedTime();
+        return paginateProjectDetails(convertToDtos(entities), pageable);
+    }
+
+    private Pageable createPageable(PageRequestDto pageRequest) {
+        return PageRequest.of(
+                pageRequest.getPage(),
+                pageRequest.getSize(),
+                RestUtil.constructSort(pageRequest.getSortBy(), pageRequest.getSortOrder())
+        );
+    }
+
+    private Page<ProjectDto> paginateProjectDetails(List<ProjectDto> projectDtos, Pageable pageable) {
+        int totalRecords = projectDtos.size();
+        int start = pageable.getPageSize() * pageable.getPageNumber();
+        int end = Math.min(start + pageable.getPageSize(), totalRecords);
+        List<ProjectDto> paginatedProjectDetails = projectDtos.subList(start, end);
+
+        return new PageImpl<>(paginatedProjectDetails, pageable, totalRecords);
+    }
+
+    public List<ProjectDto> create(List<ProjectDto> resources, UUID clientId) {
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resources, "Failed to create Project with null payload");
+        List<Project> entities = resources.stream()
+                .map(resource -> {
+                    Project project = ProjectConverter.toEntityModel(resource);
+                    if (clientId != null) {
+                        Client client = searchForClient(clientId);
+                        project.setClient(client);
+                    }
+                    return project;
+                })
+                .toList();
+
+        return save(entities);
+    }
+
+    private List<ProjectDto> save(List<Project> entities) {
+        Set<String> existingCodes = repository.findAll().stream()
+                .map(Project::getCode).collect(Collectors.toSet());
+
+        List<ProjectDto> invalidData = new ArrayList<>();
+        LocalDateTime uploadTime =LocalDateTime.now();
+
+        for (Project project : entities) {
+            if (existingCodes.contains(project.getCode())) {
+                invalidData.add(ProjectConverter.toTransportModel(project));
+            } else {
+                try {
+                    project.setUploadTime(uploadTime);
+                    repository.save(project);
+                } catch (RuntimeException e) {
+                    String errorMessage = "Failed to save Projects";
+                    throw new LnFException(errorMessage, e);
+                }
+            }
+        }
+        return invalidData;
     }
 
 }

@@ -356,18 +356,20 @@ public class DataExportService {
     }
 
 
-    public List<ProjectDto> retrieveProjectFile(MultipartFile file) throws IOException {
-        return handleUploadedProjectFile(file);
+    public List<ProjectDto> retrieveProjectFile(MultipartFile file, UUID clientId) throws IOException {
+        return handleUploadedProjectFile(file, clientId);
     }
 
-    public List<ProjectDto> handleUploadedProjectFile(MultipartFile file) throws IOException {
+    public List<ProjectDto> handleUploadedProjectFile(MultipartFile file, UUID clientId) throws IOException {
         File csvFile = convertToCSV(file);
         List<Project> projectList;
         try {
             List<String[]> data = readCSV(csvFile);
 
             deleteFirst(data);
-            projectList = data.stream().map(this::toProjectDto).toList();
+            projectList = data.stream().map(entity ->
+                    this.toProjectDto(entity, clientId)
+            ).toList();
             return projectList.stream().map(ProjectConverter::toTransportModel).toList();
         } catch (LnFException e) {
             log.error(ENCOUNTERED_AN_ERROR_WHILE_READING_THE_FILE, file);
@@ -388,10 +390,11 @@ public class DataExportService {
         }
     }
 
-    private Project toProjectDto(String[] rowData) {
+    private Project toProjectDto(String[] rowData, UUID clientId) {
         if (rowData == null || rowData.length < 13) {
             throw new IllegalArgumentException(ROW_DATA_ARRAY_IS_NULL_OR_HAS_INSUFFICIENT_ELEMENTS);
         }
+        Client client = clientService.search(clientId);
 
         DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder()
                 .appendOptional(DateTimeFormatter.ofPattern(DD_MM_YYYY))
@@ -413,21 +416,23 @@ public class DataExportService {
         String status = rowData[11];
         String type = rowData[12];
 
-        return new Project(code, name, type, description, purchaseOrder, budgetTerms, status, currency, budget, hoursPerDay, billingTerm, startDate, endDate, null, null, null, null);
+        return new Project(code, name, type, description, purchaseOrder, budgetTerms, status, currency, budget, hoursPerDay, billingTerm, startDate, endDate, null, client, null, null);
     }
 
-    public List<TaskDto> retrieveFile(MultipartFile file) throws IOException {
-        return handleUploadedFile(file);
+    public List<TaskDto> retrieveFile(MultipartFile file, UUID projectId) throws IOException {
+        return handleUploadedFile(file, projectId);
     }
 
-    public List<TaskDto> handleUploadedFile(MultipartFile file) throws IOException {
+    public List<TaskDto> handleUploadedFile(MultipartFile file, UUID projectId) throws IOException {
         File csvFile = convertToCSV(file);
         List<Task> taskList;
         try {
             List<String[]> data = readCSV(csvFile);
 
             deleteFirst(data);
-            taskList = data.stream().map(this::toTaskDto).toList();
+            taskList = data.stream().map(entity ->
+                    this.toTaskDto(entity, projectId)
+            ).toList();
             return taskList.stream().map(TaskConverter::toTransportModel).toList();
         } catch (LnFException e) {
             log.error(ENCOUNTERED_AN_ERROR_WHILE_READING_THE_FILE, file);
@@ -442,10 +447,11 @@ public class DataExportService {
         }
     }
 
-    private Task toTaskDto(String[] rowData) {
+    private Task toTaskDto(String[] rowData, UUID projectId) {
         if (rowData == null || rowData.length < 7) {
             throw new IllegalArgumentException(ROW_DATA_ARRAY_IS_NULL_OR_HAS_INSUFFICIENT_ELEMENTS);
         }
+        Project project = projectService.search(projectId);
 
         DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder()
                 .appendOptional(DateTimeFormatter.ofPattern(DD_MM_YYYY1))
@@ -460,7 +466,7 @@ public class DataExportService {
         String status = rowData[4];
         String type = rowData[5];
 
-        return new Task(name, type, status, description, startDate, endDate, null, null);
+        return new Task(name, type, status, description, startDate, endDate, null, project);
     }
 
 }

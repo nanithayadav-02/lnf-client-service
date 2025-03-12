@@ -22,6 +22,7 @@ import com.lnf.dto.client.ProjectDto;
 import com.lnf.dto.client.ProjectOverviewDto;
 import com.lnf.dto.employee.EmployeeDto;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -134,7 +135,6 @@ public class ProjectConverter {
         entity.setType(transport.getType());
         entity.setStartDate(transport.getStartDate());
         entity.setEndDate(transport.getEndDate());
-        entity.setUploadTime(transport.getUploadTime());
 
         return entity;
     }

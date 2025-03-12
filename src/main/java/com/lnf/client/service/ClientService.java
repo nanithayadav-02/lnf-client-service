@@ -37,18 +37,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -239,7 +236,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @param clientId Client Id
      * @return Client object
      */
-    private Client search(UUID clientId) {
+    public Client search(UUID clientId) {
         return repository.findById(clientId).
                 orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
@@ -287,6 +284,59 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
                         .orElseThrow(() -> new LnFException("Client not found for id: " + id)))
                 .toList();
         repository.deleteAll(clientList);
+    }
+
+    public Page<ClientDto> getLastUploadData(PageRequestDto pageRequest) {
+        Pageable pageable = createPageable(pageRequest);
+        List<Client> entities = repository.findByUploadedTime();
+        return paginateClientDetails(convertToDtos(entities), pageable);
+    }
+
+    private Pageable createPageable(PageRequestDto pageRequest) {
+        return PageRequest.of(
+                pageRequest.getPage(),
+                pageRequest.getSize(),
+                RestUtil.constructSort(pageRequest.getSortBy(), pageRequest.getSortOrder())
+        );
+    }
+
+    private Page<ClientDto> paginateClientDetails(List<ClientDto> clientDtos, Pageable pageable) {
+        int totalRecords = clientDtos.size();
+        int start = pageable.getPageSize() * pageable.getPageNumber();
+        int end = Math.min(start + pageable.getPageSize(), totalRecords);
+        List<ClientDto> paginatedClientDetails = clientDtos.subList(start, end);
+
+        return new PageImpl<>(paginatedClientDetails, pageable, totalRecords);
+    }
+
+    public List<ClientDto> create(List<ClientDto> resources) {
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resources,
+                "Failed to create Client with null payload");
+        List<Client> entities = resources.stream().map(ClientConverter::toEntityModel).toList();
+        return save(entities);
+    }
+
+    private List<ClientDto> save(List<Client> entities) {
+        Set<String> existingCodes = repository.findAll().stream()
+                .map(Client::getCode).collect(Collectors.toSet());
+
+        List<ClientDto> invalidData = new ArrayList<>();
+        LocalDateTime uploadTime =LocalDateTime.now();
+
+        for (Client client : entities) {
+            if (existingCodes.contains(client.getCode())) {
+                invalidData.add(ClientConverter.toTransportModel(client));
+            } else {
+                try {
+                    client.setUploadTime(uploadTime);
+                    repository.save(client);
+                } catch (RuntimeException e) {
+                    String errorMessage = "Failed to save Projects";
+                    throw new LnFException(errorMessage, e);
+                }
+            }
+        }
+        return invalidData;
     }
 
 }
