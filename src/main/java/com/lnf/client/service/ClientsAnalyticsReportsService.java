@@ -5,13 +5,17 @@ import com.lnf.client.model.Project;
 import com.lnf.client.repository.ClientRepository;
 import com.lnf.client.repository.ProjectRepository;
 import com.lnf.client.repository.TaskRepository;
+import com.lnf.dto.common.DateRangeDto;
+import com.lnf.util.FinancialYearDateCalculator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -32,22 +36,21 @@ public class ClientsAnalyticsReportsService {
         long activeProjectCount = countActiveEntities(projectRepository.findByStatusAndYear(ACTIVE, year));
         long activeTaskCount = countActiveEntities(taskRepository.findByStatusAndYear(ACTIVE, year));
 
-        List<String> labels = Arrays.asList(
-                "Jan", "Feb", "Mar", "April", "May", "Jun", "July", "Aug", "Sep", "Oct", "Nov", "Dec");
+        Map<String, Integer> projectCountByMonth = getMonthlyCounts(projectRepository.findByStatus(ACTIVE), year, Project::getStartDate);
+        Map<String, Integer> clientCountByMonth = getMonthlyCounts(clientRepository.findByStatus(ACTIVE), year, Client::getWorkingFrom);
 
-        // Get counts of projects and clients by month
-        List<Integer> projectCountByMonth = getMonthlyCounts(projectRepository.findByStatus(ACTIVE), year, Project::getStartDate);
-        List<Integer> clientCountByMonth = getMonthlyCounts(clientRepository.findByStatus(ACTIVE), year, Client::getWorkingFrom);
-
-        // Add data to the report
         clientReports.put("totalActiveProjects", activeProjectCount);
         clientReports.put("totalActiveClients", activeClientCount);
         clientReports.put("totalActiveTasks", activeTaskCount);
-        clientReports.put("labels", labels);
         clientReports.put("ClientsData", clientCountByMonth);
         clientReports.put("ProjectData", projectCountByMonth);
 
         return clientReports;
+    }
+
+    public DateRangeDto getClientDateRanges() {
+        Object result = clientRepository.findClientDateLimits();
+        return FinancialYearDateCalculator.getDateRanges(result);
     }
 
     /**
@@ -61,15 +64,25 @@ public class ClientsAnalyticsReportsService {
      * Generic method to calculate monthly counts for any entity that has a date field.
      * This reduces code duplication for projects and clients.
      */
-    private <T> List<Integer> getMonthlyCounts(List<T> entities, Integer year, java.util.function.Function<T, LocalDate> getDateFunction) {
-        // Initialize list of 12 months, all starting with 0 count
-        List<Integer> monthlyCounts = new ArrayList<>(Collections.nCopies(12, 0));
+    private <T> Map<String, Integer> getMonthlyCounts(List<T> entities, Integer year, java.util.function.Function<T, LocalDate> getDateFunction) {
+        Map<String, Integer> monthlyCounts = new LinkedHashMap<>();
+
+        String[] monthNames = {
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        };
+
+        for (String month : monthNames) {
+            monthlyCounts.put(month, 0);
+        }
 
         entities.forEach(entity -> {
             LocalDate date = getDateFunction.apply(entity);
             if (date != null && date.getYear() == year) {
                 int month = date.getMonthValue() - 1;
-                monthlyCounts.set(month, monthlyCounts.get(month) + 1);
+                String monthName = monthNames[month];
+
+                monthlyCounts.put(monthName, monthlyCounts.get(monthName) + 1);
             }
         });
 

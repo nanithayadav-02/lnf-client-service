@@ -45,4 +45,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID>, JpaSpecificat
     @Query("SELECT t FROM Task t WHERE LOWER(t.status) = LOWER(:status) and YEAR(t.startDate) = :year")
     List<Task> findByStatusAndYear(String status, Integer year);
 
+    @Query("SELECT t FROM Task t WHERE t.uploadTime = (SELECT MAX(t.uploadTime) FROM Task t)")
+    List<Task> findByUploadedTime();
+
 }

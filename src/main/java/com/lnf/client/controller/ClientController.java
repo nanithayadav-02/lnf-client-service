@@ -27,6 +27,7 @@ import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -170,6 +171,36 @@ public class ClientController {
     @ResponseStatus(HttpStatus.CREATED)
     public void clearCaches() {
         service.clearClientsCache();
+    }
+
+    @PostMapping(value = "/clients/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file) throws IOException {
+        return ResponseEntity.ok(dataExportService.retrieveClientFile(file));
+    }
+
+    @DeleteMapping("/clients/last-upload")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLastUpload() {
+        service.deleteLastUploadFile();
+    }
+
+    @DeleteMapping("/clients")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteClients(@RequestBody List<UUID> clientIds) {
+        service.deleteClientList(clientIds);
+    }
+
+    @GetMapping("/clients/last-upload")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<ClientDto> getLastUpload(@PageableAsQueryParam PageRequestDto pageRequest) {
+        return service.getLastUploadData(pageRequest);
+    }
+
+    @PostMapping(value = "/clients/data-upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<ClientDto> create(@RequestBody final List<ClientDto> resources) {
+        return service.create(resources);
     }
 
 }

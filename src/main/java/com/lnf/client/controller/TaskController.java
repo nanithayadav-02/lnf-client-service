@@ -19,6 +19,8 @@ package com.lnf.client.controller;
 import com.lnf.client.service.DataExportService;
 import com.lnf.client.service.TaskService;
 import com.lnf.dto.client.TaskDto;
+import com.lnf.dto.common.PageRequestDto;
+import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.util.QueryConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -188,6 +190,36 @@ public class TaskController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteByProjectIdAndTaskId(@PathVariable final UUID projectId, @PathVariable final UUID taskId) {
         service.deleteByProjectIdAndTaskId(projectId, taskId);
+    }
+
+    @PostMapping(value = "/tasks/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file, @RequestParam final UUID projectId) throws IOException {
+        return ResponseEntity.ok(dataExportService.retrieveFile(file, projectId));
+    }
+
+    @DeleteMapping("/tasks/last-upload")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLastUpload() {
+        service.deleteLastUploadFile();
+    }
+
+    @DeleteMapping("/tasks")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTasks(@RequestBody List<UUID> taskIds) {
+        service.deleteTaskList(taskIds);
+    }
+
+    @GetMapping("/tasks/last-upload")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<TaskDto> getLastUpload(@PageableAsQueryParam PageRequestDto pageRequest) {
+        return service.getLastUploadData(pageRequest);
+    }
+
+    @PostMapping(value = "/projects/{projectId}/tasks/data-upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<TaskDto> create(@PathVariable final UUID projectId, @RequestBody final List<TaskDto> resources) {
+        return service.create(projectId, resources);
     }
 
 }

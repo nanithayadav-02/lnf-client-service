@@ -191,7 +191,7 @@ public class AddressService {
         try {
             repository.saveAll(entities);
         } catch (RuntimeException e) {
-            String errorMessage = "Failed to save Address for client [%s]".formatted(entities.get(0).getId());
+            String errorMessage = "Failed to save Address for client [%s]".formatted(entities.getFirst().getId());
             throw new LnFException(errorMessage);
         }
     }

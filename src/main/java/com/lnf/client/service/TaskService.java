@@ -23,18 +23,19 @@ import com.lnf.client.model.Task;
 import com.lnf.client.repository.ProjectRepository;
 import com.lnf.client.repository.TaskRepository;
 import com.lnf.dto.client.TaskDto;
+import com.lnf.dto.common.PageRequestDto;
 import com.lnf.exception.LnFBadRequestException;
 import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
 import com.lnf.util.RestUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -235,6 +236,69 @@ public class TaskService {
     private Task search(UUID taskId) {
         return repository.findById(taskId).
                 orElseThrow(() -> new LnFEntityNotFoundException("Task with id [%s] does not exist".formatted(taskId)));
+    }
+
+    public void deleteLastUploadFile() {
+        List<Task> tasks = repository.findByUploadedTime();
+        repository.deleteAll(tasks);
+    }
+
+    public void deleteTaskList(List<UUID> taskIds) {
+        List<Task> taskList = taskIds.stream()
+                .map(id -> repository.findById(id)
+                        .orElseThrow(() -> new LnFException("Task not found for id: " + id)))
+                .toList();
+        repository.deleteAll(taskList);
+    }
+
+    public Page<TaskDto> getLastUploadData(PageRequestDto pageRequest) {
+        Pageable pageable = createPageable(pageRequest);
+        List<Task> entities = repository.findByUploadedTime();
+        List<TaskDto> dtoList = entities.stream().map(TaskConverter::toTransportModel).filter(Objects::nonNull).toList();
+        return paginateTaskDetails(dtoList, pageable);
+    }
+
+    private Pageable createPageable(PageRequestDto pageRequest) {
+        return PageRequest.of(
+                pageRequest.getPage(),
+                pageRequest.getSize(),
+                RestUtil.constructSort(pageRequest.getSortBy(), pageRequest.getSortOrder())
+        );
+    }
+
+    private Page<TaskDto> paginateTaskDetails(List<TaskDto> taskDtos, Pageable pageable) {
+        int totalRecords = taskDtos.size();
+        int start = pageable.getPageSize() * pageable.getPageNumber();
+        int end = Math.min(start + pageable.getPageSize(), totalRecords);
+        List<TaskDto> paginatedTaskDetails = taskDtos.subList(start, end);
+
+        return new PageImpl<>(paginatedTaskDetails, pageable, totalRecords);
+    }
+
+    public List<TaskDto> create(UUID projectId, List<TaskDto> resources) {
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resources, "Failed to create Task for project[%s] with null payload".formatted(projectId));
+        Project projectEntity = searchForProject(projectId);
+        List<Task> entities = resources.stream().map(resource -> {
+            Task entity = TaskConverter.toEntityModel(resource);
+            entity.setProject(projectEntity);
+            return entity;
+        }).toList();
+
+        return save(entities);
+    }
+
+    private List<TaskDto> save(List<Task> entities) {
+        List<TaskDto> invalidTask = new ArrayList<>();
+        LocalDateTime uploadTime =LocalDateTime.now();
+        for (Task task : entities) {
+            try {
+                task.setUploadTime(uploadTime);
+                save(task);
+            } catch (RuntimeException e) {
+                invalidTask.add(TaskConverter.toTransportModel(task));
+            }
+        }
+        return invalidTask;
     }
 
 }

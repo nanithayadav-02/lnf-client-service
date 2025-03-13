@@ -16,14 +16,15 @@
 
 package com.lnf.client.model;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.lnf.model.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @ToString
 @Entity
@@ -64,6 +65,9 @@ public class Client extends AuditableEntity {
 
     @Column(name = "client_details", nullable = false)
     private String clientDetails;
+
+    @Column(name = "upload_time")
+    private LocalDateTime uploadTime;
 
     @ToString.Exclude
     @Builder.Default

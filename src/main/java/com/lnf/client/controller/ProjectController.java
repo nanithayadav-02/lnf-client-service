@@ -23,6 +23,7 @@ import com.lnf.dto.common.PageRequestDto;
 import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -144,5 +145,34 @@ public class ProjectController {
         return service.getTimeSheetsByClientId(clientId, projectId, month, year, status);
     }
 
+    @PostMapping(value = "/projects/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file, @RequestParam final UUID clientId) throws IOException {
+        return ResponseEntity.ok(dataExportService.retrieveProjectFile(file, clientId));
+    }
+
+    @DeleteMapping("/projects/last-upload")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLastUpload() {
+        service.deleteLastUploadFile();
+    }
+
+    @DeleteMapping("/projects")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteProjects(@RequestBody List<UUID> projectIds) {
+        service.deleteProjectList(projectIds);
+    }
+
+    @GetMapping("/projects/last-upload")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<ProjectDto> getLastUpload(@PageableAsQueryParam PageRequestDto pageRequest) {
+        return service.getLastUploadData(pageRequest);
+    }
+
+    @PostMapping(value = "projects/data-upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<ProjectDto> create(@RequestBody final List<ProjectDto> resources, @RequestParam final UUID clientId) {
+        return service.create(resources, clientId);
+    }
 
 }
