@@ -28,6 +28,7 @@ import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
 import com.lnf.service.file.FileFolderService;
 import com.lnf.service.file.FileService;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +59,8 @@ public class DocumentService {
 
     @Value("${aws.s3.bucket.folderName}")
     private String folderName;
+
+    private static final String CLIENT_SERVICE = "clientService";
 
     /**
      * Returns DocumentDto client by clientId and document type.
@@ -114,6 +117,7 @@ public class DocumentService {
      * @param type     enum DocumentType
      * @return ResponseEntity<byte [ ]>
      */
+    @Retry(name = CLIENT_SERVICE)
     public ResponseEntity<byte[]> findClientAgreement(UUID clientId, DocumentType type, String fileName) {
         try {
             searchForClient(clientId);

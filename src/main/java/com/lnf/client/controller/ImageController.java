@@ -19,6 +19,7 @@ package com.lnf.client.controller;
 import com.lnf.client.model.enums.DocumentType;
 import com.lnf.client.service.DocumentService;
 import com.lnf.dto.client.DocumentDto;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ import java.util.UUID;
 public class ImageController {
 
     private final DocumentService service;
+    private static final String CLIENT_SERVICE = "clientService";
 
     /**
      * Returns DocumentDto for the client image
@@ -43,6 +45,7 @@ public class ImageController {
      * @return DocumentDto of the Image
      * @throws IOException IOException
      */
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.OK)
     public DocumentDto findByClientId(@PathVariable final UUID clientId) throws IOException {
@@ -55,6 +58,7 @@ public class ImageController {
      * @param clientId Client Id
      * @return ResponseEntity<byte [ ]>
      */
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping(value = "/clients/{clientId}/image/download")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> findClientAgreement(@PathVariable final UUID clientId, @RequestParam String fileName) {
@@ -67,6 +71,7 @@ public class ImageController {
      * @param clientId Client Id
      * @return ResponseEntity<byte [ ]>
      */
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping(value = "/clients/{clientId}/image/{fileName}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> findById(@PathVariable final UUID clientId,
@@ -81,10 +86,12 @@ public class ImageController {
      * @param clientId Client Id
      * @param image    Client image in MultipartFile format
      */
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @PostMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable final UUID clientId, @RequestParam MultipartFile image) {
+    public ResponseEntity<String> create(@PathVariable final UUID clientId, @RequestParam MultipartFile image) {
         service.create(clientId, DocumentType.image, image);
+        return ResponseEntity.ok("file uploaded successfully");
     }
 
     /**
@@ -106,10 +113,12 @@ public class ImageController {
      *
      * @param clientId Client Id
      */
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @DeleteMapping(value = "/clients/{clientId}/image")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable final UUID clientId, @RequestParam String fileName) {
+    public ResponseEntity<String> delete(@PathVariable final UUID clientId, @RequestParam String fileName) {
         service.deleteByClientId(clientId, DocumentType.image, fileName);
+        return ResponseEntity.ok("file uploaded successfully");
     }
 
 }

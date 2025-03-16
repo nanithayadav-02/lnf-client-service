@@ -18,6 +18,7 @@ package com.lnf.client.controller;
 
 import com.lnf.client.service.ClientAgreementService;
 import com.lnf.dto.client.AgreementDto;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,30 +35,37 @@ import java.util.UUID;
 public class ClientAgreementController {
 
     private final ClientAgreementService service;
+    private static final String CLIENT_SERVICE = "clientService";
 
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping("/clients/{clientId}/agreements")
     @ResponseStatus(HttpStatus.OK)
     public List<AgreementDto> findByProjectIdAndClientId(@PathVariable UUID clientId) {
         return service.findByClientId(clientId);
     }
 
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping("/clients/{clientId}/agreements/{fileName}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> findById(@PathVariable UUID clientId, @PathVariable String fileName) {
         return service.findById(clientId, fileName);
     }
 
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @PostMapping(value = "/clients/{clientId}/agreements", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable UUID clientId, @RequestPart("files") MultipartFile[] files,
-                       @RequestPart("resource") List<AgreementDto> resource) {
+    public ResponseEntity<String> create(@PathVariable UUID clientId, @RequestPart("files") MultipartFile[] files,
+                                         @RequestPart("resource") List<AgreementDto> resource) {
         service.create(clientId, files, resource);
+        return ResponseEntity.ok("file uploaded successfully");
     }
 
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @PutMapping(value = "/clients/{clientId}/agreements", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void update(@PathVariable UUID clientId, @RequestParam String fileName,
-                       @RequestPart("file") MultipartFile file, @RequestPart("resource") AgreementDto resource) {
+    public ResponseEntity<String> update(@PathVariable UUID clientId, @RequestParam String fileName,
+                                         @RequestPart("file") MultipartFile file, @RequestPart("resource") AgreementDto resource) {
         service.update(clientId, fileName, file, resource);
+        return ResponseEntity.ok("file uploaded successfully");
     }
 
     @DeleteMapping(value = "/clients/{clientId}/agreements")

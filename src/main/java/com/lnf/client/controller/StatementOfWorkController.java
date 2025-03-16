@@ -18,6 +18,7 @@ package com.lnf.client.controller;
 
 import com.lnf.client.service.StatementOfWorkService;
 import com.lnf.dto.client.StatementOfWorkDto;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,7 +35,9 @@ import java.util.UUID;
 public class StatementOfWorkController {
 
     private final StatementOfWorkService service;
+    private static final String CLIENT_SERVICE = "clientService";
 
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping("/clients/{clientId}/project/{projectId}/sow")
     @ResponseStatus(HttpStatus.OK)
     public List<StatementOfWorkDto> findByProjectIdAndClientId(@PathVariable UUID clientId,
@@ -43,6 +46,7 @@ public class StatementOfWorkController {
         return service.findByProjectIdAndClientId(clientId, projectId);
     }
 
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping("/clients/{clientId}/project/{projectId}/sow/{fileName}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> findById(@PathVariable UUID clientId, @PathVariable UUID projectId,
@@ -50,24 +54,30 @@ public class StatementOfWorkController {
         return service.findById(clientId, projectId, fileName);
     }
 
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @PostMapping(value = "/clients/{clientId}/project/{projectId}/sow", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable UUID clientId, @PathVariable UUID projectId, @RequestPart("files") MultipartFile[] files,
-                       @RequestPart("resource") List<StatementOfWorkDto> resource) {
+    public ResponseEntity<String> create(@PathVariable UUID clientId, @PathVariable UUID projectId, @RequestPart("files") MultipartFile[] files,
+                                         @RequestPart("resource") List<StatementOfWorkDto> resource) {
         service.create(clientId, projectId, files, resource);
+        return ResponseEntity.ok("file uploaded successfully");
     }
 
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @PutMapping(value = "/clients/{clientId}/project/{projectId}/sow", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void update(@PathVariable UUID clientId, @PathVariable UUID projectId, @RequestParam String fileName,
-                       @RequestPart("file") MultipartFile file, @RequestPart("resource") StatementOfWorkDto resource) {
+    public ResponseEntity<String> update(@PathVariable UUID clientId, @PathVariable UUID projectId, @RequestParam String fileName,
+                                         @RequestPart("file") MultipartFile file, @RequestPart("resource") StatementOfWorkDto resource) {
         service.update(clientId, projectId, fileName, file, resource);
+        return ResponseEntity.ok("file uploaded successfully");
     }
 
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @DeleteMapping(value = "/clients/{clientId}/project/{projectId}/sows")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteByIdAndFileName(@PathVariable UUID clientId, @PathVariable UUID projectId,
-                                      @RequestParam String fileName) {
+    public ResponseEntity<String> deleteByIdAndFileName(@PathVariable UUID clientId, @PathVariable UUID projectId,
+                                                        @RequestParam String fileName) {
         service.deleteByIdAndFileName(clientId, projectId, fileName);
+        return ResponseEntity.ok("file Deleted successfully");
     }
 
 }

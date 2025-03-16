@@ -25,6 +25,7 @@ import com.lnf.dto.client.ProjectDto;
 import com.lnf.dto.employee.EmployeeDto;
 import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.service.employee.EmployeeService;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ public class EmployeeProjectService {
 
     private final ProjectEmployeeRepository repository;
     private final EmployeeService employeeService;
+    private static final String CLIENT_SERVICE = "clientService";
 
     /**
      * Get projects associated to the employee
@@ -48,6 +50,7 @@ public class EmployeeProjectService {
      * @param employeeId Employee Id
      * @return ProjectEmployeeDto
      */
+    @Retry(name = CLIENT_SERVICE)
     public EmployeeProjectDto findProjectsByEmployeeId(final String employeeId) {
 
         searchForEmployee(employeeId);

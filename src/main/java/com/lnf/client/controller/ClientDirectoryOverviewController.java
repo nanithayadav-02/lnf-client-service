@@ -17,7 +17,6 @@ package com.lnf.client.controller;
 
 import com.lnf.client.service.ClientDirectoryService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -35,8 +34,7 @@ public class ClientDirectoryOverviewController {
     private final ClientDirectoryService service;
     private static final String CLIENT_SERVICE = "clientService";
 
-    @CircuitBreaker(name = CLIENT_SERVICE, fallbackMethod = "clientIdDirectoryExcelFallback")
-    @Retry(name = CLIENT_SERVICE)
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping("/clients/{clientId}/directory/excel")
     public ResponseEntity<byte[]> clientDirectoryExcel(@PathVariable UUID clientId) {
         byte[] excelBytes = service.clientDirectoryExcel(clientId);
@@ -44,8 +42,7 @@ public class ClientDirectoryOverviewController {
         return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
     }
 
-    @CircuitBreaker(name = CLIENT_SERVICE, fallbackMethod = "clientDirectoryExcelFallback")
-    @Retry(name = CLIENT_SERVICE)
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping("/client/directory/excel")
     public ResponseEntity<byte[]> clientDirectoryExcel() {
         byte[] excelBytes = service.clientDirectoryExcel();
@@ -60,8 +57,7 @@ public class ClientDirectoryOverviewController {
         return headers;
     }
 
-    @CircuitBreaker(name = CLIENT_SERVICE, fallbackMethod = "downloadClientDirectoryAsPdfFallback")
-    @Retry(name = CLIENT_SERVICE)
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping("/client/directory/pdf")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> downloadClientDirectoryAsPdf() {
@@ -78,8 +74,7 @@ public class ClientDirectoryOverviewController {
                 .body(pdfBytes);
     }
 
-    @CircuitBreaker(name = CLIENT_SERVICE, fallbackMethod = "downloadClientIdDirectoryAsPdfFallback")
-    @Retry(name = CLIENT_SERVICE)
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping("/clients/{clientId}/directory/pdf")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> downloadClientDirectoryAsPdf(@PathVariable UUID clientId) {
@@ -94,31 +89,6 @@ public class ClientDirectoryOverviewController {
                 .ok()
                 .headers(headers)
                 .body(pdfBytes);
-    }
-
-    public ResponseEntity<byte[]> clientIdDirectoryExcelFallback(UUID clientId, Exception ex) {
-        return fallbackResponse("client-directory-fallback.xlsx", MediaType.APPLICATION_OCTET_STREAM);
-    }
-
-    public ResponseEntity<byte[]> clientDirectoryExcelFallback(Exception ex) {
-        return fallbackResponse("client-directory-fallback.xlsx", MediaType.APPLICATION_OCTET_STREAM);
-    }
-
-    public ResponseEntity<byte[]> downloadClientIdDirectoryAsPdfFallback(UUID clientId, Exception ex) {
-        return fallbackResponse("clientDirectory-fallback.pdf", MediaType.APPLICATION_PDF);
-    }
-
-    public ResponseEntity<byte[]> downloadClientDirectoryAsPdfFallback(Exception ex) {
-        return fallbackResponse("clientDirectory-fallback.pdf", MediaType.APPLICATION_PDF);
-    }
-
-
-    private ResponseEntity<byte[]> fallbackResponse(String fileName, MediaType mediaType) {
-        return ResponseEntity
-                .status(HttpStatus.SERVICE_UNAVAILABLE)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
-                .contentType(mediaType)
-                .body("Service is temporarily unavailable. Please try again later.".getBytes());
     }
 
 }

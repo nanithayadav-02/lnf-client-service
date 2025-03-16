@@ -30,6 +30,7 @@ import com.lnf.dto.employee.EmployeeDto;
 import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
 import com.lnf.service.employee.EmployeeService;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
@@ -52,6 +53,7 @@ public class ProjectTaskEmployeeService {
     private final ProjectEmployeeRepository projectEmployeeRepository;
     private final EmployeeService employeeService;
     private final CacheManager cacheManager;
+    private static final String CLIENT_SERVICE = "clientService";
 
     /**
      * Get employees associated to the task
@@ -60,6 +62,7 @@ public class ProjectTaskEmployeeService {
      * @param taskId    Task Id
      * @return TaskEmployeeDto
      */
+    @Retry(name = CLIENT_SERVICE)
     @Cacheable(value = "projectTaskEmployees")
     public ProjectTaskEmployeeDto findEmployeesByProjectIdAndTaskId(final UUID projectId, final UUID taskId) {
         Project project = searchForProject(projectId);
@@ -72,6 +75,7 @@ public class ProjectTaskEmployeeService {
         return createProjectTaskEmployeeDto(taskId, project, task, employeeDtos);
     }
 
+    @Retry(name = CLIENT_SERVICE)
     @Cacheable(value = "projectTaskEmployees")
     public Map<String, Object> findAllAssignedEmployees(final UUID projectId, final UUID taskId, int page, Integer size) {
         Project project = searchForProject(projectId);

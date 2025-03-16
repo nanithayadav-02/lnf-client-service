@@ -17,6 +17,7 @@
         <java.version>21</java.version>
         <revision>1.1.0-SNAPSHOT</revision>
         <lombok.version>1.18.30</lombok.version>
+        <spring-cloud.version>2023.0.5</spring-cloud.version>
     </properties>
     <dependencies>
         <dependency>
@@ -131,16 +132,10 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
-            <version>3.2.0</version>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.resilience4j</groupId>
-            <artifactId>resilience4j-retry</artifactId>
-            <version>2.2.0</version> <!-- Keep this for Retry functionality -->
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
@@ -196,5 +191,17 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>

@@ -28,6 +28,7 @@ import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
 import com.lnf.service.file.FileFolderService;
 import com.lnf.service.file.FileService;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +56,9 @@ public class ClientAgreementService {
     private final FileFolderService fileFolderService;
     @Value("${aws.s3.bucket.folderName}")
     private String folderName;
+    private static final String CLIENT_SERVICE = "clientService";
 
+    @Retry(name = CLIENT_SERVICE)
     public List<AgreementDto> findByClientId(UUID clientId) {
         String filePath = S_S_S.formatted(folderName, clientId, AGREEMENTS);
         List<FileDto> files = fileFolderService.findFiles(filePath);
@@ -80,6 +83,7 @@ public class ClientAgreementService {
         agreementDtos.add(agreementDto);
     }
 
+    @Retry(name = CLIENT_SERVICE)
     public ResponseEntity<byte[]> findById(UUID clientId, String fileName) {
         try {
             searchForFileName(fileName);
@@ -91,6 +95,7 @@ public class ClientAgreementService {
         }
     }
 
+    @Retry(name = CLIENT_SERVICE)
     public void create(UUID clientId, MultipartFile[] files, List<AgreementDto> resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "failed to create agreement with null payload [%s]".formatted(clientId));
         Client client = searchForClientId(clientId);

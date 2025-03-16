@@ -36,6 +36,7 @@ import com.lnf.service.email.ThymeleafDocumentService;
 import com.lnf.service.specification.GenericSpecificationBuilder;
 import com.lnf.util.RestUtil;
 import com.lnf.util.specification.SpecificationUtil;
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +61,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
     private static final String CLIENT_EXCEL_FILE = "client_directory.xlsx";
     static final String DUPLICATE_EMAIL_ERROR = "A record already exists with the email address [%s]";
     static final String MULTIPLE_DUPLICATE_EMAIL_ERROR = "A record already exist with the following email addresses: [%s]";
+    private static final String CLIENT_SERVICE = "clientService";
 
     private final ThymeleafDocumentService documentService;
     private final ExcelReportService excelReportService;
@@ -279,12 +281,14 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         }
     }
 
+    @Retry(name = CLIENT_SERVICE)
     public byte[] clientDirectoryExcel(UUID clientId) {
         List<ClientDirectoryDto> summaries = findByClientId(clientId);
         ClientDirectoryExcelDto excelSpreadSheetDto = createExcelSpreadSheetDto(summaries);
         return excelReportService.generateReport(createExcelReportDto(excelSpreadSheetDto));
     }
 
+    @Retry(name = CLIENT_SERVICE)
     public byte[] clientDirectoryExcel() {
         List<ClientDirectoryDto> summaries = findAll();
         ClientDirectoryExcelDto excelSpreadSheetDto = createExcelSpreadSheetDto(summaries);
@@ -306,11 +310,13 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         return dto;
     }
 
+    @Retry(name = CLIENT_SERVICE)
     public byte[] downloadClientDirectoryAsPdf() {
         List<ClientDirectoryDto> clientDirectoryDtos = findAll();
         return generatePdfFromVendorDirectoryDtos(clientDirectoryDtos, FILE_NAME);
     }
 
+    @Retry(name = CLIENT_SERVICE)
     public byte[] downloadClientDirectoryAsPdf(UUID clientId) {
         List<ClientDirectoryDto> clientDirectoryDtos = findByClientId(clientId);
         return generatePdfFromVendorDirectoryDtos(clientDirectoryDtos, FILE_NAME);

@@ -34,6 +34,7 @@ import com.lnf.service.specification.GenericSpecificationBuilder;
 import com.lnf.service.timesheet.TimesheetService;
 import com.lnf.util.RestUtil;
 import com.lnf.util.specification.SpecificationUtil;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
@@ -61,6 +62,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
     private final TaskService taskService;
     private final CacheManager cacheManager;
     private final TimesheetService timesheetService;
+    private static final String CLIENT_SERVICE = "clientService";
 
     /**
      * Return requested page with list of ProjectDto objects with requested size. Raises LnFEntityNotFoundException
@@ -196,6 +198,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param clientId The UUID of the client.
      * @return A list of EmployeeDto objects associated with the client.
      */
+    @Retry(name = CLIENT_SERVICE)
     public List<ClientEmployeeDto> findEmployeesByClientId(UUID clientId) {
         searchForClient(clientId);
         List<Project> projects = repository.findByClientId(clientId);
@@ -313,6 +316,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                 orElseThrow(() -> new LnFEntityNotFoundException("Project with id [%s] does not exist".formatted(projectId)));
     }
 
+    @Retry(name = CLIENT_SERVICE)
     public List<Map<String, Object>> getTimeSheetsByClientId(UUID clientId, UUID projectId,
                                                              Optional<Integer> month, Optional<Integer> year,
                                                              String status) {
@@ -389,7 +393,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                 .map(Project::getCode).collect(Collectors.toSet());
 
         List<ProjectDto> invalidData = new ArrayList<>();
-        LocalDateTime uploadTime =LocalDateTime.now();
+        LocalDateTime uploadTime = LocalDateTime.now();
 
         for (Project project : entities) {
             if (existingCodes.contains(project.getCode())) {

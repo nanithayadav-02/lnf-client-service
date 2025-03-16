@@ -28,6 +28,7 @@ import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
 import com.lnf.service.file.FileFolderService;
 import com.lnf.service.file.FileService;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +59,9 @@ public class StatementOfWorkService {
     @Value("${aws.s3.bucket.folderName}")
     private String folderName;
 
+    private static final String CLIENT_SERVICE = "clientService";
+
+    @Retry(name = CLIENT_SERVICE)
     public List<StatementOfWorkDto> findByProjectIdAndClientId(UUID clientId, UUID projectId) {
         String filePath = S_S_S_S_S.formatted(folderName, clientId, PROJECT, projectId, SOW);
         List<FileDto> files = fileFolderService.findFiles(filePath);
@@ -83,6 +87,7 @@ public class StatementOfWorkService {
         statementOfWorkDtos.add(statementOfWorkDto);
     }
 
+    @Retry(name = CLIENT_SERVICE)
     public ResponseEntity<byte[]> findById(UUID clientId, UUID projectId, String fileName) {
         try {
             searchForFileName(fileName);
@@ -94,6 +99,7 @@ public class StatementOfWorkService {
         }
     }
 
+    @Retry(name = CLIENT_SERVICE)
     public void create(UUID clientId, UUID projectId, MultipartFile[] files, List<StatementOfWorkDto> resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "failed to create sows with null payload [%s]".formatted(projectId));
         Project project = searchForProjectIdAndClientId(projectId, clientId);
@@ -142,6 +148,7 @@ public class StatementOfWorkService {
         }
     }
 
+    @Retry(name = CLIENT_SERVICE)
     public void deleteByIdAndFileName(UUID clientId, UUID projectId, String fileName) {
         searchForProjectIdAndClientId(projectId, clientId);
         StatementOfWork entity = searchForFileName(fileName);

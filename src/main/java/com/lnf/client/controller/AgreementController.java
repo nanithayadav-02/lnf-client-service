@@ -19,6 +19,7 @@ package com.lnf.client.controller;
 import com.lnf.client.model.enums.DocumentType;
 import com.lnf.client.service.DocumentService;
 import com.lnf.dto.client.DocumentDto;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ import java.util.UUID;
 public class AgreementController {
 
     private final DocumentService service;
+    private static final String CLIENT_SERVICE = "clientService";
 
     /**
      * Returns DocumentDto for the client agreement
@@ -55,6 +57,7 @@ public class AgreementController {
      * @param clientId Client Id
      * @return ResponseEntity<byte [ ]>
      */
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping(value = "/clients/{clientId}/agreement/download")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> findClientAgreement(@PathVariable final UUID clientId, @RequestParam String fileName) {

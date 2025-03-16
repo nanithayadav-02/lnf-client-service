@@ -12,6 +12,7 @@ import com.lnf.dto.employee.EmployeeDto;
 import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
 import com.lnf.service.employee.EmployeeService;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -39,7 +40,9 @@ public class EmployeeProjectAndTaskService {
     private final ProjectEmployeeRepository projectEmployeeRepository;
 
     private final EmployeeService employeeService;
+    private static final String CLIENT_SERVICE = "clientService";
 
+    @Retry(name = CLIENT_SERVICE)
     @CacheEvict(value = "projectTaskEmployees", allEntries = true)
     public void addAllEmployeesToProjectAndTask(UUID projectId, UUID taskId) {
 

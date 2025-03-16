@@ -19,9 +19,7 @@ package com.lnf.client.controller;
 import com.lnf.client.service.ProjectEmployeeService;
 import com.lnf.dto.client.ProjectEmployeeDto;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +35,6 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/lnf")
-@Slf4j
 public class ProjectEmployeeController {
 
     private final ProjectEmployeeService service;
@@ -51,8 +48,7 @@ public class ProjectEmployeeController {
      * @param size      The number of employees per page for pagination (optional).
      * @return ResponseEntity representing the result of the operation.
      */
-    @CircuitBreaker(name = CLIENT_SERVICE, fallbackMethod = "fallbackFindEmployees")
-    @Retry(name = CLIENT_SERVICE)
+    @CircuitBreaker(name = CLIENT_SERVICE)
     @GetMapping(value = "/projects/{projectId}/employees")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> findEmployees(
