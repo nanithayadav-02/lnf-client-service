@@ -17,9 +17,7 @@
 package com.lnf.client.service;
 
 import com.lnf.client.model.Client;
-import com.lnf.client.model.ClientDocument;
 import com.lnf.client.model.enums.DocumentType;
-import com.lnf.client.repository.ClientDocumentRepository;
 import com.lnf.client.repository.ClientRepository;
 import com.lnf.dto.client.DocumentDto;
 import com.lnf.dto.file.FileDto;
@@ -53,7 +51,6 @@ public class DocumentService {
     public static final String S_S_S_S = "%s/%s/%s/%s";
     public static final String S_S_S = "%s/%s/%s/";
     private final ClientRepository clientRepository;
-    private final ClientDocumentRepository repository;
     private final FileFolderService fileFolderService;
     private final FileService fileService;
 
@@ -75,10 +72,8 @@ public class DocumentService {
             var filePath = S_S_S.formatted(folderName, clientId, type);
             List<FileDto> filePaths = fileFolderService.findFiles(filePath);
             if (filePaths == null || filePaths.isEmpty()) {
-                log.error("Document not found for client {} ", clientId);
                 return null;
             }
-
             return setDocumentDto(clientId, type, filePaths);
         } catch (Exception e) {
             throw new LnFException("file not found for clientId:" + e.getMessage());
@@ -86,14 +81,11 @@ public class DocumentService {
     }
 
     public static String constructUrlFromType(UUID clientId, DocumentType type) {
-        String url = "";
-        switch (type) {
-            case DocumentType.agreement -> "/lnf/clients/%s/agreement/".formatted(clientId);
-            case DocumentType.image -> "/lnf/clients/%s/image/".formatted(clientId);
-            case DocumentType.others -> "/lnf/clients/%s/others/".formatted(clientId);
-            default -> throw new LnFException("Unknown document type");
-        }
-        return url;
+        return switch (type) {
+            case agreement -> "/lnf/clients/%s/agreement/".formatted(clientId);
+            case image -> "/lnf/clients/%s/image/".formatted(clientId);
+            case others -> "/lnf/clients/%s/others/".formatted(clientId);
+        };
     }
 
     private static DocumentDto setDocumentDto(UUID clientId, String type, List<FileDto> filePaths) {
@@ -199,10 +191,6 @@ public class DocumentService {
 
     private Client searchForClient(UUID clientId) {
         return clientRepository.findById(clientId).orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
-    }
-
-    private ClientDocument searchForDocument(UUID clientId, DocumentType type) {
-        return repository.findByClientIdAndType(clientId, type).orElseThrow(() -> new LnFEntityNotFoundException("Document with clientId [%s] and type [%s] does not exist".formatted(clientId, type)));
     }
 
     private void uploadFile(String folder, MultipartFile file) {
