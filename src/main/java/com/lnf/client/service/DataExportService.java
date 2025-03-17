@@ -354,16 +354,17 @@ public class DataExportService {
         String state = rowData[12];
         String country = rowData[13];
         String postCode = rowData[14];
+        postCode = postCode.replace(".0","");
         String addressType = rowData[15];
         String contactName = rowData[16];
-        String contactPhoneNumber = rowData[17];
+        String contactPhoneNumber = formatNumber(rowData[17]);
         String contactDesignation = rowData[18];
         String contactDepartment = rowData[19];
         String contactEmail = rowData[20];
         String escalationName = rowData[21];
         String escalationEmail = rowData[22];
-        String escalationMobileNumber = rowData[23];
-        String escalationPhoneNumber = rowData[24];
+        String escalationMobileNumber = formatNumber(rowData[23]);
+        String escalationPhoneNumber = formatNumber(rowData[24]);
         String gstNumber = rowData[25];
         String gstLocation = rowData[26];
 
@@ -558,6 +559,14 @@ public class DataExportService {
         String type = rowData[5];
 
         return new Task(name, type, status, description, startDate, endDate, null, project);
+    }
+
+    private String formatNumber(String phoneNumber) {
+        if (phoneNumber != null && phoneNumber.contains("E")) {
+            return String.format("%.0f", Double.parseDouble(phoneNumber));
+        } else {
+            return phoneNumber;
+        }
     }
 
 }
