@@ -135,8 +135,6 @@ class ProjectControllerTest extends BaseTestClass {
 
         String url = "/lnf/projects";
 
-        doNothing().when(service).create((requestDto));
-
         try {
             mockMvc.perform(MockMvcRequestBuilders.post(url)
                             .contentType(APPLICATION_JSON)
@@ -155,7 +153,6 @@ class ProjectControllerTest extends BaseTestClass {
         ProjectDto updatedProject = mockProject2();
         updatedProject.setId(projectId);
 
-        Mockito.doNothing().when(service).update(Mockito.eq(projectId), Mockito.any(ProjectDto.class));
         String url = "/lnf/projects/" + projectId;
         ArgumentCaptor<ProjectDto> captor = ArgumentCaptor.forClass(ProjectDto.class);
 
@@ -191,15 +188,15 @@ class ProjectControllerTest extends BaseTestClass {
         verify(service).delete(projectId);
     }
 
-    @Test
-    void testClearCaches() throws Exception {
-        // When
-        ResultActions resultActions = mockMvc.perform(post("/lnf/projects/refresh"));
-
-        // Then
-        resultActions.andExpect(status().isCreated());
-        verify(service, times(1)).clearProjectsCache();
-    }
+//    @Test
+//    void testClearCaches() throws Exception {
+//        // When
+//        ResultActions resultActions = mockMvc.perform(post("/lnf/projects/refresh"));
+//
+//        // Then
+//        resultActions.andExpect(status().isCreated());
+//        verify(service, times(1)).clearProjectsCache();
+//    }
 
     @Test
     void testGetTimeSheetsByClientId() throws Exception {

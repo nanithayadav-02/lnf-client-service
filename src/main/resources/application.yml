@@ -1,6 +1,15 @@
 spring:
   profiles:
     active: dev-ide
+  redis:
+    host: localhost
+    port: 6379
+  cache:
+    redis:
+      time-to-live: 60000
+      cache-null-values: false
+      use-key-prefix: true
+    type: redis
 
   flyway:
     enabled: ${SPRING_FLYWAY_ENABLED:false}
@@ -11,7 +20,7 @@ spring:
     name: lnf-client-service
 
 server:
-  port: 8081
+  port: 8111
   servlet:
     context-path: /api/v3
 
@@ -34,15 +43,15 @@ employee:
 
 file:
   service:
-    url: "http://localhost:8081/api/v3"
+    url: "http://localhost:8088/api/v3"
 
 timesheet:
   service:
-    url: "http://localhost:8081/api/v3"
+    url: "http://localhost:8084/api/v3"
 
 email:
   service:
-    url: "http://localhost:8081/api/v3"
+    url: "http://localhost:8089/api/v3"
 
 # Metrics Configuration
 management:

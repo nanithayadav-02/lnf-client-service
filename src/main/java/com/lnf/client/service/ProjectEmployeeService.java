@@ -46,7 +46,7 @@ public class ProjectEmployeeService {
     private final ProjectEmployeeRepository repository;
     private final ProjectRepository projectRepository;
     private final EmployeeService employeeService;
-    private final CacheManager cacheManager;
+    //private final CacheManager cacheManager;
 
     /**
      * Get employees associated to the project
@@ -54,9 +54,9 @@ public class ProjectEmployeeService {
      * @param projectId Project Id
      * @return ProjectEmployeeDto
      */
-    @Cacheable(value = "projectEmployees")
-    public ProjectEmployeeDto findEmployeesByProjectId(final UUID projectId) {
-        Project project = searchForProject(projectId);
+    @Cacheable(value = "projectEmployees",key = "#projectEmpId")
+    public ProjectEmployeeDto findEmployeesByProjectId(final UUID projectEmpId) {
+        Project project = searchForProject(projectEmpId);
 
         // Get the list of employees associated with the project
         List<ProjectEmployee> employees = repository.findByProject(project);
@@ -65,7 +65,6 @@ public class ProjectEmployeeService {
         return createProjectEmployeeDto(project, employeeDtos);
     }
 
-    @Cacheable(value = "projectEmployees")
     public Map<String, Object> findAllAssignedEmployees(final UUID projectId, int page, Integer size) {
         Project project = searchForProject(projectId);
         List<ProjectEmployee> employees = repository.findByProject(project);
@@ -194,10 +193,10 @@ public class ProjectEmployeeService {
     /**
      * Clears the cache for projectEmployees.
      */
-    public void clearProjectEmployeesCache() {
-        Objects.requireNonNull(cacheManager.getCache("projectEmployees")).clear();
-        log.debug("ProjectEmployees cache cleared.");
-    }
+//    public void clearProjectEmployeesCache() {
+//        Objects.requireNonNull(cacheManager.getCache("projectEmployees")).clear();
+//        log.debug("ProjectEmployees cache cleared.");
+//    }
 
     private ProjectEmployee search(UUID projectId, String employeeId) {
         return repository.findByProjectIdAndEmployeeId(projectId, employeeId).orElseThrow(() -> new LnFEntityNotFoundException("ProjectEmployee entity with projectId [%s] and employeeId [%s] does not exist".formatted(projectId, employeeId)));

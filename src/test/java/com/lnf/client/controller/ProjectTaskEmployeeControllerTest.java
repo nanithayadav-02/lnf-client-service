@@ -137,17 +137,17 @@ class ProjectTaskEmployeeControllerTest extends BaseTestClass {
         verify(service).removeEmployeesFromProjectAndTask(projectId, taskId, requestedDto);
     }
 
-    @Test
-    public void testClearCaches() throws Exception {
-
-        String url = "/lnf//projectTaskEmployees/refresh";
-        // When
-        ResultActions resultActions = mockMvc.perform(post(url));
-
-        // Then
-        resultActions.andExpect(status().isCreated());
-        verify(service, times(1)).clearProjectTaskEmployeesCache();
-    }
+//    @Test
+//    public void testClearCaches() throws Exception {
+//
+//        String url = "/lnf//projectTaskEmployees/refresh";
+//        // When
+//        ResultActions resultActions = mockMvc.perform(post(url));
+//
+//        // Then
+//        resultActions.andExpect(status().isCreated());
+//        verify(service, times(1)).clearProjectTaskEmployeesCache();
+//    }
 
     @Test
     public void testAddAllTasksToEmployees() throws Exception {

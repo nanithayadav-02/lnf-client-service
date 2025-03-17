@@ -35,6 +35,7 @@ import com.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -130,6 +131,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @param clientId Client Id
      * @return ClientDto object
      */
+    @Cacheable(value = "clients",key = "#clientId")
     public ClientDto findByClientId(UUID clientId) {
         Client entity = search(clientId);
         return findClientWithDocument(entity);
@@ -148,12 +150,13 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      *
      * @param resource clientDto object
      */
-    public void create(ClientDto resource) {
+    @CachePut(value = "clients", key = "#result.id")
+    public ClientDto create(ClientDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
                 "Failed to create Client with null payload");
         Client entity = ClientConverter.toEntityModel(resource);
-        saveEntity(entity);
-        log.debug("Client {} successfully created", entity.getCode());
+        return ClientConverter.toTransportModel(saveAndCacheEntity(entity));
+        //log.debug("Client {} successfully created", entity.getCode());
     }
 
     /**
@@ -163,13 +166,24 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @param resource ClientDto
      */
     @Transactional
-    public void update(UUID clientId, ClientDto resource) {
+    @CachePut(value = "clients",key = "#result.id")
+    public ClientDto update(UUID clientId, ClientDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
                 "Failed to update Client with null payload");
         Client entity = search(clientId);
         Client updatedEntity = ClientConverter.toEntityModel(resource, entity);
         saveEntity(updatedEntity);
         log.debug("Client {} successfully updated", clientId);
+        return ClientConverter.toTransportModel(updatedEntity);
+    }
+
+    private Client saveAndCacheEntity(Client entity) {
+        try {
+            return repository.save(entity);
+        } catch (RuntimeException e) {
+            String errorMessage = String.format("Failed to save client [%s]", entity.getCode());
+            throw new LnFException(errorMessage, e);
+        }
     }
 
     /**
