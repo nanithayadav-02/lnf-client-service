@@ -156,7 +156,6 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
                 "Failed to create Client with null payload");
         Client entity = ClientConverter.toEntityModel(resource);
         return ClientConverter.toTransportModel(saveAndCacheEntity(entity));
-        //log.debug("Client {} successfully created", entity.getCode());
     }
 
     /**

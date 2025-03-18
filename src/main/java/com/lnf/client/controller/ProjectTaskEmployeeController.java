@@ -83,11 +83,11 @@ public class ProjectTaskEmployeeController {
         service.removeEmployeesFromProjectAndTask(projectId, taskId, employeeIds);
     }
 
-//    @PostMapping("/projectTaskEmployees/refresh")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public void clearCaches() {
-//        service.clearProjectTaskEmployeesCache();
-//    }
+    @PostMapping("/projectTaskEmployees/refresh")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void clearCaches() {
+        service.clearProjectTaskEmployeesCache();
+    }
 
     @PostMapping(value = "/projects/{projectId}/tasks/employees")
     @ResponseStatus(HttpStatus.CREATED)

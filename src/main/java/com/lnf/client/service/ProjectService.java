@@ -36,6 +36,7 @@ import com.lnf.util.RestUtil;
 import com.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -59,7 +60,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
     private final ClientRepository clientRepository;
     private final ProjectEmployeeService projectEmployeeService;
     private final TaskService taskService;
-    //private final CacheManager cacheManager;
+    private final CacheManager cacheManager;
     private final TimesheetService timesheetService;
 
     /**
@@ -177,7 +178,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param clientId Project Id
      * @return List of ProjectDto objects associated to the client.
      */
-    //@Cacheable(value = "projectOverviewDto",key = "#clientId")
+    @Cacheable(value = "projectOverviewDto",key = "#clientId")
     public List<ProjectOverviewDto> findProjectsByClientId(UUID clientId) {
         searchForClient(clientId);
         List<Project> projects = repository.findByClientId(clientId);
@@ -224,7 +225,6 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
             entity.setClient(client);
         }
         return ProjectConverter.toTransportModel(saveAndCacheEntity(entity));
-        //log.debug("Project {} successfully created", entity.getCode());
     }
 
     /**
@@ -248,7 +248,6 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
             updatedEntity.setClient(null);
         }
         return ProjectConverter.toTransportModel(saveAndCacheEntity(updatedEntity));
-        //log.debug("Project {} successfully updated", projectId);
     }
 
     /**
@@ -281,10 +280,10 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
     /**
      * Clears the cache for projects.
      */
-//    public void clearProjectsCache() {
-//        Objects.requireNonNull(cacheManager.getCache("projects")).clear();
-//        log.debug("Projects cache cleared.");
-//    }
+    public void clearProjectsCache() {
+        Objects.requireNonNull(cacheManager.getCache("projects")).clear();
+        log.debug("Projects cache cleared.");
+    }
 
     private Page<ProjectOverviewDto> validateAndGetPages(int page, Page<Project> resultPage) {
         if (page > resultPage.getTotalPages()) {

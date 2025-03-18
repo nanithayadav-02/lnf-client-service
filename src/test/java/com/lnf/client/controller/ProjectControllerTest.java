@@ -188,15 +188,15 @@ class ProjectControllerTest extends BaseTestClass {
         verify(service).delete(projectId);
     }
 
-//    @Test
-//    void testClearCaches() throws Exception {
-//        // When
-//        ResultActions resultActions = mockMvc.perform(post("/lnf/projects/refresh"));
-//
-//        // Then
-//        resultActions.andExpect(status().isCreated());
-//        verify(service, times(1)).clearProjectsCache();
-//    }
+    @Test
+    void testClearCaches() throws Exception {
+        // When
+        ResultActions resultActions = mockMvc.perform(post("/lnf/projects/refresh"));
+
+        // Then
+        resultActions.andExpect(status().isCreated());
+        verify(service, times(1)).clearProjectsCache();
+    }
 
     @Test
     void testGetTimeSheetsByClientId() throws Exception {

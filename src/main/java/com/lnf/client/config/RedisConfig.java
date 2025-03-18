@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -42,16 +43,17 @@ public class RedisConfig {
     @Value("${spring.cache.redis.use-key-prefix}")
     private boolean useKeyPrefix;
 
-    @Bean
-    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
+
+    private CacheManager cacheManager;
+
+    @PostConstruct
+    public void init() {
         if (isRedisAvailable()) {
-            log.info("Using Redis as the cache manager.");
-            return RedisCacheManager.builder(redisConnectionFactory)
-                    .cacheDefaults(cacheConfiguration())
-                    .build();
+            cacheManager = createRedisCacheManager();
         } else {
-            log.warn("Redis is unavailable. Falling back to in-memory cache.");
-            return new ConcurrentMapCacheManager();
+            cacheManager = new ConcurrentMapCacheManager();
         }
     }
 
@@ -66,7 +68,16 @@ public class RedisConfig {
     }
 
     @Bean
-    @ConditionalOnBean(name = "redisCacheManager")
+    public CacheManager cacheManager() {
+        return cacheManager;
+    }
+
+    private RedisCacheManager createRedisCacheManager() {
+        return RedisCacheManager.builder(redisConnectionFactory)
+                .cacheDefaults(cacheConfiguration())
+                .build();
+    }
+
     public RedisCacheConfiguration cacheConfiguration() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
@@ -94,26 +105,6 @@ public class RedisConfig {
         return config;
     }
 
-
-//Redis config bean without ehcache
-
-//    @Bean
-//    public RedisCacheConfiguration cacheConfiguration() {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        objectMapper.registerModule(new JavaTimeModule());
-//
-//        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-//        objectMapper.activateDefaultTyping(
-//                objectMapper.getPolymorphicTypeValidator(),
-//                ObjectMapper.DefaultTyping.NON_FINAL,
-//                JsonTypeInfo.As.PROPERTY
-//        );
-//
-//        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
-//        return RedisCacheConfiguration.defaultCacheConfig()
-//                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer));
-//    }
 }
 
 

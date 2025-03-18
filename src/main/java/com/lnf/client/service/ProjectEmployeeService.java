@@ -46,7 +46,7 @@ public class ProjectEmployeeService {
     private final ProjectEmployeeRepository repository;
     private final ProjectRepository projectRepository;
     private final EmployeeService employeeService;
-    //private final CacheManager cacheManager;
+    private final CacheManager cacheManager;
 
     /**
      * Get employees associated to the project
@@ -193,10 +193,10 @@ public class ProjectEmployeeService {
     /**
      * Clears the cache for projectEmployees.
      */
-//    public void clearProjectEmployeesCache() {
-//        Objects.requireNonNull(cacheManager.getCache("projectEmployees")).clear();
-//        log.debug("ProjectEmployees cache cleared.");
-//    }
+    public void clearProjectEmployeesCache() {
+        Objects.requireNonNull(cacheManager.getCache("projectEmployees")).clear();
+        log.debug("ProjectEmployees cache cleared.");
+    }
 
     private ProjectEmployee search(UUID projectId, String employeeId) {
         return repository.findByProjectIdAndEmployeeId(projectId, employeeId).orElseThrow(() -> new LnFEntityNotFoundException("ProjectEmployee entity with projectId [%s] and employeeId [%s] does not exist".formatted(projectId, employeeId)));

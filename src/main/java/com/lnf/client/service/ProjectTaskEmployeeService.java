@@ -51,7 +51,7 @@ public class ProjectTaskEmployeeService {
     private final ProjectRepository projectRepository;
     private final ProjectEmployeeRepository projectEmployeeRepository;
     private final EmployeeService employeeService;
-    //private final CacheManager cacheManager;
+    private final CacheManager cacheManager;
 
     /**
      * Get employees associated to the task
@@ -210,10 +210,10 @@ public class ProjectTaskEmployeeService {
     /**
      * Clears the cache for projectTaskEmployees.
      */
-//    public void clearProjectTaskEmployeesCache() {
-//        Objects.requireNonNull(cacheManager.getCache("projectTaskEmployees")).clear();
-//        log.debug("ProjectTaskEmployees cache cleared.");
-//    }
+    public void clearProjectTaskEmployeesCache() {
+        Objects.requireNonNull(cacheManager.getCache("projectTaskEmployees")).clear();
+        log.debug("ProjectTaskEmployees cache cleared.");
+    }
 
     private ProjectTaskEmployee search(Project project, Task task, String employeeId) {
         return repository.findByProjectAndTaskAndEmployeeId(project, task, employeeId).orElseThrow(() -> new LnFEntityNotFoundException("TaskEmployee entity with project [%s], taskId [%s] and employeeId [%s] does not exist".formatted(project.getId(), task.getId(), employeeId)));
