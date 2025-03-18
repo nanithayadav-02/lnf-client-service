@@ -67,19 +67,6 @@ public class ProjectEmployeeController {
         }
     }
 
-    private ResponseEntity<?> fallbackFindEmployees(UUID projectId, Integer page, Integer size, Throwable t) {
-        //       log.error("Fallback triggered for projectId: {} with exception: {}", projectId, t.getMessage());
-
-        String errorMessage = "Unable to fetch employees for project " + projectId;
-        if (page != null && size != null) {
-            // If pagination parameters are present, return an empty page response
-            return ResponseEntity.ok(Map.of("content", Collections.emptyList(), "totalElements", 0));
-        } else {
-            // If no pagination, return an empty list response
-            return ResponseEntity.ok(new ProjectEmployeeDto());
-        }
-    }
-
     /**
      * Add employees to a project.
      *
