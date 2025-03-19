@@ -38,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -71,7 +72,6 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @return A Page object with projectDto
      */
     @Override
-    @Cacheable(value = "projects")
     public Page<ProjectOverviewDto> findPaginated(final int page, final int size) {
         Page<Project> resultPage = repository.findAll(PageRequest.of(page, size));
         return validateAndGetPages(page, resultPage);
@@ -88,7 +88,6 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @return A Page object with sorted projectDtos
      */
     @Override
-    @Cacheable(value = "projects")
     public Page<ProjectOverviewDto> findPaginatedAndSorted(int page, int size, String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         Page<Project> resultPage = repository.findAll(PageRequest.of(page, size, sortInfo));
@@ -103,7 +102,6 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @return Sorted list of all ProjectDto objects.
      */
     @Override
-    @Cacheable(value = "projects")
     public List<ProjectOverviewDto> findAllSorted(String sortBy, String sortOrder) {
         final Sort sortInfo = RestUtil.constructSort(sortBy, sortOrder);
         List<Project> entities = Lists.newArrayList(repository.findAll(sortInfo));
@@ -116,7 +114,6 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @return List of all ProjectDto objects.
      */
     @Override
-    @Cacheable(value = "projects")
     public List<ProjectOverviewDto> findAll() {
         List<Project> entities = repository.findAll();
         return entities.stream().map(ProjectConverter::toMiniTransportModel)
@@ -168,6 +165,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param projectId Project Id
      * @return ProjectDto object
      */
+    @Cacheable(value = "projects",key = "#projectId")
     public ProjectDto findByProjectId(UUID projectId) {
         Project entity = search(projectId);
         return ProjectConverter.toTransportModel(entity);
@@ -180,7 +178,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param clientId Project Id
      * @return List of ProjectDto objects associated to the client.
      */
-    @Cacheable(value = "projects")
+    @Cacheable(value = "projectOverviewDto",key = "#clientId")
     public List<ProjectOverviewDto> findProjectsByClientId(UUID clientId) {
         searchForClient(clientId);
         List<Project> projects = repository.findByClientId(clientId);
@@ -217,16 +215,16 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      *
      * @param resource projectDto object
      */
-    @CacheEvict(value = "projects", allEntries = true)
-    public void create(ProjectDto resource) {
+    @CacheEvict(value = "projects",beforeInvocation = true, allEntries = true)
+    @CachePut(value = "projects",key = "#result.id")
+    public ProjectDto create(ProjectDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create Project with null payload");
         Project entity = ProjectConverter.toEntityModel(resource);
         if (resource.getClientId() != null) {
             Client client = searchForClient(resource.getClientId());
             entity.setClient(client);
         }
-        saveEntity(entity);
-        log.debug("Project {} successfully created", entity.getCode());
+        return ProjectConverter.toTransportModel(saveAndCacheEntity(entity));
     }
 
     /**
@@ -236,8 +234,9 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param resource  ProjectDto
      */
     @Transactional
-    @CacheEvict(value = "projects", allEntries = true)
-    public void update(UUID projectId, ProjectDto resource) {
+    @CacheEvict(value = "projects",beforeInvocation = true, allEntries = true)
+    @CachePut(value = "projects",key = "#result.id")
+    public ProjectDto update(UUID projectId, ProjectDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to update Project with null payload");
         Project entity = search(projectId);
         Project updatedEntity = ProjectConverter.toEntityModel(resource, entity);
@@ -248,8 +247,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         } else {
             updatedEntity.setClient(null);
         }
-        saveEntity(updatedEntity);
-        log.debug("Project {} successfully updated", projectId);
+        return ProjectConverter.toTransportModel(saveAndCacheEntity(updatedEntity));
     }
 
     /**
@@ -297,6 +295,15 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
     private void saveEntity(Project entity) {
         try {
             repository.save(entity);
+        } catch (RuntimeException e) {
+            String errorMessage = String.format("Failed to save Project [%s]", entity.getClient().getId());
+            throw new LnFException(errorMessage);
+        }
+    }
+
+    private Project saveAndCacheEntity(Project entity) {
+        try {
+            return repository.save(entity);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to save Project [%s]", entity.getClient().getId());
             throw new LnFException(errorMessage);
