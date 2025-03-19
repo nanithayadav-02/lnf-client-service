@@ -26,7 +26,7 @@ import java.time.Duration;
 @Configuration
 @Slf4j
 @EnableCaching
-public class RedisConfig {
+public class CacheConfig {
 
     @Value("${spring.redis.host}")
     private String redisHost;
