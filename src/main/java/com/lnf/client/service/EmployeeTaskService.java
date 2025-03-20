@@ -16,18 +16,20 @@
 
 package com.lnf.client.service;
 
+import com.lnf.client.converter.ProjectConverter;
+import com.lnf.client.converter.TaskConverter;
+import com.lnf.client.model.ProjectTaskEmployee;
+import com.lnf.client.repository.ProjectTaskEmployeeRepository;
 import com.lnf.dto.client.EmployeeProjectDto;
 import com.lnf.dto.client.EmployeeProjectTaskDto;
-import com.lnf.dto.client.EmployeeProjectTasksDto;
-import com.lnf.dto.client.ProjectTasksDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -37,32 +39,69 @@ public class EmployeeTaskService {
 
     private final EmployeeProjectService employeeProjectService;
     private final EmployeeProjectTaskService employeeProjectTaskService;
+    private final ProjectTaskEmployeeRepository projectTaskEmployeeRepository;
     private static final String ACTIVE = "Active";
 
-    public EmployeeProjectTasksDto findTasksByEmployeeId(final String employeeId) {
+    public Map<String, Object> findTasksByEmployeeId(final String employeeId, int page, int size) {
+        EmployeeProjectDto employeeProjectDto = employeeProjectService.findProjectsByEmployeeId(employeeId);
 
-        EmployeeProjectTasksDto employeeProjectTasksDto = new EmployeeProjectTasksDto();
-        employeeProjectTasksDto.setEmployeeId(employeeId);
-        EmployeeProjectDto employeeProjectDto =  employeeProjectService.findProjectsByEmployeeId(employeeId);
-        List<ProjectTasksDto> projectTaskDtos = new ArrayList<>();
-        employeeProjectDto.getProjects().stream()
+        List<Map<String, Object>> allTasks = employeeProjectDto.getProjects().stream()
                 .filter(projectDto -> ACTIVE.equalsIgnoreCase(projectDto.getStatus()))
-                .forEach(projectDto -> {
-                    ProjectTasksDto projectTaskDto = new ProjectTasksDto();
-                    projectTaskDto.setProjectId(projectDto.getId());
-                    projectTaskDto.setProjectCode(projectDto.getCode());
-                    projectTaskDto.setProjectName(projectDto.getName());
-                    projectTaskDto.setProjectType(projectDto.getType());
+                .flatMap(projectDto -> {
                     EmployeeProjectTaskDto employeeProjectTaskDto =
                             employeeProjectTaskService.findTasksByEmployeeIdAndProjectId(employeeId, projectDto.getId());
-                    if (!CollectionUtils.isEmpty(employeeProjectTaskDto.getTasks())) {
-                        projectTaskDto.getTasks().addAll(employeeProjectTaskDto.getTasks());
-                    }
-                    projectTaskDtos.add(projectTaskDto);
-                });
-        employeeProjectTasksDto.setProjectTasks(projectTaskDtos);
-        return employeeProjectTasksDto;
 
+                    if (!CollectionUtils.isEmpty(employeeProjectTaskDto.getTasks())) {
+                        return employeeProjectTaskDto.getTasks().stream()
+                                .map(task -> {
+                                    ProjectTaskEmployee projectTaskEmployee = projectTaskEmployeeRepository
+                                            .findByProjectAndTaskAndEmployee(ProjectConverter.toEntityModel(projectDto)
+                                                    , TaskConverter.toEntityModel(task), employeeProjectTaskDto.getEmployeeId());
+
+                                    Map<String, Object> taskMap = new HashMap<>();
+                                    taskMap.put("id", task.getId());
+                                    taskMap.put("name", task.getName());
+                                    taskMap.put("type", task.getType());
+                                    taskMap.put("status", task.getStatus());
+                                    taskMap.put("description", task.getDescription());
+                                    taskMap.put("startDate", task.getStartDate());
+                                    taskMap.put("endDate", task.getEndDate());
+                                    taskMap.put("projectId", projectDto.getId());
+                                    taskMap.put("projectCode", projectDto.getCode());
+                                    taskMap.put("projectName", projectDto.getName());
+                                    taskMap.put("projectType", projectDto.getType());
+                                    taskMap.put("createdTime", projectTaskEmployee.getCreatedTime());
+                                    return taskMap;
+                                });
+                    }
+                    return Stream.empty();
+                })
+                .toList();
+        List<Map<String, Object>> sortedTasks = new ArrayList<>(allTasks);
+        sortedTasks.sort(Comparator.comparing(task -> (Date) task.get("createdTime"), Comparator.reverseOrder()));
+        Map<String, Object> paginatedResult = applyPagination(sortedTasks, page, size);
+        Map<String, Object> result = new HashMap<>();
+        result.put("employeeId", employeeId);
+        result.put("tasks", paginatedResult.get("data"));
+        result.put("totalPages", paginatedResult.get("totalPages"));
+        result.put("totalElements", paginatedResult.get("totalElements"));
+        return result;
+    }
+
+    private Map<String, Object> applyPagination(List<Map<String, Object>> tasks, int page, int size) {
+        int totalElements = tasks.size();
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, totalElements);
+
+        List<Map<String, Object>> paginatedTasks = tasks.subList(
+                Math.min(startIndex, totalElements),
+                endIndex);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", paginatedTasks);
+        result.put("totalElements", totalElements);
+        result.put("totalPages", (int) Math.ceil((double) totalElements / size));
+        return result;
     }
 
 }

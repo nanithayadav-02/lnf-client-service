@@ -17,10 +17,10 @@
 package com.lnf.client.service;
 
 import com.lnf.client.converter.ContactConverter;
-import com.lnf.client.repository.ClientContactRepository;
-import com.lnf.client.repository.ClientRepository;
 import com.lnf.client.model.Client;
 import com.lnf.client.model.ClientContact;
+import com.lnf.client.repository.ClientContactRepository;
+import com.lnf.client.repository.ClientRepository;
 import com.lnf.dto.client.ContactDto;
 import com.lnf.exception.LnFBadRequestException;
 import com.lnf.exception.LnFEntityNotFoundException;
@@ -69,7 +69,7 @@ public class ClientContactService {
     }
 
     public void create(UUID clientId, List<ContactDto> resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create contact for client [%s] with null payload", clientId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create contact for client [%s] with null payload".formatted(clientId));
         Client clientEntity = searchForClient(clientId);
         List<ClientContact> entities = new ArrayList<>();
         resource.stream().filter(Objects::nonNull).forEach(contactDto -> {
@@ -88,7 +88,7 @@ public class ClientContactService {
      * @param resource ContactDto
      */
     public void create(UUID clientId, ContactDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to create contact for client[%s] with null payload", clientId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create contact for client[%s] with null payload".formatted(clientId));
         Client clientEntity = searchForClient(clientId);
         ClientContact entity = ContactConverter.toEntityModel(resource);
         entity.setClient(clientEntity);
@@ -104,7 +104,7 @@ public class ClientContactService {
      * @param resource  ContactDto
      */
     public void update(UUID clientId, UUID contactId, ContactDto resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("Failed to contact client[%s] with null payload", clientId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to contact client[%s] with null payload".formatted(clientId));
         searchForClient(clientId);
         ClientContact entity = searchForContact(contactId);
         ClientContact updatedEntity = ContactConverter.toEntityModel(resource, entity);
@@ -124,7 +124,7 @@ public class ClientContactService {
             repository.deleteAll(entities);
             log.debug("Contacts for client {} successfully deleted", clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete contacts for client [%s]", clientId);
+            String errorMessage = "Failed to delete contacts for client [%s]".formatted(clientId);
             throw new LnFException(errorMessage);
         }
     }
@@ -142,7 +142,7 @@ public class ClientContactService {
             repository.delete(entity);
             log.debug("Contact {} for client {} successfully deleted", contactId, clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete contact[%s] for client [%s]", contactId, clientId);
+            String errorMessage = "Failed to delete contact[%s] for client [%s]".formatted(contactId, clientId);
             throw new LnFException(errorMessage);
         }
     }
@@ -160,18 +160,18 @@ public class ClientContactService {
         try {
             repository.saveAll(entities);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save contact for employee [%s]", entities.get(0).getClient().getId());
+            String errorMessage = String.format("Failed to save contact for employee [%s]", entities.getFirst().getClient().getId());
             throw new LnFException(errorMessage);
         }
     }
 
     private Client searchForClient(UUID clientId) {
         return clientRepository.findById(clientId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
     private ClientContact searchForContact(UUID contactId) {
         return repository.findById(contactId).
-                orElseThrow(() -> new LnFEntityNotFoundException(String.format("Contact with id [%s] does not exist", contactId)));
+                orElseThrow(() -> new LnFEntityNotFoundException("Contact with id [%s] does not exist".formatted(contactId)));
     }
 }

@@ -2,6 +2,16 @@ spring:
   profiles:
     active: dev-ide
 
+  redis:
+    host: localhost
+    port: 6379
+  cache:
+    redis:
+      time-to-live: 60000
+      cache-null-values: false
+      use-key-prefix: true
+    type: redis
+
   flyway:
     enabled: ${SPRING_FLYWAY_ENABLED:false}
     baseline-on-migrate: true
@@ -46,10 +56,6 @@ email:
 
 # Metrics Configuration
 management:
-  metrics:
-    export:
-      prometheus:
-        enabled: true
   endpoint:
     prometheus:
       enabled: true
@@ -62,6 +68,7 @@ management:
       exposure:
         exclude:
         include: "*"
+  prometheus.metrics.export.enabled: true
 logging:
   level:
     org:
@@ -141,7 +148,6 @@ spring:
     url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
     username: ${database.username:client_user}
     password: ${database.password:client@12345}
-    data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
     hikari:
       maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
@@ -185,6 +191,8 @@ spring:
         provider:
           keycloak:
             issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+
+  sql.init.data-locations: classpath*:db/data.sql
 
 printStackTrace: true
 
@@ -198,7 +206,6 @@ spring:
     url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
     username: ${database.username:client_user}
     password: ${database.password:client@12345}
-    data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
     hikari:
       maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
@@ -243,6 +250,8 @@ spring:
           keycloak:
             issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
 
+  sql.init.data-locations: classpath*:db/data.sql
+
 printStackTrace: true
 
 ---
@@ -255,7 +264,6 @@ spring:
     url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
     username: ${database.username:client_user}
     password: ${database.password:client@12345}
-    data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
     hikari:
       maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
@@ -286,6 +294,8 @@ spring:
     exclude:
       - org.keycloak.adapters.springboot.KeycloakAutoConfiguration
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+
+  sql.init.data-locations: classpath*:db/data.sql
 
 printStackTrace: true
 

@@ -16,9 +16,6 @@
 
 package com.lnf.client.repository;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.lnf.client.model.Task;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +23,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.UUID;
 
 
 public interface TaskRepository extends JpaRepository<Task, UUID>, JpaSpecificationExecutor<Task> {
@@ -41,5 +41,11 @@ public interface TaskRepository extends JpaRepository<Task, UUID>, JpaSpecificat
             " TO_CHAR(t.start_date, 'MON') AS month, status, COUNT(t.id) AS count " +
             " FROM task AS t GROUP BY year, month, status ORDER BY year, status DESC", nativeQuery = true)
     List<StatisticsSummary> tasksByYearAndStatus();
+
+    @Query("SELECT t FROM Task t WHERE LOWER(t.status) = LOWER(:status) and YEAR(t.startDate) = :year")
+    List<Task> findByStatusAndYear(String status, Integer year);
+
+    @Query("SELECT t FROM Task t WHERE t.uploadTime = (SELECT MAX(t.uploadTime) FROM Task t)")
+    List<Task> findByUploadedTime();
 
 }

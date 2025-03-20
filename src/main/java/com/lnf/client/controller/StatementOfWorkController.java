@@ -37,16 +37,16 @@ public class StatementOfWorkController {
 
     @GetMapping("/clients/{clientId}/project/{projectId}/sow")
     @ResponseStatus(HttpStatus.OK)
-    public List<StatementOfWorkDto> findByProjectIdAndClientId(@PathVariable("clientId") UUID clientId,
-                                                               @PathVariable("projectId") UUID projectId) {
+    public List<StatementOfWorkDto> findByProjectIdAndClientId(@PathVariable UUID clientId,
+                                                               @PathVariable UUID projectId) {
 
         return service.findByProjectIdAndClientId(clientId, projectId);
     }
 
     @GetMapping("/clients/{clientId}/project/{projectId}/sow/{fileName}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<byte[]> findById(@PathVariable("clientId") UUID clientId, @PathVariable("projectId") UUID projectId,
-                                           @PathVariable("fileName") String fileName) {
+    public ResponseEntity<byte[]> findById(@PathVariable UUID clientId, @PathVariable UUID projectId,
+                                           @PathVariable String fileName) {
         return service.findById(clientId, projectId, fileName);
     }
 
@@ -58,15 +58,15 @@ public class StatementOfWorkController {
     }
 
     @PutMapping(value = "/clients/{clientId}/project/{projectId}/sow", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void update(@PathVariable("clientId") UUID clientId, @PathVariable("projectId") UUID projectId, @RequestParam("fileName") String fileName,
+    public void update(@PathVariable UUID clientId, @PathVariable UUID projectId, @RequestParam String fileName,
                        @RequestPart("file") MultipartFile file, @RequestPart("resource") StatementOfWorkDto resource) {
         service.update(clientId, projectId, fileName, file, resource);
     }
 
     @DeleteMapping(value = "/clients/{clientId}/project/{projectId}/sows")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteByIdAndFileName(@PathVariable("clientId") UUID clientId, @PathVariable("projectId") UUID projectId,
-                                      @RequestParam("fileName") String fileName) {
+    public void deleteByIdAndFileName(@PathVariable UUID clientId, @PathVariable UUID projectId,
+                                      @RequestParam String fileName) {
         service.deleteByIdAndFileName(clientId, projectId, fileName);
     }
 

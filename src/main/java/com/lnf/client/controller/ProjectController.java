@@ -20,7 +20,6 @@ import com.lnf.client.service.DataExportService;
 import com.lnf.client.service.ProjectService;
 import com.lnf.dto.client.ProjectDto;
 import com.lnf.dto.common.PageRequestDto;
-import com.lnf.dto.timesheet.TimesheetDto;
 import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +62,7 @@ public class ProjectController {
      */
     @GetMapping(value = "/projects", params = {"search"})
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> search(@RequestParam(value = "search", required = false) String search,
+    public ResponseEntity<?> search(@RequestParam(required = false) String search,
                                     @PageableAsQueryParam PageRequestDto pageRequest) {
         if (search != null && !search.isEmpty()) {
             if (pageRequest != null && pageRequest.getPage() != null) {
@@ -85,7 +84,7 @@ public class ProjectController {
      */
     @GetMapping(value = "/projects/{projectId}")
     @ResponseStatus(HttpStatus.OK)
-    public ProjectDto findByProjectId(@PathVariable("projectId") final UUID projectId) {
+    public ProjectDto findByProjectId(@PathVariable final UUID projectId) {
         return service.findByProjectId(projectId);
     }
 
@@ -101,8 +100,8 @@ public class ProjectController {
     }
 
     @PostMapping(value = "/projects/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadFile(@RequestParam("clientId") final UUID clientId,
-                                             @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<String> uploadFile(@RequestParam final UUID clientId,
+                                             @RequestParam MultipartFile file) throws IOException {
         dataExportService.uploadFile(file, ProjectDto.class, clientId);
         return ResponseEntity.ok("File uploaded successfully.");
     }
@@ -115,7 +114,7 @@ public class ProjectController {
      */
     @PutMapping(value = "/projects/{projectId}")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("projectId") final UUID projectId, @RequestBody final ProjectDto resource) {
+    public void update(@PathVariable final UUID projectId, @RequestBody final ProjectDto resource) {
         service.update(projectId, resource);
     }
 
@@ -126,7 +125,7 @@ public class ProjectController {
      */
     @DeleteMapping(value = "/projects/{projectId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("projectId") final UUID projectId) {
+    public void delete(@PathVariable final UUID projectId) {
         service.delete(projectId);
     }
 
@@ -138,13 +137,42 @@ public class ProjectController {
 
     @GetMapping("/projects/clients/{clientId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<Map<String, Object>> getTimeSheetsByClientId(@PathVariable("clientId") UUID clientId,
-                                                             @RequestParam(value = "projectId", required = false) UUID projectId,
-                                                             @RequestParam(value = "month", required = false) Optional<Integer> month,
-                                                             @RequestParam(value = "year", required = false) Optional<Integer> year,
-                                                             @RequestParam(value = "status", required = false) String status) {
+    public List<Map<String, Object>> getTimeSheetsByClientId(@PathVariable UUID clientId,
+                                                             @RequestParam(required = false) UUID projectId,
+                                                             @RequestParam(required = false) Optional<Integer> month,
+                                                             @RequestParam(required = false) Optional<Integer> year,
+                                                             @RequestParam(required = false) String status) {
         return service.getTimeSheetsByClientId(clientId, projectId, month, year, status);
     }
 
+    @PostMapping(value = "/projects/retrieve-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> retrieveFile(@RequestParam MultipartFile file, @RequestParam final UUID clientId) throws IOException {
+        return ResponseEntity.ok(dataExportService.retrieveProjectFile(file, clientId));
+    }
+
+    @DeleteMapping("/projects/last-upload")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLastUpload() {
+        service.deleteLastUploadFile();
+    }
+
+    @DeleteMapping("/projects")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteProjects(@RequestBody List<UUID> projectIds) {
+        service.deleteProjectList(projectIds);
+    }
+
+    @GetMapping("/projects/last-upload")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<ProjectDto> getLastUpload(@PageableAsQueryParam PageRequestDto pageRequest) {
+        return service.getLastUploadData(pageRequest);
+    }
+
+    @PostMapping(value = "projects/data-upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<ProjectDto> create(@RequestBody final List<ProjectDto> resources, @RequestParam final UUID clientId) {
+        return service.create(resources, clientId);
+    }
 
 }

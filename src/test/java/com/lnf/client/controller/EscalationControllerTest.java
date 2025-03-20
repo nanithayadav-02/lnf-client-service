@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -76,7 +76,7 @@ class EscalationControllerTest extends BaseTestClass {
         String url = "/lnf/clients/" + clientId + "/escalation";
 
         String resultContent = new String(Files
-                .readAllBytes(Paths.get(ClassLoader.getSystemResource("testdata/client-escalation.json")
+                .readAllBytes(Path.of(ClassLoader.getSystemResource("testdata/client-escalation.json")
                         .toURI())));
 
         mockMvc.perform(get(url)
@@ -145,8 +145,8 @@ class EscalationControllerTest extends BaseTestClass {
     @Test
     void update() {
         // Arrange
-        UUID escalationId = UUID.fromString ("3f81db1c-825d-4f86-b682-d3f0369a3ada");
-        EscalationDto updatedEscalation = createEscalation1 ();
+        UUID escalationId = UUID.fromString("3f81db1c-825d-4f86-b682-d3f0369a3ada");
+        EscalationDto updatedEscalation = createEscalation1();
         updatedEscalation.setId(escalationId);
 
         Mockito.doNothing().when(service).update(Mockito.eq(clientId), Mockito.eq(escalationId), Mockito.any(EscalationDto.class));
@@ -186,7 +186,7 @@ class EscalationControllerTest extends BaseTestClass {
     @Test
     void testDelete() throws Exception {
         UUID escalationId = UUID.randomUUID();
-        String urlTemplate = String.format("/lnf/clients/%s/escalation/%s", clientId, escalationId);
+        String urlTemplate = "/lnf/clients/%s/escalation/%s".formatted(clientId, escalationId);
 
         mockMvc.perform(delete(urlTemplate)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -206,7 +206,7 @@ class EscalationControllerTest extends BaseTestClass {
     }
 
     private EscalationDto createEscalationDto(String id, String name, String phoneNumber, String email,
-                                        String mobileNumber) {
+                                              String mobileNumber) {
         EscalationDto dto = new EscalationDto();
         dto.setId(UUID.fromString(id));
         dto.setName(name);

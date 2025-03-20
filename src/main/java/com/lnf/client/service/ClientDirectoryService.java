@@ -99,8 +99,8 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
 
     private Page<ClientDirectoryDto> validateAndGetPages(int page, Page<ClientDirectory> resultPage) {
         if (page > resultPage.getTotalPages()) {
-            throw new LnFEntityNotFoundException(String.format("Total number of pages [%d], " +
-                    "requested page [%d] does not exist", resultPage.getTotalPages(), page));
+            throw new LnFEntityNotFoundException(("Total number of pages [%d], " +
+                    "requested page [%d] does not exist").formatted(resultPage.getTotalPages(), page));
         }
         return resultPage.map(ClientDirectoryConverter::toTransportModel);
     }
@@ -152,22 +152,22 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
 
     private ClientDirectory searchForClientDirectoryId(UUID directoryId) {
         return repository.findById(directoryId).orElseThrow(() ->
-                new LnFEntityNotFoundException(String.format("ClientDirectory with id [%s] does not exist", directoryId)));
+                new LnFEntityNotFoundException("ClientDirectory with id [%s] does not exist".formatted(directoryId)));
     }
 
     private Client searchForClient(UUID clientId) {
         return clientRepository.findByClientId(clientId).orElseThrow(() ->
-                new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
+                new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
     public void create(UUID clientId, ClientDirectoryDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
-                String.format("Failed to create ClientDirectory for Client [%s] with null payload", clientId));
+                "Failed to create ClientDirectory for Client [%s] with null payload".formatted(clientId));
 
         var clientByEmail = searchForClientDirectory(resource.getEmail());
 
         if (clientByEmail != null) {
-            throw new LnFException(String.format(DUPLICATE_EMAIL_ERROR, resource.getEmail()));
+            throw new LnFException(DUPLICATE_EMAIL_ERROR.formatted(resource.getEmail()));
         }
 
         Client client = searchForClient(clientId);
@@ -179,7 +179,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
 
     public void createAll(UUID clientId, List<ClientDirectoryDto> resources) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resources,
-                String.format("Failed to create ClientDirectory [%s] with null payload", clientId));
+                "Failed to create ClientDirectory [%s] with null payload".formatted(clientId));
 
         List<ClientDirectory> existingClientDirectories = resources.stream()
                 .map(resource -> searchForClientDirectory(resource.getEmail()))
@@ -191,7 +191,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
                     .map(ClientDirectory::getEmail)
                     .toList();
 
-            throw new LnFException(String.format(MULTIPLE_DUPLICATE_EMAIL_ERROR, String.join(", ", duplicateEmails)));
+            throw new LnFException(MULTIPLE_DUPLICATE_EMAIL_ERROR.formatted(String.join(", ", duplicateEmails)));
         }
 
         Client client = searchForClient(clientId);
@@ -211,7 +211,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
 
     public void update(UUID clientId, UUID directoryId, ClientDirectoryDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
-                String.format("Failed to update ClientDirectory for Client [%s] with null payload", clientId));
+                "Failed to update ClientDirectory for Client [%s] with null payload".formatted(clientId));
 
         searchForClient(clientId);
         ClientDirectory entity = searchForClientDirectoryId(directoryId);
@@ -231,7 +231,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
             repository.deleteAll(entities);
             log.debug("ClientDirectory {} for Client successfully deleted", clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete ClientDirectories [%s] for Client", clientId);
+            String errorMessage = "Failed to delete ClientDirectories [%s] for Client".formatted(clientId);
             throw new LnFException(errorMessage);
         }
     }
@@ -243,7 +243,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
             repository.delete(entity);
             log.debug("ClientDirectory {} for Client {} successfully deleted", clientId, directoryId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete ClientDirectory [%s] for job [%s]", clientId, directoryId);
+            String errorMessage = "Failed to delete ClientDirectory [%s] for job [%s]".formatted(clientId, directoryId);
             throw new LnFException(errorMessage);
         }
     }
@@ -264,7 +264,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
         try {
             repository.save(entity);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save ClientDirectory [%s]", entity.toString());
+            String errorMessage = "Failed to save ClientDirectory [%s]".formatted(entity.toString());
             throw new LnFException(errorMessage, e);
         }
     }
@@ -274,7 +274,7 @@ public class ClientDirectoryService implements PaginatedAndSortedService<ClientD
             repository.saveAll(entities);
         } catch (RuntimeException e) {
             String errorMessage = String.format("Failed to save ClientDirectory for Client [%s]",
-                    entities.get(0).getClient().getId());
+                    entities.getFirst().getClient().getId());
             throw new LnFException(errorMessage);
         }
     }

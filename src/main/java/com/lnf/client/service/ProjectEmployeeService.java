@@ -16,10 +16,10 @@
 
 package com.lnf.client.service;
 
-import com.lnf.client.repository.ProjectEmployeeRepository;
 import com.lnf.client.converter.ProjectConverter;
 import com.lnf.client.model.Project;
 import com.lnf.client.model.ProjectEmployee;
+import com.lnf.client.repository.ProjectEmployeeRepository;
 import com.lnf.client.repository.ProjectRepository;
 import com.lnf.dto.client.ClientEmployeeDto;
 import com.lnf.dto.client.ProjectEmployeeDto;
@@ -54,9 +54,9 @@ public class ProjectEmployeeService {
      * @param projectId Project Id
      * @return ProjectEmployeeDto
      */
-    @Cacheable(value = "projectEmployees")
-    public ProjectEmployeeDto findEmployeesByProjectId(final UUID projectId) {
-        Project project = searchForProject(projectId);
+    @Cacheable(value = "projectEmployees",key = "#projectEmpId")
+    public ProjectEmployeeDto findEmployeesByProjectId(final UUID projectEmpId) {
+        Project project = searchForProject(projectEmpId);
 
         // Get the list of employees associated with the project
         List<ProjectEmployee> employees = repository.findByProject(project);
@@ -65,7 +65,6 @@ public class ProjectEmployeeService {
         return createProjectEmployeeDto(project, employeeDtos);
     }
 
-    @Cacheable(value = "projectEmployees")
     public Map<String, Object> findAllAssignedEmployees(final UUID projectId, int page, Integer size) {
         Project project = searchForProject(projectId);
         List<ProjectEmployee> employees = repository.findByProject(project);
@@ -176,7 +175,7 @@ public class ProjectEmployeeService {
             repository.deleteAll(projectEmployees);
             log.debug("projectEmployees is successfully removed from the Project {}", project.getId());
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to remove projectEmployees from the Project[%s]", project.getId());
+            String errorMessage = "Failed to remove projectEmployees from the Project[%s]".formatted(project.getId());
             throw new LnFException(errorMessage, e);
         }
     }
@@ -200,11 +199,11 @@ public class ProjectEmployeeService {
     }
 
     private ProjectEmployee search(UUID projectId, String employeeId) {
-        return repository.findByProjectIdAndEmployeeId(projectId, employeeId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("ProjectEmployee entity with projectId [%s] and employeeId [%s] does not exist", projectId, employeeId)));
+        return repository.findByProjectIdAndEmployeeId(projectId, employeeId).orElseThrow(() -> new LnFEntityNotFoundException("ProjectEmployee entity with projectId [%s] and employeeId [%s] does not exist".formatted(projectId, employeeId)));
     }
 
     private Project searchForProject(UUID projectId) {
-        return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException(String.format("Project with id [%s] does not exist", projectId)));
+        return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException("Project with id [%s] does not exist".formatted(projectId)));
     }
 
     @CacheEvict(value = "projectEmployees", allEntries = true)

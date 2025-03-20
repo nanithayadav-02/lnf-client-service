@@ -42,7 +42,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -93,13 +93,13 @@ class ClientControllerTest extends BaseTestClass {
         when(service.findAllSorted("degree", "asc")).thenReturn(mockedList);
         when(service.findAll()).thenReturn(mockedList);
 
-        ClientController controller = new ClientController(service,projectService,paginationAndSortingHandler,dataExportService);
+        ClientController controller = new ClientController(service, projectService, paginationAndSortingHandler, dataExportService);
         // Test for paginated and sorted request
         ResponseEntity<?> response = controller.findAll(pageRequest);
         assertEquals(ResponseEntity.ok(mockedPage), response);
 
         // Pagination with  sortBy and sortOrder
-        pageRequest = new PageRequestDto(0, 10,null,null);
+        pageRequest = new PageRequestDto(0, 10, null, null);
         response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
         assertEquals(ResponseEntity.ok(mockedPage), response);
 
@@ -113,6 +113,7 @@ class ClientControllerTest extends BaseTestClass {
         response = paginationAndSortingHandler.handleFindAllRequest(pageRequest, service);
         assertEquals(ResponseEntity.ok(mockedList), response);
     }
+
     @Test
     void testSearch() throws Exception {
         String status = "Active";
@@ -155,7 +156,7 @@ class ClientControllerTest extends BaseTestClass {
         String url = "/lnf/clients/" + clientId + "/projects";
 
         String resultContent = new String(Files
-                .readAllBytes(Paths.get(ClassLoader.getSystemResource("testdata/client-project.json")
+                .readAllBytes(Path.of(ClassLoader.getSystemResource("testdata/client-project.json")
                         .toURI())));
 
         mockMvc.perform(get(url)
@@ -177,7 +178,7 @@ class ClientControllerTest extends BaseTestClass {
         String url = "/lnf/clients/" + clientId + "/employees";
 
         String resultContent = new String(Files
-                .readAllBytes(Paths.get(ClassLoader.getSystemResource("testdata/employee.json")
+                .readAllBytes(Path.of(ClassLoader.getSystemResource("testdata/employee.json")
                         .toURI())));
 
         mockMvc.perform(get(url)
@@ -193,8 +194,6 @@ class ClientControllerTest extends BaseTestClass {
         ClientDto requestDto = createClient1();
 
         String url = "/lnf/clients";
-
-        doNothing().when(service).create(any(ClientDto.class));
 
         try {
             mockMvc.perform(MockMvcRequestBuilders.post(url)
@@ -214,7 +213,6 @@ class ClientControllerTest extends BaseTestClass {
         ClientDto updatedClient = createClient1();
         updatedClient.setId(clientId);
 
-        Mockito.doNothing().when(service).update(Mockito.eq(clientId), Mockito.any(ClientDto.class));
         String url = "/lnf/clients/" + clientId;
         ArgumentCaptor<ClientDto> captor = ArgumentCaptor.forClass(ClientDto.class);
 
@@ -288,7 +286,7 @@ class ClientControllerTest extends BaseTestClass {
 
     private ClientDto createClient2() {
         return createClientDto("1b49b31c-573a-4b47-b13f-01d320e11ec5", "ASH-001", "Ashield", "KMUYT4390N",
-                "ASWQ03028F", "On-Hold", "2024-02-01", "2025-12-31","Staffing", "Accenture");
+                "ASWQ03028F", "On-Hold", "2024-02-01", "2025-12-31", "Staffing", "Accenture");
     }
 
     private ClientOverviewDto createClientOverview() {
@@ -297,7 +295,7 @@ class ClientControllerTest extends BaseTestClass {
     }
 
     private ClientDto createClientDto(String id, String code, String name, String pan, String tan, String status, String workingFrom,
-                                          String agreementExpiryDate, String serviceType, String clientDetails) {
+                                      String agreementExpiryDate, String serviceType, String clientDetails) {
         ClientDto dto = new ClientDto();
         dto.setId(UUID.fromString(id));
         dto.setCode(code);
@@ -314,7 +312,7 @@ class ClientControllerTest extends BaseTestClass {
     }
 
     private ClientOverviewDto createClientOverviewDto(String id, String code, String name, String pan, String tan, String status,
-                                      String workingFrom, String agreementExpiryDate) {
+                                                      String workingFrom, String agreementExpiryDate) {
         ClientOverviewDto dto = new ClientOverviewDto();
         dto.setId(UUID.fromString(id));
         dto.setCode(code);
@@ -347,7 +345,7 @@ class ClientControllerTest extends BaseTestClass {
 
     private ProjectOverviewDto mockProjectOverview1() {
         return createProjectOverview("e17a4ac7-873f-460e-9b38-eb02d7bb8ba7", "PRJ-020", "Data Analytics", "Project08", "Testing",
-                "PO26032043",  "8500000.00","Variable", "On-Hold", "10","Monthly", "2024-02-01", UUID.fromString("45a83fb6-78e0-45ff-9507-2781893722b7"),
+                "PO26032043", "8500000.00", "Variable", "On-Hold", "10", "Monthly", "2024-02-01", UUID.fromString("45a83fb6-78e0-45ff-9507-2781893722b7"),
                 "Ajax technologies", "2024-05-01"
         );
     }
@@ -402,7 +400,7 @@ class ClientControllerTest extends BaseTestClass {
     }
 
     private ClientEmployeeDto mockEmployee2() {
-        return createEmployee("f12b86f8-7dab-42c6-a2db-6cf82e7e9e33", "HRD-CE-TF-3033","Kushbu",  "sharma", "Kushbu@gmail.com",
+        return createEmployee("f12b86f8-7dab-42c6-a2db-6cf82e7e9e33", "HRD-CE-TF-3033", "Kushbu", "sharma", "Kushbu@gmail.com",
                 "9876543210", "TERMINATED", "SE");
     }
 

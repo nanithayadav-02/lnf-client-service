@@ -57,13 +57,13 @@ public class ClientAgreementService {
     private String folderName;
 
     public List<AgreementDto> findByClientId(UUID clientId) {
-        String filePath = String.format(S_S_S, folderName, clientId, AGREEMENTS);
+        String filePath = S_S_S.formatted(folderName, clientId, AGREEMENTS);
         List<FileDto> files = fileFolderService.findFiles(filePath);
         List<AgreementDto> agreementDtos = new ArrayList<>();
         files.forEach(file -> {
             String fileName = StringUtils.substringAfterLast(file.getFileName(), "/");
             String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path(String.format("/lnf/clients/%s/agreements/%s", clientId, fileName))
+                    .path("/lnf/clients/%s/agreements/%s".formatted(clientId, fileName))
                     .toUriString();
             setClientAgreement(agreementDtos, file, fileName, downloadURL);
         });
@@ -83,16 +83,16 @@ public class ClientAgreementService {
     public ResponseEntity<byte[]> findById(UUID clientId, String fileName) {
         try {
             searchForFileName(fileName);
-            String filePath = String.format("%s/%s/%s/%s", folderName, clientId, AGREEMENTS, fileName);
+            String filePath = "%s/%s/%s/%s".formatted(folderName, clientId, AGREEMENTS, fileName);
             return fileService.findFileContent(filePath);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("file not found for agreement[%s]", clientId);
+            String errorMessage = "file not found for agreement[%s]".formatted(clientId);
             throw new LnFException(errorMessage, e);
         }
     }
 
     public void create(UUID clientId, MultipartFile[] files, List<AgreementDto> resource) {
-        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, String.format("failed to create agreement with null payload [%s]", clientId));
+        LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "failed to create agreement with null payload [%s]".formatted(clientId));
         Client client = searchForClientId(clientId);
 
         List<Agreement> entities = new ArrayList<>();
@@ -105,11 +105,11 @@ public class ClientAgreementService {
                 entities.add(entity);
                 save(entities);
 
-                var folder = String.format(S_S_S, folderName, clientId, AGREEMENTS);
+                var folder = S_S_S.formatted(folderName, clientId, AGREEMENTS);
                 String filePath = fileService.uploadFile(folder, file);
                 log.debug("File uploaded successfully to S3 bucket: " + filePath);
             } catch (RuntimeException e) {
-                String errorMessage = String.format("Failed to create agreement[%s] for client [%s]", file.getName(), clientId);
+                String errorMessage = "Failed to create agreement[%s] for client [%s]".formatted(file.getName(), clientId);
                 throw new LnFException(errorMessage, e);
             }
         });
@@ -117,24 +117,24 @@ public class ClientAgreementService {
 
     public void update(UUID clientId, String fileName, MultipartFile file, AgreementDto resource) {
         com.lnf.exception.LnFBadRequestException.throwOnCondition(Objects::isNull, file,
-                String.format("Failed to update file for agreement [%s] with null payload", fileName));
+                "Failed to update file for agreement [%s] with null payload".formatted(fileName));
         try {
             Agreement entity = searchForFileName(fileName);
             Agreement updatedEntity = ClientAgreementConverter.toEntityModel(resource, entity);
             save(updatedEntity);
-            String s3ObjectKey = String.format("%s/%s/%s/%s", folderName, clientId, AGREEMENTS, fileName);
+            String s3ObjectKey = "%s/%s/%s/%s".formatted(folderName, clientId, AGREEMENTS, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
             log.debug("S3 object deleted for sows file");
 
             //Before Updating the file we are deleting from the s3 bucket
-            var folder = String.format(S_S_S, folderName, clientId, AGREEMENTS);
+            var folder = S_S_S.formatted(folderName, clientId, AGREEMENTS);
             String filePath = fileService.uploadFile(folder, file);
 
             log.debug("File uploaded successfully to S3 bucket: " + filePath);
             log.debug("fileName {} for agreement {} successfully updated", fileName, clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to update fileName[%s] for agreement [%s]", fileName, clientId);
+            String errorMessage = "Failed to update fileName[%s] for agreement [%s]".formatted(fileName, clientId);
             throw new LnFException(errorMessage, e);
         }
     }
@@ -143,14 +143,14 @@ public class ClientAgreementService {
         searchForClientId(clientId);
         Agreement entity = searchForFileName(fileName);
         try {
-            String s3ObjectKey = String.format("%s/%s/%s/%s", folderName, clientId, AGREEMENTS, fileName);
+            String s3ObjectKey = "%s/%s/%s/%s".formatted(folderName, clientId, AGREEMENTS, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
             log.debug("S3 object deleted for agreement file");
             repository.delete(entity);
             log.debug("file {} for agreement {} successfully deleted", fileName, clientId);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to delete File[[%s] for agreement [%s]", fileName, clientId);
+            String errorMessage = "Failed to delete File[[%s] for agreement [%s]".formatted(fileName, clientId);
             throw new LnFException(errorMessage);
         }
     }
@@ -159,7 +159,7 @@ public class ClientAgreementService {
         try {
             repository.saveAll(entities);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save agreement for client [%s]", entities.get(0).getClient().getId());
+            String errorMessage = String.format("Failed to save agreement for client [%s]", entities.getFirst().getClient().getId());
             throw new LnFException(errorMessage);
         }
     }
@@ -168,7 +168,7 @@ public class ClientAgreementService {
         try {
             repository.save(entity);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save agreement for client [%s]", entity.getId());
+            String errorMessage = "Failed to save agreement for client [%s]".formatted(entity.getId());
             throw new LnFException(errorMessage);
         }
     }
@@ -176,12 +176,12 @@ public class ClientAgreementService {
     private Agreement searchForFileName(String fileName) {
         return repository.findByFileName(fileName).
                 orElseThrow(() -> new LnFEntityNotFoundException(
-                        String.format("agreement file with fileName [%s] does not exist", fileName)));
+                        "agreement file with fileName [%s] does not exist".formatted(fileName)));
     }
 
     private Client searchForClientId(UUID clientId) {
         return clientRepository.findByClientId(clientId)
-                .orElseThrow(() -> new LnFEntityNotFoundException(String.format("Client with id [%s] does not exist", clientId)));
+                .orElseThrow(() -> new LnFEntityNotFoundException("Client with id [%s] does not exist".formatted(clientId)));
     }
 
 }

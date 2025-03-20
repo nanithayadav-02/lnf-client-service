@@ -32,18 +32,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/lnf")
 public class ClientAgreementController {
-    
+
     private final ClientAgreementService service;
 
     @GetMapping("/clients/{clientId}/agreements")
     @ResponseStatus(HttpStatus.OK)
-    public List<AgreementDto> findByProjectIdAndClientId(@PathVariable("clientId") UUID clientId) {
+    public List<AgreementDto> findByProjectIdAndClientId(@PathVariable UUID clientId) {
         return service.findByClientId(clientId);
     }
 
     @GetMapping("/clients/{clientId}/agreements/{fileName}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<byte[]> findById(@PathVariable("clientId") UUID clientId, @PathVariable("fileName") String fileName) {
+    public ResponseEntity<byte[]> findById(@PathVariable UUID clientId, @PathVariable String fileName) {
         return service.findById(clientId, fileName);
     }
 
@@ -55,14 +55,14 @@ public class ClientAgreementController {
     }
 
     @PutMapping(value = "/clients/{clientId}/agreements", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void update(@PathVariable("clientId") UUID clientId, @RequestParam("fileName") String fileName,
+    public void update(@PathVariable UUID clientId, @RequestParam String fileName,
                        @RequestPart("file") MultipartFile file, @RequestPart("resource") AgreementDto resource) {
         service.update(clientId, fileName, file, resource);
     }
 
     @DeleteMapping(value = "/clients/{clientId}/agreements")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteByIdAndFileName(@PathVariable("clientId") UUID clientId, @RequestParam("fileName") String fileName) {
+    public void deleteByIdAndFileName(@PathVariable UUID clientId, @RequestParam String fileName) {
         service.deleteByIdAndFileName(clientId, fileName);
     }
 

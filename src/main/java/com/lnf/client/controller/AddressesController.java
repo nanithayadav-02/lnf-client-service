@@ -40,7 +40,7 @@ public class AddressesController {
      */
     @PostMapping(value = "/clients/{clientId}/addresses")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable("clientId") final UUID clientId, @RequestBody final List<AddressDto> resources) {
+    public void create(@PathVariable final UUID clientId, @RequestBody final List<AddressDto> resources) {
         service.create(clientId, resources);
     }
 

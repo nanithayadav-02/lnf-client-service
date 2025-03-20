@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,7 +75,7 @@ class GstControllerTest extends BaseTestClass {
         String url = "/lnf/clients/" + clientId + "/gst";
 
         String resultContent = new String(Files
-                .readAllBytes(Paths.get(ClassLoader.getSystemResource("testdata/client-gsts.json")
+                .readAllBytes(Path.of(ClassLoader.getSystemResource("testdata/client-gsts.json")
                         .toURI())));
 
         mockMvc.perform(get(url)
@@ -90,7 +90,7 @@ class GstControllerTest extends BaseTestClass {
     void findByClientIdAndId() throws Exception {
         UUID id = UUID.fromString("cfe94b9f-c86f-4733-be96-a9b619f7bca7");
 
-        GstDto expectedDto = mockGst1 ();
+        GstDto expectedDto = mockGst1();
 
         given(service.findById(any(UUID.class), any(UUID.class))).willReturn(expectedDto);
 
@@ -123,7 +123,7 @@ class GstControllerTest extends BaseTestClass {
     @Test
     void update() {
         // Arrange
-        UUID gstId = UUID.fromString ("cfe94b9f-c86f-4733-be96-a9b619f7bca7");
+        UUID gstId = UUID.fromString("cfe94b9f-c86f-4733-be96-a9b619f7bca7");
         GstDto updatedGst = mockGst2();
         updatedGst.setId(gstId);
 
@@ -164,7 +164,7 @@ class GstControllerTest extends BaseTestClass {
     @Test
     void testDeleteByClientIdAndId() throws Exception {
         UUID id = UUID.randomUUID();
-        String urlTemplate = String.format("/lnf/clients/%s/gst/%s", clientId, id);
+        String urlTemplate = "/lnf/clients/%s/gst/%s".formatted(clientId, id);
 
         mockMvc.perform(delete(urlTemplate)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -181,7 +181,7 @@ class GstControllerTest extends BaseTestClass {
         return createGst("019d9f96-8f91-4725-9056-ed022b4cb65f", "begumpet", "GSTIN1e793bo4nj");
     }
 
-    private GstDto createGst(String id, String location,String number) {
+    private GstDto createGst(String id, String location, String number) {
         GstDto dto = new GstDto();
         dto.setId(UUID.fromString(id));
         dto.setLocation(location);

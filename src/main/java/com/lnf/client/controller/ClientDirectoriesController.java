@@ -38,8 +38,8 @@ public class ClientDirectoriesController {
 
     @GetMapping(value = "/clients/{clientId}/directory")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> findAll(@RequestParam(value = "search", required = false) String search,
-                                     @PathVariable("clientId") UUID clientId,
+    public ResponseEntity<?> findAll(@RequestParam(required = false) String search,
+                                     @PathVariable UUID clientId,
                                      @PageableAsQueryParam PageRequestDto pageRequest) {
         if (search != null && !search.isEmpty()) {
             if (pageRequest != null && pageRequest.getPage() != null) {
@@ -56,7 +56,7 @@ public class ClientDirectoriesController {
 
     @PostMapping(value = "/clients/{clientId}/directories")
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@PathVariable("clientId") UUID clientId, @RequestBody final List<ClientDirectoryDto> resource) {
+    public void create(@PathVariable UUID clientId, @RequestBody final List<ClientDirectoryDto> resource) {
         service.createAll(clientId, resource);
     }
 
