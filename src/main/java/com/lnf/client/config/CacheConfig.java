@@ -20,8 +20,6 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import redis.clients.jedis.Jedis;
 
-import java.time.Duration;
-
 
 @Configuration
 @Slf4j
@@ -33,9 +31,6 @@ public class CacheConfig {
 
     @Value("${spring.redis.port}")
     private int redisPort;
-
-    @Value("${spring.cache.redis.time-to-live}")
-    private long timeToLive;
 
     @Value("${spring.cache.redis.cache-null-values}")
     private boolean cacheNullValues;
@@ -91,8 +86,7 @@ public class CacheConfig {
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
-                .entryTtl(Duration.ofMillis(timeToLive));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer));
 
         if (!cacheNullValues) {
             config = config.disableCachingNullValues();
