@@ -110,8 +110,13 @@ public class ClientController {
      */
     @GetMapping(value = "/clients/{clientId}/projects")
     @ResponseStatus(HttpStatus.OK)
-    public List<ProjectOverviewDto> findProjectsByClientId(@PathVariable final UUID clientId) {
-        return projectService.findProjectsByClientId(clientId);
+    public ResponseEntity<?> findProjectsByClientId(@PathVariable final UUID clientId,
+                                            @PageableAsQueryParam PageRequestDto pageRequest) {
+        if (clientId != null && pageRequest != null && pageRequest.getPage() != null) {
+            return ResponseEntity.ok(projectService.findByClientIdWithPagination(clientId, pageRequest));
+        } else {
+            return ResponseEntity.ok(projectService.findProjectsByClientId(clientId));
+        }
     }
 
     /**
