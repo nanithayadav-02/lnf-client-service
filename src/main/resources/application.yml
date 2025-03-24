@@ -54,8 +54,24 @@ email:
   service:
     url: "http://localhost:8081/api/v3"
 
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE:http://localhost:8081/eureka/}
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+
+tracing:
+  url: http://localhost:4318/v1/traces
+
 # Metrics Configuration
 management:
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: true
   endpoint:
     prometheus:
       enabled: true
