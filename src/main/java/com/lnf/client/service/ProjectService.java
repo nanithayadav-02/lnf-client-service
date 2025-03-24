@@ -165,7 +165,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param projectId Project Id
      * @return ProjectDto object
      */
-    @Cacheable(value = "projects",key = "#projectId")
+    @Cacheable(value = "projects", key = "#projectId")
     public ProjectDto findByProjectId(UUID projectId) {
         Project entity = search(projectId);
         return ProjectConverter.toTransportModel(entity);
@@ -178,13 +178,21 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param clientId Project Id
      * @return List of ProjectDto objects associated to the client.
      */
-    @Cacheable(value = "projectOverviewDto",key = "#clientId")
+    @Cacheable(value = "projectOverviewDto", key = "#clientId")
     public List<ProjectOverviewDto> findProjectsByClientId(UUID clientId) {
         searchForClient(clientId);
         List<Project> projects = repository.findByClientId(clientId);
         return projects.stream().map(ProjectConverter::toMiniTransportModel)
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    public Page<ProjectOverviewDto> findByClientIdWithPagination(UUID clientId, PageRequestDto pageRequestDto) {
+        Pageable pageable = PageRequest.of(pageRequestDto.getPage(), pageRequestDto.getSize(),
+                RestUtil.constructSort(pageRequestDto.getSortBy(), pageRequestDto.getSortOrder()));
+        searchForClient(clientId);
+        Page<Project> projects = repository.findByClientId(clientId, pageable);
+        return projects.map(ProjectConverter::toMiniTransportModel);
     }
 
     /**
@@ -215,8 +223,8 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      *
      * @param resource projectDto object
      */
-    @CacheEvict(value = "projects",beforeInvocation = true, allEntries = true)
-    @CachePut(value = "projects",key = "#result.id")
+    @CacheEvict(value = "projects", beforeInvocation = true, allEntries = true)
+    @CachePut(value = "projects", key = "#result.id")
     public ProjectDto create(ProjectDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create Project with null payload");
         Project entity = ProjectConverter.toEntityModel(resource);
@@ -234,8 +242,8 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param resource  ProjectDto
      */
     @Transactional
-    @CacheEvict(value = "projects",beforeInvocation = true, allEntries = true)
-    @CachePut(value = "projects",key = "#result.id")
+    @CacheEvict(value = "projects", beforeInvocation = true, allEntries = true)
+    @CachePut(value = "projects", key = "#result.id")
     public ProjectDto update(UUID projectId, ProjectDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to update Project with null payload");
         Project entity = search(projectId);
@@ -396,7 +404,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
                 .map(Project::getCode).collect(Collectors.toSet());
 
         List<ProjectDto> invalidData = new ArrayList<>();
-        LocalDateTime uploadTime =LocalDateTime.now();
+        LocalDateTime uploadTime = LocalDateTime.now();
 
         for (Project project : entities) {
             if (existingCodes.contains(project.getCode())) {
