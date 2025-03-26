@@ -195,8 +195,6 @@ class ClientControllerTest extends BaseTestClass {
 
         String url = "/lnf/clients";
 
-        doNothing().when(service).create(any(ClientDto.class));
-
         try {
             mockMvc.perform(MockMvcRequestBuilders.post(url)
                             .contentType(APPLICATION_JSON)
@@ -215,7 +213,6 @@ class ClientControllerTest extends BaseTestClass {
         ClientDto updatedClient = createClient1();
         updatedClient.setId(clientId);
 
-        Mockito.doNothing().when(service).update(Mockito.eq(clientId), Mockito.any(ClientDto.class));
         String url = "/lnf/clients/" + clientId;
         ArgumentCaptor<ClientDto> captor = ArgumentCaptor.forClass(ClientDto.class);
 

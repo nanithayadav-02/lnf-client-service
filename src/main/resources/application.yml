@@ -2,6 +2,16 @@ spring:
   profiles:
     active: dev-ide
 
+  redis:
+    host: localhost
+    port: 6379
+  cache:
+    redis:
+      time-to-live: 3600000
+      cache-null-values: false
+      use-key-prefix: true
+    type: redis
+
   flyway:
     enabled: ${SPRING_FLYWAY_ENABLED:false}
     baseline-on-migrate: true
@@ -44,8 +54,25 @@ email:
   service:
     url: "http://localhost:8081/api/v3"
 
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    enabled: ${EUREKA_ENABLED:false}
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE:http://localhost:8081/eureka/}
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+
+tracing:
+  url: ${TRACING_URL:http://localhost:4318/v1/traces}
+
 # Metrics Configuration
 management:
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: ${TRACING_ENABLED:true}
   endpoint:
     prometheus:
       enabled: true
@@ -61,8 +88,8 @@ management:
   prometheus.metrics.export.enabled: true
 logging:
   level:
-    org:
-      springframework: INFO
+    org.springframework: INFO
+    org.springframework.data: WARN
     root: ERROR
     com.lnf.client.*: DEBUG
 

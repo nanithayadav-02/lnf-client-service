@@ -60,7 +60,7 @@ public class ProjectTaskEmployeeService {
      * @param taskId    Task Id
      * @return TaskEmployeeDto
      */
-    @Cacheable(value = "projectTaskEmployees")
+
     public ProjectTaskEmployeeDto findEmployeesByProjectIdAndTaskId(final UUID projectId, final UUID taskId) {
         Project project = searchForProject(projectId);
         Task task = searchForTask(taskId);
@@ -72,7 +72,6 @@ public class ProjectTaskEmployeeService {
         return createProjectTaskEmployeeDto(taskId, project, task, employeeDtos);
     }
 
-    @Cacheable(value = "projectTaskEmployees")
     public Map<String, Object> findAllAssignedEmployees(final UUID projectId, final UUID taskId, int page, Integer size) {
         Project project = searchForProject(projectId);
         Task task = searchForTask(taskId);
