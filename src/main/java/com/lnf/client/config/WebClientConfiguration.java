@@ -99,7 +99,10 @@ public class WebClientConfiguration {
     }
 
     @Bean
-    OtlpHttpSpanExporter otlpHttpSpanExporter(@Value("${tracing.url}") String url) {
+    OtlpHttpSpanExporter otlpHttpSpanExporter(@Value("${tracing.url:}") String url) {
+        if (url == null || url.isEmpty()) {
+            return null;
+        }
         return OtlpHttpSpanExporter.builder()
                 .setEndpoint(url)
                 .build();
