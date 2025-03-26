@@ -65,7 +65,7 @@ eureka:
     hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
 
 tracing:
-  url: ${TRACING_URL:http://jaeger:4318/v1/traces}
+  url: ${TRACING_URL:http://localhost:4318/v1/traces}
 
 # Metrics Configuration
 management:
