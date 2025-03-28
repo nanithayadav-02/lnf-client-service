@@ -19,9 +19,8 @@ package com.lnf.client.service;
 import com.lnf.client.converter.ClientConverter;
 import com.lnf.client.converter.ProjectConverter;
 import com.lnf.client.converter.TaskConverter;
-import com.lnf.client.model.Client;
-import com.lnf.client.model.Project;
-import com.lnf.client.model.Task;
+import com.lnf.client.model.*;
+import com.lnf.client.model.enums.AddressType;
 import com.lnf.dto.client.ClientDto;
 import com.lnf.dto.client.ProjectDto;
 import com.lnf.dto.client.TaskDto;
@@ -330,7 +329,7 @@ public class DataExportService {
     }
 
     private Client toClientDto(String[] rowData) {
-        if (rowData == null || rowData.length < 9) {
+        if (rowData == null || rowData.length < 27) {
             throw new IllegalArgumentException(ROW_DATA_ARRAY_IS_NULL_OR_HAS_INSUFFICIENT_ELEMENTS);
         }
 
@@ -349,12 +348,105 @@ public class DataExportService {
         LocalDate agreementExpiryDate = LocalDate.parse(rowData[6], dateFormatter);
         String serviceType = rowData[7];
         String clientDetails = rowData[8];
+        String addressText = rowData[9];
+        String town = rowData[10];
+        String city = rowData[11];
+        String state = rowData[12];
+        String country = rowData[13];
+        String postCode = rowData[14];
+        postCode = postCode.replace(".0","");
+        String addressType = rowData[15];
+        String contactName = rowData[16];
+        String contactPhoneNumber = formatNumber(rowData[17]);
+        String contactDesignation = rowData[18];
+        String contactDepartment = rowData[19];
+        String contactEmail = rowData[20];
+        String escalationName = rowData[21];
+        String escalationEmail = rowData[22];
+        String escalationMobileNumber = formatNumber(rowData[23]);
+        String escalationPhoneNumber = formatNumber(rowData[24]);
+        String gstNumber = rowData[25];
+        String gstLocation = rowData[26];
 
-        return new Client(code, name, pan, null, tan, status, workingFrom, agreementExpiryDate, serviceType,
-                clientDetails, null, null, null, null, null, null, null,
-                null, null, null);
+        // Create objects only if valid
+        ClientAddress clientAddress = buildClientAddress(addressText, town, city, state, country, postCode, addressType);
+        ClientContact clientContact = buildClientContact(contactName, contactPhoneNumber, contactDesignation, contactDepartment, contactEmail);
+        Escalation escalation = buildEscalation(escalationName, escalationEmail, escalationMobileNumber, escalationPhoneNumber);
+        Gst gst = buildGst(gstLocation, gstNumber);
+
+        // Set collections
+        Set<ClientAddress> addressSet = createSetIfValid(clientAddress);
+        Set<ClientContact> clientContactSet = createSetIfValid(clientContact);
+        Set<Escalation> escalationSet = createSetIfValid(escalation);
+        Set<Gst> gstSet = createSetIfValid(gst);
+
+        return new Client(
+                code, name, pan, null, tan, status, workingFrom, agreementExpiryDate, serviceType, clientDetails,
+                null, addressSet, clientContactSet, escalationSet, gstSet, null, null, null, null, null
+        );
     }
 
+    private ClientAddress buildClientAddress(String addressText, String town, String city, String state, String country, String postCode, String addressType) {
+        if (StringUtils.isNotBlank(addressText) && StringUtils.isNotBlank(town) && StringUtils.isNotBlank(city) &&
+                StringUtils.isNotBlank(state) && StringUtils.isNotBlank(country) && StringUtils.isNotBlank(postCode) &&
+                addressType != null) {
+            ClientAddress clientAddress = new ClientAddress();
+            clientAddress.setAddressText(addressText);
+            clientAddress.setTown(town);
+            clientAddress.setCity(city);
+            clientAddress.setState(state);
+            clientAddress.setCountry(country);
+            clientAddress.setPostCode(postCode);
+            clientAddress.setAddressType(AddressType.valueOf(addressType));
+            return clientAddress;
+        }
+        return null;
+    }
+
+    private ClientContact buildClientContact(String name, String phoneNumber, String designation, String department, String email) {
+        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(phoneNumber) && StringUtils.isNotBlank(designation) &&
+                StringUtils.isNotBlank(department) && StringUtils.isNotBlank(email)) {
+            ClientContact clientContact = new ClientContact();
+            clientContact.setName(name);
+            clientContact.setPhoneNumber(phoneNumber);
+            clientContact.setDesignation(designation);
+            clientContact.setDepartment(department);
+            clientContact.setEmail(email);
+            return clientContact;
+        }
+        return null;
+    }
+
+    private Escalation buildEscalation(String name, String email, String mobileNumber, String phoneNumber) {
+        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(email) && StringUtils.isNotBlank(mobileNumber) &&
+                StringUtils.isNotBlank(phoneNumber)) {
+            Escalation escalation = new Escalation();
+            escalation.setName(name);
+            escalation.setEmail(email);
+            escalation.setMobileNumber(mobileNumber);
+            escalation.setPhoneNumber(phoneNumber);
+            return escalation;
+        }
+        return null;
+    }
+
+    private Gst buildGst(String location, String number) {
+        if (StringUtils.isNotBlank(location) && StringUtils.isNotBlank(number)) {
+            Gst gst = new Gst();
+            gst.setLocation(location);
+            gst.setNumber(number);
+            return gst;
+        }
+        return null;
+    }
+
+    private <T> Set<T> createSetIfValid(T object) {
+        Set<T> set = new HashSet<>();
+        if (object != null) {
+            set.add(object);
+        }
+        return set;
+    }
 
     public List<ProjectDto> retrieveProjectFile(MultipartFile file, UUID clientId) throws IOException {
         return handleUploadedProjectFile(file, clientId);
@@ -467,6 +559,14 @@ public class DataExportService {
         String type = rowData[5];
 
         return new Task(name, type, status, description, startDate, endDate, null, project);
+    }
+
+    private String formatNumber(String phoneNumber) {
+        if (phoneNumber != null && phoneNumber.contains("E")) {
+            return String.format("%.0f", Double.parseDouble(phoneNumber));
+        } else {
+            return phoneNumber;
+        }
     }
 
 }

@@ -54,9 +54,9 @@ public class ProjectEmployeeService {
      * @param projectId Project Id
      * @return ProjectEmployeeDto
      */
-    @Cacheable(value = "projectEmployees")
-    public ProjectEmployeeDto findEmployeesByProjectId(final UUID projectId) {
-        Project project = searchForProject(projectId);
+    @Cacheable(value = "projectEmployees",key = "#projectEmpId")
+    public ProjectEmployeeDto findEmployeesByProjectId(final UUID projectEmpId) {
+        Project project = searchForProject(projectEmpId);
 
         // Get the list of employees associated with the project
         List<ProjectEmployee> employees = repository.findByProject(project);
@@ -65,7 +65,6 @@ public class ProjectEmployeeService {
         return createProjectEmployeeDto(project, employeeDtos);
     }
 
-    @Cacheable(value = "projectEmployees")
     public Map<String, Object> findAllAssignedEmployees(final UUID projectId, int page, Integer size) {
         Project project = searchForProject(projectId);
         List<ProjectEmployee> employees = repository.findByProject(project);
