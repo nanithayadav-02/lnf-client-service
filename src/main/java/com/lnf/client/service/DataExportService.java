@@ -381,7 +381,7 @@ public class DataExportService {
         Set<Gst> gstSet = createSetIfValid(gst);
 
         return new Client(
-                code, name, pan, null, tan, status, workingFrom, agreementExpiryDate, serviceType, clientDetails,
+                code, name, pan, null, tan, status, workingFrom, agreementExpiryDate, serviceType, clientDetails, null,
                 null, addressSet, clientContactSet, escalationSet, gstSet, null, null, null, null, null
         );
     }

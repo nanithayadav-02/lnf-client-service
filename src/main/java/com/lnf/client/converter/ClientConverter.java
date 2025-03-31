@@ -22,7 +22,6 @@ import com.lnf.dto.client.AddressDto;
 import com.lnf.dto.client.ClientDto;
 import com.lnf.dto.client.ClientOverviewDto;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class ClientConverter {
@@ -48,6 +47,7 @@ public class ClientConverter {
         dto.setServiceType(entity.getServiceType());
         dto.setClientDetails(entity.getClientDetails());
         dto.setUploadTime(entity.getUploadTime());
+        dto.setCategory(entity.getCategory());
         Optional.ofNullable(entity.getClientContacts())
                 .ifPresent(clientContacts ->
                         dto.getContacts().addAll(
@@ -164,6 +164,7 @@ public class ClientConverter {
         entity.setAgreementExpiryDate(transport.getAgreementExpiryDate());
         entity.setServiceType(transport.getServiceType());
         entity.setClientDetails(transport.getClientDetails());
+        entity.setCategory(transport.getCategory());
 
         return entity;
     }
