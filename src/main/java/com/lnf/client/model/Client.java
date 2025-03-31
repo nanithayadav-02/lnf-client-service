@@ -69,6 +69,9 @@ public class Client extends AuditableEntity {
     @Column(name = "upload_time")
     private LocalDateTime uploadTime;
 
+    @Column(name = "category")
+    private String category;
+
     @ToString.Exclude
     @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
