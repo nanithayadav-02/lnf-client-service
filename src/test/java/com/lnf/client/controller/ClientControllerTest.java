@@ -30,9 +30,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
@@ -50,6 +53,7 @@ import java.util.UUID;
 
 import static org.aspectj.bridge.MessageUtil.fail;
 import static org.hamcrest.Matchers.containsString;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -71,6 +75,9 @@ class ClientControllerTest extends BaseTestClass {
     private UUID clientId;
     @Autowired
     private PaginationAndSortingHandler paginationAndSortingHandler;
+
+    @Autowired
+    private ClientController controller;
 
     @BeforeAll
     void beforeAll() {
@@ -442,6 +449,63 @@ class ClientControllerTest extends BaseTestClass {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void testDeleteLastUpload() throws Exception {
+        doNothing().when(service).deleteLastUploadFile();
+
+        mockMvc.perform(delete("/lnf/clients/last-upload"))
+                .andExpect(status().isNoContent());
+
+        verify(service, times(1)).deleteLastUploadFile();
+    }
+
+    @Test
+    public void testDeleteClients() throws Exception {
+        List<UUID> clientIds = Arrays.asList(UUID.randomUUID(), UUID.randomUUID());
+
+        doNothing().when(service).deleteClientList(clientIds);
+
+        mockMvc.perform(delete("/lnf/clients")
+                        .contentType("application/json")
+                        .content("[\"" + clientIds.get(0) + "\", \"" + clientIds.get(1) + "\"]"))
+                .andExpect(status().isNoContent());
+
+        verify(service, times(1)).deleteClientList(clientIds);
+    }
+
+    @Test
+    public void testGetLastUpload() throws Exception {
+
+        List<ClientDto> expectedDto = List.of(createClient1());
+
+        Page<ClientDto> mockedPage = new PageImpl<>(expectedDto, PageRequest.of(0, 10), 1);
+
+        PageRequestDto pageRequest = new PageRequestDto(0, 10, "null", "null");
+
+        given(service.getLastUploadData(ArgumentMatchers.eq(pageRequest)))
+                .willReturn(mockedPage);
+
+        String url = "/lnf/clients/last-upload";
+
+        mockMvc.perform(get(url)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        assertEquals(expectedDto, mockedPage.getContent());
+    }
+
+    @Test
+    void testCreateProjects() {
+        List<ClientDto> client = List.of(createClient1());
+
+        when(service.create(client)).thenReturn(client);
+
+        List<ClientDto> result = controller.create(client);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
     }
 
 }
