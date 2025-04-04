@@ -21,6 +21,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.lnf.client.BaseTestClass;
 import com.lnf.client.service.TaskService;
 import com.lnf.dto.client.TaskDto;
+import com.lnf.dto.common.PageRequestDto;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
 import com.lnf.util.RestUtil;
 import org.junit.jupiter.api.Assertions;
@@ -48,7 +49,9 @@ import java.util.UUID;
 
 import static org.aspectj.bridge.MessageUtil.fail;
 import static org.hamcrest.Matchers.containsString;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -63,6 +66,8 @@ class TaskControllerTest extends BaseTestClass {
     private MockMvc mockMvc;
     @Autowired
     private TaskService service;
+    @Autowired
+    private TaskController taskController;
     private UUID projectId;
 
     @BeforeAll
@@ -303,6 +308,52 @@ class TaskControllerTest extends BaseTestClass {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    void testDeleteLastUpload() {
+        doNothing().when(service).deleteLastUploadFile();
+
+        taskController.deleteLastUpload();
+
+        verify(service, times(1)).deleteLastUploadFile();
+    }
+
+    @Test
+    void testDeleteTasks() {
+        List<UUID> taskIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+
+        doNothing().when(service).deleteTaskList(taskIds);
+
+        taskController.deleteTasks(taskIds);
+
+        verify(service, times(1)).deleteTaskList(taskIds);
+    }
+
+    @Test
+    void testGetLastUpload() {
+        PageRequestDto pageRequest = new PageRequestDto(0, 10, null, null);
+        Page<TaskDto> taskPage = new PageImpl<>(List.of(mockTask1()));
+
+        when(service.getLastUploadData(pageRequest)).thenReturn(taskPage);
+
+        Page<TaskDto> result = taskController.getLastUpload(pageRequest);
+
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertEquals(1, result.getContent().size());
+    }
+
+    @Test
+    void testCreateTasks() {
+        List<TaskDto> tasks = List.of(mockTask1());
+
+        when(service.create(projectId, tasks)).thenReturn(tasks);
+
+        List<TaskDto> result = taskController.create(projectId, tasks);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
     }
 
 }
