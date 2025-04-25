@@ -34,6 +34,7 @@ import com.lnf.util.RestUtil;
 import com.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -58,7 +59,8 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
     private final ProjectService projectService;
     private final CacheManager cacheManager;
     private final DocumentService documentService;
-    public final ApplicationContext applicationContext;
+    @Autowired
+    public ApplicationContext applicationContext;
 
     /**
      * Return requested page with list of ClientDto objects with requested size. Raises LnFEntityNotFoundException
