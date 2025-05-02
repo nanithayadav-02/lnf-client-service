@@ -34,9 +34,11 @@ import com.lnf.util.RestUtil;
 import com.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -57,6 +59,8 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
     private final ProjectService projectService;
     private final CacheManager cacheManager;
     private final DocumentService documentService;
+    @Autowired
+    public ApplicationContext applicationContext;
 
     /**
      * Return requested page with list of ClientDto objects with requested size. Raises LnFEntityNotFoundException
@@ -127,14 +131,13 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
     /**
      * Returns clientDto from the clientId. Raises LnFEntityNotFoundException
      * if there is no client with the input clientId
-
+     *
      * @param clientId Client Id
      * @return ClientDto object
      */
-    @Cacheable(value = "clients",key = "#clientId")
+    @Cacheable(value = "clients", key = "#clientId")
     public ClientDto findByClientId(UUID clientId) {
-        Client entity = search(clientId);
-        return findClientWithDocument(entity);
+        return getClientDto(clientId);
     }
 
     public Page<ClientDto> findingAllWithPagination(String search, PageRequestDto pageRequestDto) {
@@ -165,7 +168,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @param resource ClientDto
      */
     @Transactional
-    @CachePut(value = "clients",key = "#result.id")
+    @CachePut(value = "clients", key = "#result.id")
     public ClientDto update(UUID clientId, ClientDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
                 "Failed to update Client with null payload");
@@ -173,7 +176,24 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
         Client updatedEntity = ClientConverter.toEntityModel(resource, entity);
         saveEntity(updatedEntity);
         log.debug("Client {} successfully updated", clientId);
+
+        if (clientId != null) {
+            //updating the cache
+            applicationContext.getBean(this.getClass()).updateClient(clientId);
+        }
         return ClientConverter.toTransportModel(updatedEntity);
+    }
+
+    @CachePut(value = "clients", key = "#clientId")
+    // don't make this method void because cache put needs return type
+    public ClientDto updateClient(UUID clientId) {
+        log.debug("Updating cache for clientId: {}", clientId);
+        return getClientDto(clientId);
+    }
+
+    private ClientDto getClientDto(UUID clientId) {
+        Client entity = search(clientId);
+        return findClientWithDocument(entity);
     }
 
     private Client saveAndCacheEntity(Client entity) {

@@ -31,6 +31,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
@@ -44,7 +45,9 @@ import java.util.*;
 
 import static org.aspectj.bridge.MessageUtil.fail;
 import static org.hamcrest.Matchers.containsString;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -63,6 +66,10 @@ class ProjectControllerTest extends BaseTestClass {
     private PaginationAndSortingHandler paginationAndSortingHandler;
     @Autowired
     private DataExportService dataExportService;
+    @Autowired
+    private ProjectController projectController;
+
+    private UUID clientId = UUID.randomUUID();
 
     @Test
     void findAll() {
@@ -328,6 +335,52 @@ class ProjectControllerTest extends BaseTestClass {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    void testDeleteLastUpload() {
+        doNothing().when(service).deleteLastUploadFile();
+
+        projectController.deleteLastUpload();
+
+        verify(service, times(1)).deleteLastUploadFile();
+    }
+
+    @Test
+    void testDeleteProjects() {
+        List<UUID> projectIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+
+        doNothing().when(service).deleteProjectList(projectIds);
+
+        projectController.deleteProjects(projectIds);
+
+        verify(service, times(1)).deleteProjectList(projectIds);
+    }
+
+    @Test
+    void testGetLastUpload() {
+        PageRequestDto pageRequest = new PageRequestDto(0, 10, null, null);
+        Page<ProjectDto> projectPage = new PageImpl<>(List.of(mockProject2()));
+
+        when(service.getLastUploadData(pageRequest)).thenReturn(projectPage);
+
+        Page<ProjectDto> result = projectController.getLastUpload(pageRequest);
+
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertEquals(1, result.getContent().size());
+    }
+
+    @Test
+    void testCreateProjects() {
+        List<ProjectDto> projects = List.of(mockProject2());
+
+        when(service.create(projects, clientId)).thenReturn(projects);
+
+        List<ProjectDto> result = projectController.create(projects, clientId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
     }
 
 }
