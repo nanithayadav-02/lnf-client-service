@@ -22,6 +22,7 @@ import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -99,6 +100,7 @@ public class WebClientConfiguration {
     }
 
     @Bean
+    @ConditionalOnProperty(name = "management.tracing.enabled", havingValue = "true", matchIfMissing = false)
     OtlpHttpSpanExporter otlpHttpSpanExporter(@Value("${tracing.url:}") String url) {
         if (url == null || url.isEmpty()) {
             return null;
