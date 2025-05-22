@@ -60,7 +60,7 @@ email:
 
 lnf:
   audit:
-    enabled: ${AUDIT_ENABLED:true}
+    enabled: ${AUDIT_ENABLED:false}
 
 eureka:
   client:
