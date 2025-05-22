@@ -50,9 +50,17 @@ timesheet:
   service:
     url: "http://localhost:8081/api/v3"
 
+audit:
+  service:
+    url: "http://localhost:8081/api/v3"
+
 email:
   service:
     url: "http://localhost:8081/api/v3"
+
+lnf:
+  audit:
+    enabled: ${AUDIT_ENABLED:false}
 
 eureka:
   client:
@@ -92,6 +100,7 @@ logging:
     org.springframework.data: WARN
     root: ERROR
     com.lnf.client.*: DEBUG
+    com.lnf.listener.audit.ChangeTrackerListener: DEBUG
 
 springdoc:
   api-docs:
