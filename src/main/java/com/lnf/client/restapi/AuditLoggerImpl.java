@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@ConditionalOnProperty(name = "lnf.audit.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "lnf.audit.enabled", havingValue = "true",matchIfMissing = false)
 public class AuditLoggerImpl implements AuditLoggerService {
 
     private final AuditClientImpl auditClient;
