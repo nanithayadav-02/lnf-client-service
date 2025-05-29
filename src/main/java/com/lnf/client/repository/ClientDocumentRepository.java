@@ -30,9 +30,9 @@ import org.springframework.data.repository.query.Param;
 public interface ClientDocumentRepository extends JpaRepository<ClientDocument, UUID> {
 
     @Query("SELECT cd FROM ClientDocument cd WHERE cd.client.id = :client_id AND cd.type = :type")
-    Optional<ClientDocument> findByClientIdAndType(@Param("client_id") UUID client_id, @Param("type") DocumentType type);
+    Optional<ClientDocument> findByClientIdAndType(@Param("client_id") UUID clientId, @Param("type") DocumentType type);
 
     @Query("SELECT cd FROM ClientDocument cd WHERE cd.client.id = :client_id")
-    List<ClientDocument> findByClientId(@Param("client_id") UUID client_id);
+    List<ClientDocument> findByClientId(@Param("client_id") UUID clientId);
 
 }

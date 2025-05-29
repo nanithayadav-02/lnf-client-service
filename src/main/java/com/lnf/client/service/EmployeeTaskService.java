@@ -37,6 +37,8 @@ import java.util.stream.Stream;
 @Slf4j
 public class EmployeeTaskService {
 
+    public static final String TOTAL_PAGES = "totalPages";
+    public static final String TOTAL_ELEMENTS = "totalElements";
     private final EmployeeProjectService employeeProjectService;
     private final EmployeeProjectTaskService employeeProjectTaskService;
     private final ProjectTaskEmployeeRepository projectTaskEmployeeRepository;
@@ -83,8 +85,8 @@ public class EmployeeTaskService {
         Map<String, Object> result = new HashMap<>();
         result.put("employeeId", employeeId);
         result.put("tasks", paginatedResult.get("data"));
-        result.put("totalPages", paginatedResult.get("totalPages"));
-        result.put("totalElements", paginatedResult.get("totalElements"));
+        result.put(TOTAL_PAGES, paginatedResult.get(TOTAL_PAGES));
+        result.put(TOTAL_ELEMENTS, paginatedResult.get(TOTAL_ELEMENTS));
         return result;
     }
 
@@ -99,8 +101,8 @@ public class EmployeeTaskService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("data", paginatedTasks);
-        result.put("totalElements", totalElements);
-        result.put("totalPages", (int) Math.ceil((double) totalElements / size));
+        result.put(TOTAL_ELEMENTS, totalElements);
+        result.put(TOTAL_PAGES, (int) Math.ceil((double) totalElements / size));
         return result;
     }
 

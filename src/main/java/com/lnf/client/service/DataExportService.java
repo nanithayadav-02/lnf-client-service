@@ -67,7 +67,7 @@ public class DataExportService {
     public static final String ROW_DATA_ARRAY_IS_NULL_OR_HAS_INSUFFICIENT_ELEMENTS = "rowData array is null or has insufficient elements.";
     public static final String ENCOUNTERED_AN_ERROR_WHILE_READING_THE_FILE = "Encountered an error while reading the file {}";
     public static final String ENCOUNTERED_AN_ERROR_WHILE_PARSING_THE_CSV_DATA = "Encountered an error while parsing the CSV data {}";
-    public static final String COULD_NOT_DELETE_THE_FILE = "Could not delete the file ";
+    public static final String COULD_NOT_DELETE_THE_FILE = "Could not delete the file {}";
 
     private final ClientService clientService;
     private final ProjectService projectService;
@@ -322,8 +322,10 @@ public class DataExportService {
             log.error(ENCOUNTERED_AN_ERROR_WHILE_PARSING_THE_CSV_DATA, file);
             throw new LnFException("Encountered an error while parsing the CSV data", e);
         } finally {
-            if (!csvFile.delete()) {
-                log.error(COULD_NOT_DELETE_THE_FILE + csvFile.getAbsolutePath());
+            try {
+                Files.delete(csvFile.toPath());
+            } catch (IOException e) {
+                log.error(COULD_NOT_DELETE_THE_FILE, csvFile.getAbsolutePath(), e);
             }
         }
     }
@@ -470,8 +472,10 @@ public class DataExportService {
             log.error(ENCOUNTERED_AN_ERROR_WHILE_PARSING_THE_CSV_DATA, file);
             throw new LnFException("Encountered an error while parsing the CSV data", e);
         } finally {
-            if (!csvFile.delete()) {
-                log.error(COULD_NOT_DELETE_THE_FILE + csvFile.getAbsolutePath());
+            try {
+                Files.delete(csvFile.toPath());
+            } catch (IOException e) {
+                log.error(COULD_NOT_DELETE_THE_FILE, csvFile.getAbsolutePath(), e);
             }
         }
     }
@@ -533,8 +537,10 @@ public class DataExportService {
             log.error(ENCOUNTERED_AN_ERROR_WHILE_PARSING_THE_CSV_DATA, file);
             throw new LnFException("Encountered an error while parsing the CSV data", e);
         } finally {
-            if (!csvFile.delete()) {
-                log.error(COULD_NOT_DELETE_THE_FILE + csvFile.getAbsolutePath());
+            try {
+                Files.delete(csvFile.toPath());
+            } catch (IOException e) {
+                log.error(COULD_NOT_DELETE_THE_FILE, csvFile.getAbsolutePath(), e);
             }
         }
     }

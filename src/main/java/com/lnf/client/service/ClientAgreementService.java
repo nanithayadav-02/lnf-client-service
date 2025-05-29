@@ -49,6 +49,7 @@ public class ClientAgreementService {
 
     public static final String AGREEMENTS = "agreements";
     public static final String S_S_S = "%s/%s/%s/";
+    public static final String S_S_S_S = "%s/%s/%s/%s";
     private final ClientAgreementRepository repository;
     private final ClientRepository clientRepository;
     private final FileService fileService;
@@ -83,7 +84,7 @@ public class ClientAgreementService {
     public ResponseEntity<byte[]> findById(UUID clientId, String fileName) {
         try {
             searchForFileName(fileName);
-            String filePath = "%s/%s/%s/%s".formatted(folderName, clientId, AGREEMENTS, fileName);
+            String filePath = S_S_S_S.formatted(folderName, clientId, AGREEMENTS, fileName);
             return fileService.findFileContent(filePath);
         } catch (RuntimeException e) {
             String errorMessage = "file not found for agreement[%s]".formatted(clientId);
@@ -122,7 +123,7 @@ public class ClientAgreementService {
             Agreement entity = searchForFileName(fileName);
             Agreement updatedEntity = ClientAgreementConverter.toEntityModel(resource, entity);
             save(updatedEntity);
-            String s3ObjectKey = "%s/%s/%s/%s".formatted(folderName, clientId, AGREEMENTS, fileName);
+            String s3ObjectKey = S_S_S_S.formatted(folderName, clientId, AGREEMENTS, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
             log.debug("S3 object deleted for sows file");
@@ -143,7 +144,7 @@ public class ClientAgreementService {
         searchForClientId(clientId);
         Agreement entity = searchForFileName(fileName);
         try {
-            String s3ObjectKey = "%s/%s/%s/%s".formatted(folderName, clientId, AGREEMENTS, fileName);
+            String s3ObjectKey = S_S_S_S.formatted(folderName, clientId, AGREEMENTS, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
             log.debug("S3 object deleted for agreement file");

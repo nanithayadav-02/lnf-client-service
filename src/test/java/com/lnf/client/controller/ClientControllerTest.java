@@ -380,27 +380,6 @@ class ClientControllerTest extends BaseTestClass {
         return dto;
     }
 
-    private void performAndVerifyGet(String url, ResultMatcher statusMatcher, String containsString,
-                                     ProjectDto expectedDto) throws Exception {
-        mockMvc.perform(get(url))
-                .andExpect(statusMatcher)
-                .andExpect(content().string(containsString(containsString)))
-                .andExpect(jsonPath("$.id").value(expectedDto.getId().toString())) // Validate ID
-                .andExpect(jsonPath("$.code").value(expectedDto.getCode()))
-                .andExpect(jsonPath("$.name").value(expectedDto.getName()))
-                .andExpect(jsonPath("$.type").value(expectedDto.getType()))
-                .andExpect(jsonPath("$.description").value(expectedDto.getDescription()))
-                .andExpect(jsonPath("$.purchaseOrder").value(expectedDto.getPurchaseOrder()))
-                .andExpect(jsonPath("$.budgetTerms").value(expectedDto.getBudgetTerms()))
-                .andExpect(jsonPath("$.status").value(expectedDto.getStatus()))
-                .andExpect(jsonPath("$.currency").value(expectedDto.getCurrency()))
-                .andExpect(jsonPath("$.budget").value(expectedDto.getBudget().toString()))
-                .andExpect(jsonPath("$.hoursPerDay").value(expectedDto.getHoursPerDay()))
-                .andExpect(jsonPath("$.billingTerm").value(expectedDto.getBillingTerm()))
-                .andExpect(jsonPath("$.startDate").value(expectedDto.getStartDate().toString()))
-                .andExpect(jsonPath("$.endDate").value(expectedDto.getEndDate().toString()));
-    }
-
     private ClientEmployeeDto mockEmployee1() {
         return createEmployee("011becae-fd68-46c3-a857-59153d98a1b8", "HRD-TE-TF-5030", "Vikrant", "thakur", "Vicky@gmail.com",
                 "9676099703", "ACTIVE", "BA");
@@ -409,21 +388,6 @@ class ClientControllerTest extends BaseTestClass {
     private ClientEmployeeDto mockEmployee2() {
         return createEmployee("f12b86f8-7dab-42c6-a2db-6cf82e7e9e33", "HRD-CE-TF-3033", "Kushbu", "sharma", "Kushbu@gmail.com",
                 "9876543210", "TERMINATED", "SE");
-    }
-
-    private void performAndVerifyGet(String url, ResultMatcher statusMatcher, String containsString,
-                                     ClientEmployeeDto expectedDto) throws Exception {
-        mockMvc.perform(get(url))
-                .andExpect(statusMatcher)
-                .andExpect(content().string(containsString(containsString)))
-                .andExpect(jsonPath("$.id").value(expectedDto.getId().toString()))
-                .andExpect(jsonPath("$.employeeId").value(expectedDto.getEmployeeId()))
-                .andExpect(jsonPath("$.firstName").value(expectedDto.getFirstName()))
-                .andExpect(jsonPath("$.lastName").value(expectedDto.getLastName()))
-                .andExpect(jsonPath("$.email").value(expectedDto.getEmail()))
-                .andExpect(jsonPath("$.mobileNumber").value(expectedDto.getMobileNumber()))
-                .andExpect(jsonPath("$.employmentStatus").value(expectedDto.getEmploymentStatus()))
-                .andExpect(jsonPath("$.designation").value(expectedDto.getDesignation()));
     }
 
     private ClientEmployeeDto createEmployee(String id, String employeeId, String firstName, String lastName,

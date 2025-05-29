@@ -165,7 +165,8 @@ public class EmployeeProjectAndTaskService {
         try {
             repository.save(entity);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save Project[%s], Task [%s] and employeeId [%s]",
+            String errorMessage = String.format("Failed to save Project[%s], Task [%s] and employeeId [%s]"
+                    , entity.getProject().getName(),
                     entity.getTask().getId(), entity.getEmployeeId());
             throw new LnFException(errorMessage);
         }

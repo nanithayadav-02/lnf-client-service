@@ -28,6 +28,6 @@ import org.springframework.data.repository.query.Param;
 public interface ClientContactRepository extends JpaRepository<ClientContact, UUID> {
 
     @Query("SELECT cc FROM ClientContact cc WHERE cc.client.id = :client_id")
-    List<ClientContact> findByClientId(@Param("client_id") UUID client_id);
+    List<ClientContact> findByClientId(@Param("client_id") UUID clientId);
 
 }

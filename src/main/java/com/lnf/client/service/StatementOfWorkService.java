@@ -50,6 +50,7 @@ public class StatementOfWorkService {
     public static final String PROJECT = "project";
     public static final String SOW = "sow";
     public static final String S_S_S_S_S = "%s/%s/%s/%s/%s/";
+    public static final String S_S_S_S = "%s/%s/%s/%s/%s/%s";
     private final StatementOfWorkRepository repository;
     private final ProjectRepository projectRepository;
     private final FileService fileService;
@@ -86,7 +87,7 @@ public class StatementOfWorkService {
     public ResponseEntity<byte[]> findById(UUID clientId, UUID projectId, String fileName) {
         try {
             searchForFileName(fileName);
-            String filePath = "%s/%s/%s/%s/%s/%s".formatted(folderName, clientId, PROJECT, projectId, SOW, fileName);
+            String filePath = S_S_S_S.formatted(folderName, clientId, PROJECT, projectId, SOW, fileName);
             return fileService.findFileContent(filePath);
         } catch (RuntimeException e) {
             String errorMessage = "file not found for sows[%s]".formatted(projectId);
@@ -125,7 +126,7 @@ public class StatementOfWorkService {
             StatementOfWork entity = searchForFileName(fileName);
             StatementOfWork updatedEntity = StatementOfWorkConverter.toEntityModel(resource, entity);
             save(updatedEntity);
-            String s3ObjectKey = "%s/%s/%s/%s/%s/%s".formatted(folderName, clientId, PROJECT, projectId, SOW, fileName);
+            String s3ObjectKey = S_S_S_S.formatted(folderName, clientId, PROJECT, projectId, SOW, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
             log.debug("S3 object deleted for sows file");
@@ -146,7 +147,7 @@ public class StatementOfWorkService {
         searchForProjectIdAndClientId(projectId, clientId);
         StatementOfWork entity = searchForFileName(fileName);
         try {
-            String s3ObjectKey = "%s/%s/%s/%s/%s/%s".formatted(folderName, clientId, PROJECT, projectId, SOW, fileName);
+            String s3ObjectKey = S_S_S_S.formatted(folderName, clientId, PROJECT, projectId, SOW, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
             fileService.delete(filePaths);
             log.debug("S3 object deleted for sows file");

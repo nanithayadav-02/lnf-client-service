@@ -178,10 +178,6 @@ public class ClientDirectoryControllerTest extends BaseTestClass {
         verify(service, times(1)).findByEmail(email);
     }
 
-    private String readJsonFromFile(String filePath) throws Exception {
-        return new String(Files.readAllBytes(Path.of(ClassLoader.getSystemResource(filePath).toURI())));
-    }
-
     private ClientDirectoryDto createClientDirectory1() {
         return createClientDirectoryDto(
                 "123e4567-e89b-12d3-a456-426614174000",
