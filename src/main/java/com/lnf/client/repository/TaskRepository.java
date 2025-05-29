@@ -31,9 +31,9 @@ import java.util.UUID;
 public interface TaskRepository extends JpaRepository<Task, UUID>, JpaSpecificationExecutor<Task> {
 
 
-    List<Task> findByProjectId(UUID project_id);
+    List<Task> findByProjectId(UUID projectId);
 
-    List<Task> findByProjectId(UUID project_id, Sort sort);
+    List<Task> findByProjectId(UUID projectId, Sort sort);
 
     Page<Task> findByProjectId(UUID projectId, Pageable pageable);
 

@@ -300,15 +300,6 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         return resultPage.map(ProjectConverter::toMiniTransportModel);
     }
 
-    private void saveEntity(Project entity) {
-        try {
-            repository.save(entity);
-        } catch (RuntimeException e) {
-            String errorMessage = String.format("Failed to save Project [%s]", entity.getClient().getId());
-            throw new LnFException(errorMessage);
-        }
-    }
-
     private Project saveAndCacheEntity(Project entity) {
         try {
             return repository.save(entity);

@@ -27,6 +27,6 @@ import org.springframework.data.repository.query.Param;
 public interface GstRepository extends JpaRepository<Gst, UUID> {
 
     @Query("SELECT g FROM Gst g WHERE g.client.id = :client_id")
-    List<Gst> findByClientId(@Param("client_id") UUID client_id);
+    List<Gst> findByClientId(@Param("client_id") UUID clientId);
 
 }

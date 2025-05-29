@@ -59,8 +59,7 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
     private final ProjectService projectService;
     private final CacheManager cacheManager;
     private final DocumentService documentService;
-    @Autowired
-    public ApplicationContext applicationContext;
+    public final ApplicationContext applicationContext;
 
     /**
      * Return requested page with list of ClientDto objects with requested size. Raises LnFEntityNotFoundException
