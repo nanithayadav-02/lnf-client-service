@@ -142,12 +142,12 @@ public class DocumentService {
      * @param file     Document in MultipartFile format
      */
     public void create(UUID clientId, DocumentType type, MultipartFile file) {
+        Client client = searchForClient(clientId);
         try {
-            searchForClient(clientId);
             var folder = S_S_S.formatted(folderName, clientId, type);
             uploadFile(folder, file);
         } catch (RuntimeException e) {
-            String errorMessage = "Failed to create document[%s] for client [%s]".formatted(clientId, file.getOriginalFilename());
+            String errorMessage = "Failed to create document[%s] for client [%s]".formatted(client.getName(), file.getOriginalFilename());
             throw new LnFException(errorMessage, e);
         }
     }

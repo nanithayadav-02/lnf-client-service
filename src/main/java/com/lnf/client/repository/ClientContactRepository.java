@@ -30,4 +30,6 @@ public interface ClientContactRepository extends JpaRepository<ClientContact, UU
     @Query("SELECT cc FROM ClientContact cc WHERE cc.client.id = :client_id")
     List<ClientContact> findByClientId(@Param("client_id") UUID clientId);
 
+    @Query("SELECT cc FROM ClientContact cc WHERE cc.client.id = :clientId AND cc.department = :department AND cc.name = :name")
+    List<ClientContact> findByClientAndNameAndDepartment(UUID clientId, String department, String name);
 }
