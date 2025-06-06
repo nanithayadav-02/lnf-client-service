@@ -17,7 +17,6 @@
 package com.lnf.client;
 
 import com.lnf.client.service.*;
-import com.lnf.client.service.*;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.InjectMocks;

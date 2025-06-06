@@ -21,7 +21,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
-@SpringBootApplication(scanBasePackages = {"com.lnf.client"})
+@SpringBootApplication(scanBasePackages = {"com.lnf.client", "com.lnf.config.jpa"})
 @EnableCaching
 @EnableDiscoveryClient
 public class Application {

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ import java.time.Duration;
 @Configuration
 @Slf4j
 @EnableCaching
+@RequiredArgsConstructor
 public class CacheConfig {
 
     @Value("${spring.redis.host}")
@@ -43,8 +45,7 @@ public class CacheConfig {
     @Value("${spring.cache.redis.use-key-prefix}")
     private boolean useKeyPrefix;
 
-    @Autowired
-    private RedisConnectionFactory redisConnectionFactory;
+    private final RedisConnectionFactory redisConnectionFactory;
 
     private CacheManager cacheManager;
 

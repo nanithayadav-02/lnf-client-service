@@ -52,6 +52,8 @@ public class WebClientConfiguration {
     @Value("${email.service.url}")
     private String emailServiceUrl;
 
+    @Value("${audit.service.url}")
+    private String auditServiceUrl;
     @Value("${application.maxInMemorySize}")
     private int maxInMemorySize;
 
@@ -62,6 +64,11 @@ public class WebClientConfiguration {
     @Bean
     WebClient employeeWebClient() {
         return createWebClient(employeeServiceUrl);
+    }
+
+    @Bean
+    WebClient auditWebClient() {
+        return createWebClient(auditServiceUrl);
     }
 
     @Bean

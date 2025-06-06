@@ -19,8 +19,6 @@ package com.lnf.client.converter;
 import com.lnf.client.model.Task;
 import com.lnf.dto.client.TaskDto;
 
-import java.time.LocalDateTime;
-
 public class TaskConverter {
 
     private TaskConverter() {
