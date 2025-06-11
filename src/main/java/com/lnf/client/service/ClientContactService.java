@@ -115,12 +115,23 @@ public class ClientContactService {
      */
     public void update(UUID clientId, UUID contactId, ContactDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to contact client[%s] with null payload".formatted(clientId));
-        searchForClient(clientId);
-        validateDuplicateContact(clientId, resource);
+        Client client = searchForClient(clientId);
+        validateDuplicateContact(client, resource);
         ClientContact entity = searchForContact(contactId);
         ClientContact updatedEntity = ContactConverter.toEntityModel(resource, entity);
         save(updatedEntity);
         log.debug("Contact for client {} successfully updated", clientId);
+    }
+
+    private void validateDuplicateContact(Client client, ContactDto resource) {
+        ClientContact clientContact = repository
+                .findByClientAndNameAndDepartment(client.getId(), resource.getDepartment(), resource.getName()).stream()
+                .findFirst()
+                .orElse(null);
+        if (clientContact != null && !resource.getId().equals(clientContact.getId())) {
+            throw new LnFException("A contact named " + resource.getName() +
+                    " from the " + resource.getDepartment() + " department already exists for this account.");
+        }
     }
 
     /**
