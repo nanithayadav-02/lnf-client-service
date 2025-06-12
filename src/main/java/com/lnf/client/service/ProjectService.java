@@ -20,7 +20,9 @@ import com.google.common.collect.Lists;
 import com.lnf.client.converter.ProjectConverter;
 import com.lnf.client.model.Client;
 import com.lnf.client.model.Project;
+import com.lnf.client.model.ProjectEmployee;
 import com.lnf.client.repository.ClientRepository;
+import com.lnf.client.repository.ProjectEmployeeRepository;
 import com.lnf.client.repository.ProjectRepository;
 import com.lnf.dto.client.ClientEmployeeDto;
 import com.lnf.dto.client.ProjectDto;
@@ -58,6 +60,7 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
 
     private final ProjectRepository repository;
     private final ClientRepository clientRepository;
+    private final ProjectEmployeeRepository projectEmployeeRepository;
     private final ProjectEmployeeService projectEmployeeService;
     private final TaskService taskService;
     private final CacheManager cacheManager;
@@ -355,6 +358,26 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
         Pageable pageable = createPageable(pageRequest);
         List<Project> entities = repository.findByUploadedTime();
         return paginateProjectDetails(convertToDtos(entities), pageable);
+    }
+
+    public Integer findEmployeesByClientIdCount(UUID clientId) {
+
+        searchForClient(clientId);
+
+        List<Project> projects = repository.findByClientId(clientId);
+        if (projects == null || projects.isEmpty()) {
+            return 0;
+        }
+
+        List<ProjectEmployee> employees = projectEmployeeRepository.findByProjectIn(projects);
+        if (employees == null || employees.isEmpty()) {
+            return 0;
+        }
+
+        Set<String> employeeIds = employees.stream().filter(Objects::nonNull)
+                .map(ProjectEmployee::getEmployeeId).collect(Collectors.toSet());
+
+        return employeeIds.size();
     }
 
     private Pageable createPageable(PageRequestDto pageRequest) {
