@@ -96,10 +96,20 @@ public class GstService {
     public void create(UUID clientId, GstDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create gst for client[%s] with null payload".formatted(clientId));
         Client clientEntity = searchForClient(clientId);
+        validateDuplicateGst(clientId, resource);
         Gst entity = GstConverter.toEntityModel(resource);
         entity.setClient(clientEntity);
         save(entity);
         log.debug("Gst for client {} successfully created", clientId);
+    }
+
+    private void validateDuplicateGst(UUID clientId, GstDto resource) {
+        List<Gst> gsts = repository
+                .findByClientAndGst(clientId, resource.getNumber());
+        if (!gsts.isEmpty()) {
+            throw new LnFException("GST with number :  " + resource.getNumber() +
+                    " already exists for this client.");
+        }
     }
 
     /**
@@ -111,11 +121,23 @@ public class GstService {
      */
     public void update(UUID clientId, UUID gstId, GstDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to gst client[%s] with null payload".formatted(clientId));
-        searchForClient(clientId);
+        Client client = searchForClient(clientId);
+        validateDuplicateGst(client,resource);
         Gst entity = searchForGst(gstId);
         Gst updatedEntity = GstConverter.toEntityModel(resource, entity);
         save(updatedEntity);
         log.debug("Gst for client {} successfully updated", clientId);
+    }
+
+    private void validateDuplicateGst(Client client, GstDto resource) {
+        Gst gst = repository
+                .findByClientAndGst(client.getId(), resource.getNumber()).stream()
+                .findFirst()
+                .orElse(null);
+        if (gst != null && !resource.getId().equals(gst.getId())) {
+            throw new LnFException("GST with number :  " + resource.getNumber() +
+                    " already exists for this client.");
+        }
     }
 
     /**

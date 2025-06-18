@@ -36,4 +36,7 @@ public interface ProjectEmployeeRepository extends JpaRepository<ProjectEmployee
     List<ProjectEmployee> findAllByProjectId(UUID projectId);
 
     boolean existsByProjectId(UUID projectId);
+
+    List<ProjectEmployee> findByProjectIn(List<Project> projects);
+
 }

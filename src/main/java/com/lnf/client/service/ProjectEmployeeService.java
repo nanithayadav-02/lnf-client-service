@@ -51,7 +51,7 @@ public class ProjectEmployeeService {
     /**
      * Get employees associated to the project
      *
-     * @param projectId Project Id
+     * @param projectEmpId projectEmpId
      * @return ProjectEmployeeDto
      */
     @Cacheable(value = "projectEmployees",key = "#projectEmpId")

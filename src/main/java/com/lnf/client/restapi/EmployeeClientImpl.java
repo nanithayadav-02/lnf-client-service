@@ -58,7 +58,7 @@ public class EmployeeClientImpl extends BaseWebClientService implements Employee
                     .block();
         } catch (LnFEntityNotFoundException ex) {
             log.error("Employee with id {} does not exist", employeeId);
-            throw new LnFException("Fetching of employee failed due to exception : ", ex);
+            throw new LnFException("Failed to fetch employee details: Employee not found", ex);
         } catch (RuntimeException ex) {
             log.error("Error occurred fetching the details of the employee {} with message : {}", employeeId, ex.getMessage());
             throw new LnFException("Employee finding failed due to exception ", ex);
@@ -66,7 +66,7 @@ public class EmployeeClientImpl extends BaseWebClientService implements Employee
     }
 
     /**
-     * Returns ArrayList of EmployeeDtos. Incase of any exception, the error is logged and an empty
+     * Returns ArrayList of EmployeeDtos. In case of any exception, the error is logged and an empty
      * array list is returned
      *
      * @param employeeIds List<String></String>
@@ -91,7 +91,7 @@ public class EmployeeClientImpl extends BaseWebClientService implements Employee
 
         } catch (RuntimeException ex) {
             log.error("Error occurred fetching the employee details for the employee Ids - {}", employeeIds);
-            throw new LnFException("Failed to retrieve the details of employeeIds due to exception : ", ex);
+            throw new LnFException("Failed to retrieve the details of employeeIds not found", ex);
         }
 
         int responseSize = employeeDtos != null ? employeeDtos.size() : 0;
@@ -123,10 +123,10 @@ public class EmployeeClientImpl extends BaseWebClientService implements Employee
                     .block();
         } catch (LnFEntityNotFoundException ex) {
             log.error("Employee with active status does not exist");
-            throw new LnFException("Exception occurred while fetching the employee with active status",ex);
+            throw new LnFException("Failed to fetch the employee with active status", ex);
         } catch (RuntimeException ex) {
             log.error("Error occurred fetching the details of the employee with message {}", ex.getMessage());
-            throw new LnFException("Employee not found with active status",ex);
+            throw new LnFException("Employee not found with active status", ex);
         }
         return employeeIds;
     }

@@ -90,10 +90,20 @@ public class ClientContactService {
     public void create(UUID clientId, ContactDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create contact for client[%s] with null payload".formatted(clientId));
         Client clientEntity = searchForClient(clientId);
+        validateDuplicateContact(clientId, resource);
         ClientContact entity = ContactConverter.toEntityModel(resource);
         entity.setClient(clientEntity);
         save(entity);
         log.debug("Contact for client {} successfully created", clientId);
+    }
+
+    private void validateDuplicateContact(UUID clientId, ContactDto resource) {
+        List<ClientContact> ledgerAccountContacts = repository
+                .findByClientAndNameAndDepartment(clientId, resource.getDepartment(), resource.getName());
+        if (!ledgerAccountContacts.isEmpty()) {
+            throw new LnFException("A contact named " + resource.getName() +
+                    " from the " + resource.getDepartment() + " department already exists for this account.");
+        }
     }
 
     /**
@@ -105,11 +115,23 @@ public class ClientContactService {
      */
     public void update(UUID clientId, UUID contactId, ContactDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to contact client[%s] with null payload".formatted(clientId));
-        searchForClient(clientId);
+        Client client = searchForClient(clientId);
+        validateDuplicateContact(client, resource);
         ClientContact entity = searchForContact(contactId);
         ClientContact updatedEntity = ContactConverter.toEntityModel(resource, entity);
         save(updatedEntity);
         log.debug("Contact for client {} successfully updated", clientId);
+    }
+
+    private void validateDuplicateContact(Client client, ContactDto resource) {
+        ClientContact clientContact = repository
+                .findByClientAndNameAndDepartment(client.getId(), resource.getDepartment(), resource.getName()).stream()
+                .findFirst()
+                .orElse(null);
+        if (clientContact != null && !resource.getId().equals(clientContact.getId())) {
+            throw new LnFException("A contact named " + resource.getName() +
+                    " from the " + resource.getDepartment() + " department already exists for this account.");
+        }
     }
 
     /**

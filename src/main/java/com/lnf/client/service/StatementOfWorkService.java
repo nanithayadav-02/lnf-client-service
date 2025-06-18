@@ -113,7 +113,7 @@ public class StatementOfWorkService {
                 String filePath = fileService.uploadFile(folder, file);
                 log.debug("File uploaded successfully to S3 bucket: " + filePath);
             } catch (RuntimeException e) {
-                String errorMessage = "Failed to create sows[%s] for project [%s]".formatted(file.getName(), projectId);
+                String errorMessage = "Failed to create sows[%s] for project [%s]".formatted(file.getName(), project.getName());
                 throw new LnFException(errorMessage, e);
             }
         });

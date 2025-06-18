@@ -29,4 +29,6 @@ public interface GstRepository extends JpaRepository<Gst, UUID> {
     @Query("SELECT g FROM Gst g WHERE g.client.id = :client_id")
     List<Gst> findByClientId(@Param("client_id") UUID clientId);
 
+    @Query("SELECT g FROM Gst g WHERE g.client.id = :client_id AND g.number = :number")
+    List<Gst> findByClientAndGst(@Param("client_id") UUID clientId, @Param("number") String number);
 }

@@ -21,7 +21,6 @@ import com.lnf.client.service.DataExportService;
 import com.lnf.client.service.ProjectService;
 import com.lnf.dto.client.ClientDto;
 import com.lnf.dto.client.ClientEmployeeDto;
-import com.lnf.dto.client.ProjectOverviewDto;
 import com.lnf.dto.common.PageRequestDto;
 import com.lnf.service.common.page.PageableAsQueryParam;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
@@ -111,7 +110,7 @@ public class ClientController {
     @GetMapping(value = "/clients/{clientId}/projects")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> findProjectsByClientId(@PathVariable final UUID clientId,
-                                            @PageableAsQueryParam PageRequestDto pageRequest) {
+                                                    @PageableAsQueryParam PageRequestDto pageRequest) {
         if (clientId != null && pageRequest != null && pageRequest.getPage() != null) {
             return ResponseEntity.ok(projectService.findByClientIdWithPagination(clientId, pageRequest));
         } else {
@@ -130,6 +129,12 @@ public class ClientController {
     @ResponseStatus(HttpStatus.OK)
     public List<ClientEmployeeDto> findEmployeesByClientId(@PathVariable final UUID clientId) {
         return projectService.findEmployeesByClientId(clientId);
+    }
+
+    @GetMapping(value = "/clients/{clientId}/employees/count")
+    @ResponseStatus(HttpStatus.OK)
+    public Integer findEmployeesByClientIdCount(@PathVariable final UUID clientId) {
+        return projectService.findEmployeesByClientIdCount(clientId);
     }
 
     /**
