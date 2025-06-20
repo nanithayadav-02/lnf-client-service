@@ -287,9 +287,9 @@ spring:
       on-profile: dev-ide
 
   datasource:
-    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
-    username: ${database.username:client_user}
-    password: ${database.password:client@12345}
+    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:tenant_core_db}
+    username: ${database.username:tenant_core_user}
+    password: ${database.password:tenant_core@12345}
     driverClassName: ${database.drive:org.postgresql.Driver}
     hikari:
       maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
