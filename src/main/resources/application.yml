@@ -21,7 +21,7 @@ spring:
     name: lnf-client-service
 
 server:
-  port: 8081
+  port: 8077
   servlet:
     context-path: /api/v3
 
@@ -52,7 +52,7 @@ timesheet:
 
 audit:
   service:
-    url: "http://localhost:8081/api/v3"
+    url: "http://localhost:8071/api/v3"
 
 email:
   service:
@@ -60,7 +60,7 @@ email:
 
 lnf:
   audit:
-    enabled: ${AUDIT_ENABLED:false}
+    enabled: ${AUDIT_ENABLED:true}
 
 eureka:
   client:
@@ -287,9 +287,9 @@ spring:
       on-profile: dev-ide
 
   datasource:
-    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
-    username: ${database.username:client_user}
-    password: ${database.password:client@12345}
+    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:tenant_core_db}
+    username: ${database.username:tenant_core_user}
+    password: ${database.password:tenant_core@12345}
     driverClassName: ${database.drive:org.postgresql.Driver}
     hikari:
       maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}

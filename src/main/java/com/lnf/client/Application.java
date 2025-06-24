@@ -18,14 +18,27 @@ package com.lnf.client;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication(scanBasePackages = {"com.lnf.client", "com.lnf.config.jpa"})
+@SpringBootApplication(scanBasePackages = {
+        "com.lnf.client",
+        "com.lnf.config.jpa",
+        "com.lnf.tenant.core"
+})
 @EnableCaching
 @EnableDiscoveryClient
+@EntityScan(basePackages = {"com.lnf.client.model", "com.lnf.tenant.core"})
+@EnableJpaRepositories(basePackages = {
+        "com.lnf.client.repository",
+        "com.lnf.tenant.core.repository"
+})
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
+
 }
