@@ -50,7 +50,7 @@ public class Address extends AuditableEntity {
     @Column(nullable = false, name = "country")
     private String country;
 
-    @Column(nullable = false,name = "addressType")
+    @Column(nullable = false,name = "address_type")
     @Enumerated(EnumType.STRING)
     private AddressType addressType;
 }
