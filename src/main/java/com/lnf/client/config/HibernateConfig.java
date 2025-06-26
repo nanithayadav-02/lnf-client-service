@@ -3,7 +3,6 @@ package com.lnf.client.config;
 import org.hibernate.cfg.Environment;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,13 +40,14 @@ public class HibernateConfig {
         properties.put(Environment.MULTI_TENANT_IDENTIFIER_RESOLVER, tenantIdentifierResolver);
         properties.put(Environment.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
         properties.put(Environment.SHOW_SQL, true);
-        properties.put(Environment.FORMAT_SQL, true);
+//        properties.put(Environment.FORMAT_SQL, true);    /* Formats SQL output for readability */
 
-        LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
-        emf.setDataSource(dataSource);
-        emf.setPackagesToScan("com.lnf.client.model", "com.lnf.tenant.core.model");
-        emf.setJpaVendorAdapter(jpaVendorAdapter());
-        emf.setJpaPropertyMap(properties);
-        return emf;
+        LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
+        entityManagerFactory.setDataSource(dataSource);
+        entityManagerFactory.setPackagesToScan("com.lnf.client.model", "com.lnf.tenant.core.model");
+        entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
+        entityManagerFactory.setJpaPropertyMap(properties);
+        return entityManagerFactory;
     }
+
 }
