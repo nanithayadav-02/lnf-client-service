@@ -22,7 +22,10 @@ import com.lnf.client.BaseTestClass;
 import com.lnf.client.service.ClientService;
 import com.lnf.client.service.DataExportService;
 import com.lnf.client.service.ProjectService;
-import com.lnf.dto.client.*;
+import com.lnf.dto.client.ClientDto;
+import com.lnf.dto.client.ClientEmployeeDto;
+import com.lnf.dto.client.ClientOverviewDto;
+import com.lnf.dto.client.ProjectOverviewDto;
 import com.lnf.dto.common.PageRequestDto;
 import com.lnf.service.common.page.PaginationAndSortingHandler;
 import org.junit.jupiter.api.Assertions;
@@ -61,7 +64,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static com.lnf.client.util.MockMvcTestUtils.withTenantHeader;
 
 
 class ClientControllerTest extends BaseTestClass {
@@ -207,7 +209,6 @@ class ClientControllerTest extends BaseTestClass {
         try {
             mockMvc.perform(MockMvcRequestBuilders.post(url)
                             .contentType(APPLICATION_JSON)
-                            .with(withTenantHeader())
                             .content(asJsonString(requestDto)))
                     .andExpect(status().isCreated());
         } catch (Exception e) {
@@ -229,8 +230,7 @@ class ClientControllerTest extends BaseTestClass {
         // Act
         try {
             mockMvc.perform(put(url)
-                            .content(asJsonString(updatedClient)) // Convert ClientDto to JSON string
-                            .with(withTenantHeader())
+                            .content(asJsonString(updatedClient))
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
         } catch (Exception e) {
@@ -260,7 +260,6 @@ class ClientControllerTest extends BaseTestClass {
     void testDeleteByClientId() throws Exception {
         String url = "/lnf/clients/" + clientId;
         mockMvc.perform(delete(url)
-                        .with(withTenantHeader())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
@@ -341,7 +340,6 @@ class ClientControllerTest extends BaseTestClass {
     private void performAndVerifyGet(String url, ResultMatcher statusMatcher, String containsString,
                                      ClientDto expectedDto) throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get(url)
-                        .with(withTenantHeader())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(statusMatcher)
                 .andExpect(content().string(containsString(containsString)))
