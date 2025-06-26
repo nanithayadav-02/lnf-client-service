@@ -27,7 +27,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @TestConfiguration
 public class MockMvcTestConfig {
-
     @Bean
     public MockMvc mockMvcWithTenant(WebApplicationContext context) {
         return MockMvcBuilders.webAppContextSetup(context)
