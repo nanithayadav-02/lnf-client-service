@@ -61,6 +61,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static com.lnf.client.util.MockMvcTestUtils.withTenantHeader;
+
 
 class ClientControllerTest extends BaseTestClass {
 
@@ -205,6 +207,7 @@ class ClientControllerTest extends BaseTestClass {
         try {
             mockMvc.perform(MockMvcRequestBuilders.post(url)
                             .contentType(APPLICATION_JSON)
+                            .with(withTenantHeader())
                             .content(asJsonString(requestDto)))
                     .andExpect(status().isCreated());
         } catch (Exception e) {
@@ -227,6 +230,7 @@ class ClientControllerTest extends BaseTestClass {
         try {
             mockMvc.perform(put(url)
                             .content(asJsonString(updatedClient)) // Convert ClientDto to JSON string
+                            .with(withTenantHeader())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
         } catch (Exception e) {
@@ -256,6 +260,7 @@ class ClientControllerTest extends BaseTestClass {
     void testDeleteByClientId() throws Exception {
         String url = "/lnf/clients/" + clientId;
         mockMvc.perform(delete(url)
+                        .with(withTenantHeader())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
@@ -335,7 +340,9 @@ class ClientControllerTest extends BaseTestClass {
 
     private void performAndVerifyGet(String url, ResultMatcher statusMatcher, String containsString,
                                      ClientDto expectedDto) throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(url))
+        mockMvc.perform(MockMvcRequestBuilders.get(url)
+                        .with(withTenantHeader())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(statusMatcher)
                 .andExpect(content().string(containsString(containsString)))
                 .andExpect(jsonPath("$.id").value(expectedDto.getId().toString()))
