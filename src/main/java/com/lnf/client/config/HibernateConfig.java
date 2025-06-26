@@ -1,6 +1,7 @@
 package com.lnf.client.config;
 
-import org.hibernate.cfg.Environment;
+import com.lnf.tenant.core.context.TenantContext;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
@@ -19,6 +20,8 @@ public class HibernateConfig {
 
     private final JpaProperties jpaProperties;
 
+    private static final String DEFAULT_TENANT_ID = "client";
+
     public HibernateConfig(JpaProperties jpaProperties) {
         this.jpaProperties = jpaProperties;
     }
@@ -29,25 +32,39 @@ public class HibernateConfig {
     }
 
     @Bean
+    public CurrentTenantIdentifierResolver tenantIdentifierResolver() {
+        return new CurrentTenantIdentifierResolver() {
+            @Override
+            public String resolveCurrentTenantIdentifier() {
+                String tenantId = TenantContext.getCurrentTenant();
+                return (tenantId != null && !tenantId.isBlank()) ? tenantId : DEFAULT_TENANT_ID;
+            }
+
+            @Override
+            public boolean validateExistingCurrentSessions() {
+                return true;
+            }
+        };
+    }
+
+    @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             DataSource dataSource,
-            MultiTenantConnectionProvider multiTenantConnectionProvider,
-            CurrentTenantIdentifierResolver tenantIdentifierResolver
+            MultiTenantConnectionProvider multiTenantConnectionProvider
     ) {
 
         Map<String, Object> properties = new HashMap<>(jpaProperties.getProperties());
-        properties.put(Environment.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
-        properties.put(Environment.MULTI_TENANT_IDENTIFIER_RESOLVER, tenantIdentifierResolver);
-        properties.put(Environment.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
-        properties.put(Environment.SHOW_SQL, true);
-//        properties.put(Environment.FORMAT_SQL, true);    /* Formats SQL output for readability */
+        properties.put(AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
+        properties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, tenantIdentifierResolver());
+        properties.put(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
+        properties.put(AvailableSettings.SHOW_SQL, true);
 
-        LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
-        entityManagerFactory.setDataSource(dataSource);
-        entityManagerFactory.setPackagesToScan("com.lnf.client.model", "com.lnf.tenant.core.model");
-        entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
-        entityManagerFactory.setJpaPropertyMap(properties);
-        return entityManagerFactory;
+        LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+        factoryBean.setDataSource(dataSource);
+        factoryBean.setPackagesToScan("com.lnf.client.model", "com.lnf.tenant.core.model");
+        factoryBean.setJpaVendorAdapter(jpaVendorAdapter());
+        factoryBean.setJpaPropertyMap(properties);
+
+        return factoryBean;
     }
-
 }
