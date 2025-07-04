@@ -192,13 +192,6 @@
             <version>1.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-    <distributionManagement>
-        <repository>
-            <id>leverandfulcrum-lnf-artifactory</id>
-            <name>leverandfulcrum-lnf-artifactory</name>
-            <url>https://leverandfulcrum-961341555615.d.codeartifact.eu-west-1.amazonaws.com/maven/lnf-artifactory/</url>
-        </repository>
-    </distributionManagement>
 
     <build>
         <plugins>
