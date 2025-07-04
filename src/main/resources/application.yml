@@ -59,7 +59,7 @@ timesheet:
 
 audit:
   service:
-    url: "http://localhost:8071/api/v3"
+    url: "http://localhost:8081/api/v3"
 
 email:
   service:
@@ -67,7 +67,7 @@ email:
 
 lnf:
   audit:
-    enabled: ${AUDIT_ENABLED:true}
+    enabled: ${AUDIT_ENABLED:false}
 
   tenant:
     enabled: ${TENANT_ENABLED:false}
