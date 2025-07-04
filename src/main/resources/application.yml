@@ -2,6 +2,13 @@ spring:
   profiles:
     active: dev-ide
 
+  tenant:
+    datasource:
+      url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:tenant_core_db}
+      username: ${database.username:tenant_core_user}
+      password: ${database.password:tenant_core@12345}
+      driverClassName: ${database.drive:org.postgresql.Driver}
+
   redis:
     host: localhost
     port: 6379
@@ -61,6 +68,10 @@ email:
 lnf:
   audit:
     enabled: ${AUDIT_ENABLED:true}
+
+  tenant:
+    enabled: ${TENANT_ENABLED:false}
+    default: ${TENANT_DEFAULT:client}
 
 eureka:
   client:
@@ -287,9 +298,9 @@ spring:
       on-profile: dev-ide
 
   datasource:
-    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:tenant_core_db}
-    username: ${database.username:tenant_core_user}
-    password: ${database.password:tenant_core@12345}
+    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
+    username: ${database.username:client_user}
+    password: ${database.password:client@12345}
     driverClassName: ${database.drive:org.postgresql.Driver}
     hikari:
       maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}

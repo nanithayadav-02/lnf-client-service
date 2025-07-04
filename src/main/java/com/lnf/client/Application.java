@@ -23,9 +23,9 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication(scanBasePackages = {"com.lnf.client", "com.lnf.config.jpa", "com.lnf.tenant.core"})
-@EntityScan(basePackages = {"com.lnf.client.model", "com.lnf.tenant.core.model"})
-@EnableJpaRepositories(basePackages = {"com.lnf.client.repository", "com.lnf.tenant.core.repository"})
+@SpringBootApplication(scanBasePackages = {"com.lnf.client", "com.lnf.config.jpa"})
+@EntityScan(basePackages = {"com.lnf.client.model"})
+@EnableJpaRepositories(basePackages = {"com.lnf.client.repository"})
 @EnableCaching
 @EnableDiscoveryClient
 public class Application {
