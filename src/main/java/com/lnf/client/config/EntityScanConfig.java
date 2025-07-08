@@ -8,6 +8,6 @@ public class EntityScanConfig {
 
     @Bean(name = "jpaPackagesToScan")
     public String[] jpaPackagesToScan() {
-        return new String[]{"com.lnf.timesheet.model", "com.lnf.tenant.core.model"};
+        return new String[]{"com.lnf.client.model", "com.lnf.tenant.core.model"};
     }
 }
