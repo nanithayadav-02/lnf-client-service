@@ -71,7 +71,10 @@ lnf:
 
   tenant:
     enabled: ${TENANT_ENABLED:false}
-    default: ${TENANT_DEFAULT:client}
+    default: ${TENANT_DEFAULT:LNF}
+    databaseName: ${TENANT_DATABASE_NAME:client}
+
+  entity-package: "com.lnf.client.model"
 
 eureka:
   client:

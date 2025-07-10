@@ -16,6 +16,7 @@
 
 package com.lnf.client.config;
 
+import com.lnf.tenant.core.context.TenantContext;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -39,6 +40,9 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class WebClientConfiguration {
+
+    @Value("${lnf.tenant.enabled:true}")
+    private boolean tenantEnabled;
 
     @Value("${employee.service.url}")
     private String employeeServiceUrl;
@@ -101,6 +105,7 @@ public class WebClientConfiguration {
         return WebClient.builder()
                 .baseUrl(baseUrl)
                 .filter(addTracingHeaders())
+                .filter(addTenantHeader())
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .exchangeStrategies(exchangeStrategies)
                 .build();
@@ -128,6 +133,26 @@ public class WebClientConfiguration {
                 return Mono.just(requestBuilder.build());
             }
             return Mono.just(clientRequest);
+        });
+    }
+
+    private ExchangeFilterFunction addTenantHeader() {
+        return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
+            if (!tenantEnabled) {
+                return Mono.just(clientRequest);
+            }
+
+            String currentTenant = TenantContext.getCurrentTenant();
+
+            String tenantPrefix = (currentTenant != null && currentTenant.contains("-"))
+                    ? currentTenant.split("-")[0]
+                    : currentTenant;
+
+            ClientRequest modifiedRequest = ClientRequest.from(clientRequest)
+                    .header("X-TenantID", tenantPrefix)
+                    .build();
+
+            return Mono.just(modifiedRequest);
         });
     }
 
