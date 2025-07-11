@@ -19,6 +19,7 @@ package com.lnf.client.service;
 import com.lnf.client.converter.StatementOfWorkConverter;
 import com.lnf.client.model.Project;
 import com.lnf.client.model.StatementOfWork;
+import com.lnf.client.model.enums.Status;
 import com.lnf.client.repository.ProjectRepository;
 import com.lnf.client.repository.StatementOfWorkRepository;
 import com.lnf.dto.client.StatementOfWorkDto;
@@ -95,6 +96,7 @@ public class StatementOfWorkService {
         }
     }
 
+    @Transactional
     public void create(UUID clientId, UUID projectId, MultipartFile[] files, List<StatementOfWorkDto> resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "failed to create sows with null payload [%s]".formatted(projectId));
         Project project = searchForProjectIdAndClientId(projectId, clientId);
@@ -105,6 +107,7 @@ public class StatementOfWorkService {
             StatementOfWorkDto statementOfWorkDto = resource.get(i);
             try {
                 StatementOfWork entity = StatementOfWorkConverter.toEntityModel(statementOfWorkDto, new StatementOfWork());
+                entity.setStatus(Status.APPROVED);
                 entity.setProject(project);
                 entities.add(entity);
                 save(entities);
@@ -119,12 +122,14 @@ public class StatementOfWorkService {
         });
     }
 
+    @Transactional
     public void update(UUID clientId, UUID projectId, String fileName, MultipartFile file, StatementOfWorkDto resource) {
         com.lnf.exception.LnFBadRequestException.throwOnCondition(Objects::isNull, file,
                 "Failed to update file for sows [%s] with null payload".formatted(fileName));
         try {
             StatementOfWork entity = searchForFileName(fileName);
             StatementOfWork updatedEntity = StatementOfWorkConverter.toEntityModel(resource, entity);
+            entity.setStatus(Status.APPROVED);
             save(updatedEntity);
             String s3ObjectKey = S_S_S_S.formatted(folderName, clientId, PROJECT, projectId, SOW, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
@@ -143,6 +148,7 @@ public class StatementOfWorkService {
         }
     }
 
+    @Transactional
     public void deleteByIdAndFileName(UUID clientId, UUID projectId, String fileName) {
         searchForProjectIdAndClientId(projectId, clientId);
         StatementOfWork entity = searchForFileName(fileName);

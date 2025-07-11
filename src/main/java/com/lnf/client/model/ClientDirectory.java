@@ -44,6 +44,7 @@ public class ClientDirectory extends AuditableEntity {
     @Column(name = "active")
     private Boolean active;
 
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", referencedColumnName = "id")
     private Client client;
