@@ -47,6 +47,7 @@ public class ClientContact extends AuditableEntity {
     @Column(name = "department", nullable = false)
     private String department;
 
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name="client_id", referencedColumnName="id", nullable = false)
     private Client client;

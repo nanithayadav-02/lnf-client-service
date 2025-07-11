@@ -19,10 +19,10 @@ package com.lnf.client.model.enums;
 public enum Status {
 
     //@formatter:off
-    Approved("Approved"),
-    In_Review("In Review"),
-    Draft("Draft"),
-    Cancelled("Cancelled");
+    APPROVED("Approved"),
+    IN_REVIEW("In Review"),
+    DRAFT("Draft"),
+    CANCELLED("Cancelled");
     //@formatter:on
 
     private final String label;
