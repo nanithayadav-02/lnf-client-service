@@ -46,7 +46,7 @@ public class CacheConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer()); // must match your cache config
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         return template;
     }
 
