@@ -27,14 +27,26 @@ import com.lnf.dto.employee.EmployeeDto;
 import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
 import com.lnf.service.employee.EmployeeService;
+import com.lnf.tenant.core.context.TenantContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -48,13 +60,22 @@ public class ProjectEmployeeService {
     private final EmployeeService employeeService;
     private final CacheManager cacheManager;
 
+    @Value("${lnf.tenant.enabled:true}")
+    private boolean tenantEnabled;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
     /**
      * Get employees associated to the project
      *
      * @param projectEmpId projectEmpId
      * @return ProjectEmployeeDto
      */
-    @Cacheable(value = "projectEmployees",key = "#projectEmpId")
+    @Cacheable(
+            value = "projectEmployees",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#projectEmpId)"
+    )
     public ProjectEmployeeDto findEmployeesByProjectId(final UUID projectEmpId) {
         Project project = searchForProject(projectEmpId);
 
@@ -116,7 +137,10 @@ public class ProjectEmployeeService {
      * @param projectId   Project Id
      * @param employeeIds List of Strings
      */
-    @CacheEvict(value = "projectEmployees", allEntries = true)
+    @CacheEvict(
+            value = "projectEmployees",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#projectId)"
+    )
     public void addEmployeeToProject(UUID projectId, List<String> employeeIds) {
 
         Project project = searchForProject(projectId);
@@ -147,7 +171,10 @@ public class ProjectEmployeeService {
      * @param projectId   Project Id
      * @param employeeIds List of Strings
      */
-    @CacheEvict(value = "projectEmployees", allEntries = true)
+    @CacheEvict(
+            value = "projectEmployees",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#projectId.toString())"
+    )
     public void removeEmployeeFromProject(UUID projectId, List<String> employeeIds) {
         searchForProject(projectId);
         employeeIds.forEach(employeeId -> {
@@ -194,8 +221,45 @@ public class ProjectEmployeeService {
      * Clears the cache for projectEmployees.
      */
     public void clearProjectEmployeesCache() {
-        Objects.requireNonNull(cacheManager.getCache("projectEmployees")).clear();
-        log.debug("ProjectEmployees cache cleared.");
+        String tenantId = TenantContext.getCurrentTenant();
+
+        // If tenant mode is disabled or Redis is not used, clear in-memory caches
+        if (!tenantEnabled || !(cacheManager instanceof RedisCacheManager)) {
+            log.info("Clearing all in-memory caches (Redis disabled or tenant mode off).");
+            cacheManager.getCacheNames().forEach(name -> {
+                Cache cache = cacheManager.getCache(name);
+                if (cache != null) {
+                    cache.clear();
+                }
+            });
+            return;
+        }
+
+        // Skip Redis cache clearing if tenant context is missing
+        if (!StringUtils.hasText(tenantId)) {
+            log.warn("TenantContext is not set. Skipping Redis cache clearing.");
+            return;
+        }
+
+        log.info("Clearing Redis cache for tenant '{}'", tenantId);
+
+        String pattern = "*::" + tenantId + ":*";
+
+        Set<String> keysToDelete = redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
+            Set<String> keys = new HashSet<>();
+            try (Cursor<byte[]> cursor = connection.scan(
+                    ScanOptions.scanOptions().match(pattern).count(1000).build())) {
+                cursor.forEachRemaining(key -> keys.add(new String(key, StandardCharsets.UTF_8)));
+            }
+            return keys;
+        });
+
+        if (!CollectionUtils.isEmpty(keysToDelete)) {
+            redisTemplate.delete(keysToDelete);
+            log.info("Deleted {} Redis keys for tenant '{}'", keysToDelete.size(), tenantId);
+        } else {
+            log.info("No Redis keys found for tenant '{}'", tenantId);
+        }
     }
 
     private ProjectEmployee search(UUID projectId, String employeeId) {
@@ -206,7 +270,10 @@ public class ProjectEmployeeService {
         return projectRepository.findById(projectId).orElseThrow(() -> new LnFEntityNotFoundException("Project with id [%s] does not exist".formatted(projectId)));
     }
 
-    @CacheEvict(value = "projectEmployees", allEntries = true)
+    @CacheEvict(
+            value = "projectEmployees",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#projectId)"
+    )
     public void addAllActiveEmployeeToProject(UUID projectId, List<String> statuses) {
         Project project = searchForProject(projectId);
         List<String> requiredIds = new ArrayList<>(employeeService.findByStatuses(statuses));

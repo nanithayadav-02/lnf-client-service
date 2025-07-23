@@ -34,19 +34,31 @@ import com.lnf.exception.LnFException;
 import com.lnf.service.common.page.PaginatedAndSortedService;
 import com.lnf.service.specification.GenericSpecificationBuilder;
 import com.lnf.service.timesheet.TimesheetService;
+import com.lnf.tenant.core.context.TenantContext;
 import com.lnf.util.RestUtil;
 import com.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -65,6 +77,12 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
     private final TaskService taskService;
     private final CacheManager cacheManager;
     private final TimesheetService timesheetService;
+
+    @Value("${lnf.tenant.enabled:true}")
+    private boolean tenantEnabled;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     /**
      * Return requested page with list of ProjectDto objects with requested size. Raises LnFEntityNotFoundException
@@ -129,7 +147,10 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      *
      * @return List of all ProjectDto objects.
      */
-    @Cacheable(value = "projects")
+    @Cacheable(
+            value = "projects",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#search)"
+    )
     public List<ProjectDto> findAll(String search) {
         Specification<Project> specification = buildProjectSpecification(search);
         List<Project> entities = repository.findAll(specification);
@@ -168,7 +189,10 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param projectId Project Id
      * @return ProjectDto object
      */
-    @Cacheable(value = "projects", key = "#projectId")
+    @Cacheable(
+            value = "projects",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#projectId)"
+    )
     public ProjectDto findByProjectId(UUID projectId) {
         Project entity = search(projectId);
         return ProjectConverter.toTransportModel(entity);
@@ -181,7 +205,10 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param clientId Project Id
      * @return List of ProjectDto objects associated to the client.
      */
-    @Cacheable(value = "projectOverviewDto", key = "#clientId")
+    @Cacheable(
+            value = "projectOverviewDto",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#clientId)"
+    )
     public List<ProjectOverviewDto> findProjectsByClientId(UUID clientId) {
         searchForClient(clientId);
         List<Project> projects = repository.findByClientId(clientId);
@@ -227,7 +254,10 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * @param resource projectDto object
      */
     @CacheEvict(value = "projects", beforeInvocation = true, allEntries = true)
-    @CachePut(value = "projects", key = "#result.id")
+    @CachePut(
+            value = "projects",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#result.id)"
+    )
     public ProjectDto create(ProjectDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to create Project with null payload");
         Project entity = ProjectConverter.toEntityModel(resource);
@@ -246,7 +276,10 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      */
     @Transactional
     @CacheEvict(value = "projects", beforeInvocation = true, allEntries = true)
-    @CachePut(value = "projects", key = "#result.id")
+    @CachePut(
+            value = "projects",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#result.id)"
+    )
     public ProjectDto update(UUID projectId, ProjectDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "Failed to update Project with null payload");
         Project entity = search(projectId);
@@ -292,8 +325,46 @@ public class ProjectService implements PaginatedAndSortedService<ProjectOverview
      * Clears the cache for projects.
      */
     public void clearProjectsCache() {
-        Objects.requireNonNull(cacheManager.getCache("projects")).clear();
-        log.debug("Projects cache cleared.");
+        String tenantId = TenantContext.getCurrentTenant();
+
+        // If tenant mode is disabled or Redis is not used, clear in-memory caches
+        if (!tenantEnabled || !(cacheManager instanceof RedisCacheManager)) {
+            log.info("Clearing all in-memory caches (Redis disabled or tenant mode off).");
+            cacheManager.getCacheNames().forEach(name -> {
+                Cache cache = cacheManager.getCache(name);
+                if (cache != null) {
+                    cache.clear();
+                }
+            });
+            return;
+        }
+
+        // Skip Redis cache clearing if tenant context is missing
+        if (!StringUtils.hasText(tenantId)) {
+            log.warn("TenantContext is not set. Skipping Redis cache clearing.");
+            return;
+        }
+
+        log.info("Clearing Redis cache for tenant '{}'", tenantId);
+
+        String pattern = "projects::" + tenantId + ":*";
+
+        Set<String> keysToDelete = redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
+            Set<String> keys = new HashSet<>();
+            try (Cursor<byte[]> cursor = connection.scan(
+                    ScanOptions.scanOptions().match(pattern).count(1000).build())) {
+                cursor.forEachRemaining(key -> keys.add(new String(key, StandardCharsets.UTF_8)));
+            }
+            return keys;
+        });
+
+        if (!CollectionUtils.isEmpty(keysToDelete)) {
+            redisTemplate.delete(keysToDelete);
+            log.info("Deleted {} Redis keys for tenant '{}'", keysToDelete.size(), tenantId);
+        } else {
+            log.info("No Redis keys found for tenant '{}'", tenantId);
+        }
+
     }
 
     private Page<ProjectOverviewDto> validateAndGetPages(int page, Page<Project> resultPage) {

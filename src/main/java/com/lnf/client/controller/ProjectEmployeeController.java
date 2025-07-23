@@ -63,7 +63,6 @@ public class ProjectEmployeeController {
         }
     }
 
-
     /**
      * Add employees to a project.
      *
@@ -93,7 +92,6 @@ public class ProjectEmployeeController {
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-
 
     /**
      * Remove employees to the project
