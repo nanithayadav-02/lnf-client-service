@@ -19,6 +19,7 @@ package com.lnf.client.service;
 import com.lnf.client.converter.ClientAgreementConverter;
 import com.lnf.client.model.Agreement;
 import com.lnf.client.model.Client;
+import com.lnf.client.model.enums.Status;
 import com.lnf.client.repository.ClientAgreementRepository;
 import com.lnf.client.repository.ClientRepository;
 import com.lnf.dto.client.AgreementDto;
@@ -92,6 +93,7 @@ public class ClientAgreementService {
         }
     }
 
+    @Transactional
     public void create(UUID clientId, MultipartFile[] files, List<AgreementDto> resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource, "failed to create agreement with null payload [%s]".formatted(clientId));
         Client client = searchForClientId(clientId);
@@ -102,6 +104,7 @@ public class ClientAgreementService {
             AgreementDto agreementDto = resource.get(i);
             try {
                 Agreement entity = ClientAgreementConverter.toEntityModel(agreementDto, new Agreement());
+                entity.setStatus(Status.APPROVED);
                 entity.setClient(client);
                 entities.add(entity);
                 save(entities);
@@ -116,12 +119,14 @@ public class ClientAgreementService {
         });
     }
 
+    @Transactional
     public void update(UUID clientId, String fileName, MultipartFile file, AgreementDto resource) {
         com.lnf.exception.LnFBadRequestException.throwOnCondition(Objects::isNull, file,
                 "Failed to update file for agreement [%s] with null payload".formatted(fileName));
         try {
             Agreement entity = searchForFileName(fileName);
             Agreement updatedEntity = ClientAgreementConverter.toEntityModel(resource, entity);
+            updatedEntity.setStatus(Status.APPROVED);
             save(updatedEntity);
             String s3ObjectKey = S_S_S_S.formatted(folderName, clientId, AGREEMENTS, fileName);
             List<String> filePaths = Collections.singletonList(s3ObjectKey);
@@ -140,6 +145,7 @@ public class ClientAgreementService {
         }
     }
 
+    @Transactional
     public void deleteByIdAndFileName(UUID clientId, String fileName) {
         searchForClientId(clientId);
         Agreement entity = searchForFileName(fileName);
