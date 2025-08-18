@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebClientConfiguration {
 
-    @Value("${lnf.tenant.enabled:true}")
+    @Value("${lnf.tenant.enabled}")
     private boolean tenantEnabled;
 
     @Value("${employee.service.url}")
