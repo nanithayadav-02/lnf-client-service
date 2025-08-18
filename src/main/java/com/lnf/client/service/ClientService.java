@@ -30,20 +30,31 @@ import com.lnf.exception.LnFEntityNotFoundException;
 import com.lnf.exception.LnFException;
 import com.lnf.service.common.page.PaginatedAndSortedService;
 import com.lnf.service.specification.GenericSpecificationBuilder;
+import com.lnf.tenant.core.context.TenantContext;
 import com.lnf.util.RestUtil;
 import com.lnf.util.specification.SpecificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -60,6 +71,12 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
     private final CacheManager cacheManager;
     private final DocumentService documentService;
     public final ApplicationContext applicationContext;
+
+    @Value("${lnf.tenant.enabled:true}")
+    private boolean tenantEnabled;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     /**
      * Return requested page with list of ClientDto objects with requested size. Raises LnFEntityNotFoundException
@@ -134,7 +151,10 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @param clientId Client Id
      * @return ClientDto object
      */
-    @Cacheable(value = "clients", key = "#clientId")
+    @Cacheable(
+            value = "clients",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#clientId)"
+    )
     public ClientDto findByClientId(UUID clientId) {
         return getClientDto(clientId);
     }
@@ -152,7 +172,10 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      *
      * @param resource clientDto object
      */
-    @CachePut(value = "clients", key = "#result.id")
+    @CachePut(
+            value = "clients",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#result.id)"
+    )
     public ClientDto create(ClientDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
                 "Failed to create Client with null payload");
@@ -167,7 +190,10 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * @param resource ClientDto
      */
     @Transactional
-    @CachePut(value = "clients", key = "#result.id")
+    @CachePut(
+            value = "clients",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#result.id)"
+    )
     public ClientDto update(UUID clientId, ClientDto resource) {
         LnFBadRequestException.throwOnCondition(Objects::isNull, resource,
                 "Failed to update Client with null payload");
@@ -183,7 +209,10 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
         return ClientConverter.toTransportModel(updatedEntity);
     }
 
-    @CachePut(value = "clients", key = "#clientId")
+    @CachePut(
+            value = "clients",
+            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#clientId)"
+    )
     // don't make this method void because cache put needs return type
     public ClientDto updateClient(UUID clientId) {
         log.debug("Updating cache for clientId: {}", clientId);
@@ -226,8 +255,44 @@ public class ClientService implements PaginatedAndSortedService<ClientOverviewDt
      * Clears the cache for clients.
      */
     public void clearClientsCache() {
-        Objects.requireNonNull(cacheManager.getCache("clients")).clear();
-        log.debug("Clients cache cleared.");
+        String tenantId = TenantContext.getCurrentTenant();
+
+        // If tenant mode is disabled or Redis is not used, clear in-memory caches
+        if (!tenantEnabled || !(cacheManager instanceof RedisCacheManager)) {
+            log.info("Clearing all in-memory caches (Redis disabled or tenant mode off).");
+            cacheManager.getCacheNames().forEach(name -> {
+                Cache cache = cacheManager.getCache(name);
+                if (cache != null) {
+                    cache.clear();
+                }
+            });
+            return;
+        }
+        // Skip Redis cache clearing if tenant context is missing
+        if (!StringUtils.hasText(tenantId)) {
+            log.warn("TenantContext is not set. Skipping Redis cache clearing.");
+            return;
+        }
+
+        log.info("Clearing Redis cache for tenant '{}'", tenantId);
+
+        String pattern = "*::" + tenantId + ":*";
+
+        Set<String> keysToDelete = redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
+            Set<String> keys = new HashSet<>();
+            try (Cursor<byte[]> cursor = connection.scan(
+                    ScanOptions.scanOptions().match(pattern).count(1000).build())) {
+                cursor.forEachRemaining(key -> keys.add(new String(key, StandardCharsets.UTF_8)));
+            }
+            return keys;
+        });
+
+        if (!CollectionUtils.isEmpty(keysToDelete)) {
+            redisTemplate.delete(keysToDelete);
+            log.info("Deleted {} Redis keys for tenant '{}'", keysToDelete.size(), tenantId);
+        } else {
+            log.info("No Redis keys found for tenant '{}'", tenantId);
+        }
     }
 
     private Page<ClientOverviewDto> validateAndGetPages(int page, Page<Client> resultPage) {

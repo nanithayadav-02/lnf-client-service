@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -17,8 +14,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import redis.clients.jedis.Jedis;
 
 import java.time.Duration;
@@ -27,35 +28,34 @@ import java.time.Duration;
 @Configuration
 @Slf4j
 @EnableCaching
-@RequiredArgsConstructor
 public class CacheConfig {
 
-    @Value("${spring.redis.host}")
+    @Value("${spring.data.redis.host}")
     private String redisHost;
-
-    @Value("${spring.redis.port}")
+    @Value("${spring.data.redis.port}")
     private int redisPort;
-
-    @Value("${spring.cache.redis.time-to-live}")
+    @Value("${spring.data.cache.redis.time-to-live}")
     private long timeToLive;
-
-    @Value("${spring.cache.redis.cache-null-values}")
+    @Value("${spring.data.cache.redis.cache-null-values}")
     private boolean cacheNullValues;
-
-    @Value("${spring.cache.redis.use-key-prefix}")
+    @Value("${spring.data.cache.redis.use-key-prefix}")
     private boolean useKeyPrefix;
 
-    private final RedisConnectionFactory redisConnectionFactory;
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        return template;
+    }
 
-    private CacheManager cacheManager;
+    @Bean
+    public CacheManager cacheManager() {
+        log.debug("Redis Host: {}, Redis Port: {}", redisHost, redisPort);
+        log.debug("Is Redis Available: {}", isRedisAvailable());
+        return isRedisAvailable() ? createRedisCacheManager() : new ConcurrentMapCacheManager();
 
-    @PostConstruct
-    public void init() {
-        if (isRedisAvailable()) {
-            cacheManager = createRedisCacheManager();
-        } else {
-            cacheManager = new ConcurrentMapCacheManager();
-        }
     }
 
     private boolean isRedisAvailable() {
@@ -69,12 +69,13 @@ public class CacheConfig {
     }
 
     @Bean
-    public CacheManager cacheManager() {
-        return cacheManager;
+    public RedisConnectionFactory redisConnectionFactory() {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisHost, redisPort);
+        return new LettuceConnectionFactory(config);
     }
 
     private RedisCacheManager createRedisCacheManager() {
-        return RedisCacheManager.builder(redisConnectionFactory)
+        return RedisCacheManager.builder(redisConnectionFactory())
                 .cacheDefaults(cacheConfiguration())
                 .build();
     }
