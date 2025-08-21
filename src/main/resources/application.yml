@@ -4,10 +4,10 @@ spring:
 
   tenant:
     datasource:
-      url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:tenant_core_db}
-      username: ${database.username:tenant_core_user}
-      password: ${database.password:tenant_core@12345}
-      driverClassName: ${database.drive:org.postgresql.Driver}
+      url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${TENANT_CORE_DB_NAME:tenant_core_db}
+      username: ${TENANT_CORE_DB_USERNAME:tenant_core_user}
+      password: ${TENANT_CORE_DB_PASSWORD:tenant_core@12345}
+      driverClassName: ${DATABASE_DRIVER:org.postgresql.Driver}
 
   data:
     redis:
