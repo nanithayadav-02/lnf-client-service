@@ -2,15 +2,23 @@ spring:
   profiles:
     active: dev-ide
 
-  redis:
-    host: localhost
-    port: 6379
-  cache:
+  tenant:
+    datasource:
+      url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${TENANT_CORE_DB_NAME:tenant_core_db}
+      username: ${TENANT_CORE_DB_USERNAME:tenant_core_user}
+      password: ${TENANT_CORE_DB_PASSWORD:tenant_core@12345}
+      driverClassName: ${DATABASE_DRIVER:org.postgresql.Driver}
+
+  data:
     redis:
-      time-to-live: 3600000
-      cache-null-values: false
-      use-key-prefix: true
-    type: redis
+      host: ${REDIS_CACHE_HOST:localhost}
+      port: ${REDIS_CACHE_PORT:6379}
+    cache:
+      redis:
+        time-to-live: 3600000
+        cache-null-values: false
+        use-key-prefix: true
+      type: redis
 
   flyway:
     enabled: ${SPRING_FLYWAY_ENABLED:false}
@@ -61,6 +69,13 @@ email:
 lnf:
   audit:
     enabled: ${AUDIT_ENABLED:false}
+
+  tenant:
+    enabled: ${TENANT_ENABLED:false}
+    default: ${TENANT_DEFAULT:LNF}
+    databaseName: ${TENANT_DATABASE_NAME:client}
+
+  entity-package: "com.lnf.client.model"
 
 eureka:
   client:
