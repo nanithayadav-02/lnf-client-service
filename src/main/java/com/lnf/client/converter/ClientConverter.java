@@ -18,6 +18,7 @@ package com.lnf.client.converter;
 
 import com.lnf.client.model.*;
 import com.lnf.client.model.enums.AddressType;
+import com.lnf.client.model.enums.Type;
 import com.lnf.dto.client.AddressDto;
 import com.lnf.dto.client.ClientDto;
 import com.lnf.dto.client.ClientOverviewDto;
@@ -48,6 +49,8 @@ public class ClientConverter {
         dto.setClientDetails(entity.getClientDetails());
         dto.setUploadTime(entity.getUploadTime());
         dto.setCategory(entity.getCategory());
+        dto.setSubCategory(entity.getSubCategory());
+        dto.setType(String.valueOf(entity.getType()));
         Optional.ofNullable(entity.getClientContacts())
                 .ifPresent(clientContacts ->
                         dto.getContacts().addAll(
@@ -165,6 +168,8 @@ public class ClientConverter {
         entity.setServiceType(transport.getServiceType());
         entity.setClientDetails(transport.getClientDetails());
         entity.setCategory(transport.getCategory());
+        entity.setSubCategory(transport.getSubCategory());
+        entity.setType(Type.valueOf(transport.getType()));
 
         return entity;
     }

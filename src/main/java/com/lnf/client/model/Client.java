@@ -16,6 +16,7 @@
 
 package com.lnf.client.model;
 
+import com.lnf.client.model.enums.Type;
 import com.lnf.model.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -71,6 +72,13 @@ public class Client extends AuditableEntity {
 
     @Column(name = "category")
     private String category;
+
+    @Column(name = "sub_category")
+    private String subCategory;
+
+    @Column(nullable = false, name = "type")
+    @Enumerated(EnumType.STRING)
+    private Type type;
 
     @ToString.Exclude
     @Builder.Default
