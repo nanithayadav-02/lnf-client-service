@@ -48,6 +48,8 @@ public class ClientConverter {
         dto.setClientDetails(entity.getClientDetails());
         dto.setUploadTime(entity.getUploadTime());
         dto.setCategory(entity.getCategory());
+        dto.setSubCategory(entity.getSubCategory());
+        dto.setType(entity.getType());
         Optional.ofNullable(entity.getClientContacts())
                 .ifPresent(clientContacts ->
                         dto.getContacts().addAll(
@@ -165,6 +167,8 @@ public class ClientConverter {
         entity.setServiceType(transport.getServiceType());
         entity.setClientDetails(transport.getClientDetails());
         entity.setCategory(transport.getCategory());
+        entity.setSubCategory(transport.getSubCategory());
+        entity.setType(transport.getType());
 
         return entity;
     }
