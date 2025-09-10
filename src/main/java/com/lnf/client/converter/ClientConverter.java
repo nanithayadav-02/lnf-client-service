@@ -128,6 +128,9 @@ public class ClientConverter {
         dto.setStatus(entity.getStatus());
         dto.setWorkingFrom(entity.getWorkingFrom());
         dto.setAgreementExpiryDate(entity.getAgreementExpiryDate());
+        dto.setCategory(entity.getCategory());
+        dto.setSubCategory(entity.getSubCategory());
+        entity.setType(entity.getType());
 
         return dto;
     }
