@@ -51,6 +51,8 @@ import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -94,10 +96,15 @@ public class ProjectTaskEmployeeService {
         Project project = searchForProject(projectId);
         Task task = searchForTask(taskId);
         List<ProjectTaskEmployee> projectTaskEmployees = repository.findByProjectAndTask(project, task);
-        size = (size == null || size <= 0) ? projectTaskEmployees.size() : size;
-        List<ClientEmployeeDto> employeeDtos = fetchEmployeeDetails(paginateEmployees(projectTaskEmployees, page, size));
+
+        List<ProjectTaskEmployee> projectTaskEmployeeList = projectTaskEmployees.stream()
+                .sorted(Comparator.comparing(ProjectTaskEmployee::getCreatedTime).reversed())
+                .toList();
+
+        size = (size == null || size <= 0) ? projectTaskEmployeeList.size() : size;
+        List<ClientEmployeeDto> employeeDtos = fetchEmployeeDetails(paginateEmployees(projectTaskEmployeeList, page, size));
         ProjectTaskEmployeeDto dto = createProjectTaskEmployeeDto(taskId, project, task, employeeDtos);
-        return createPaginationContent(projectTaskEmployees.size(), size, dto);
+        return createPaginationContent(projectTaskEmployeeList.size(), size, dto);
     }
 
     private ProjectTaskEmployeeDto createProjectTaskEmployeeDto(UUID taskId, Project project, Task task, List<ClientEmployeeDto> employeeDtos) {
@@ -122,9 +129,17 @@ public class ProjectTaskEmployeeService {
         List<String> employeeIds = pagedEmployees.stream()
                 .map(ProjectTaskEmployee::getEmployeeId)
                 .toList();
-        return employeeService.findByEmployeeIds(employeeIds)
+        List<ClientEmployeeDto> employees = employeeService.findByEmployeeIds(employeeIds)
                 .stream()
                 .map(ProjectConverter::mapToClientEmployee)
+                .filter(Objects::nonNull)
+                .toList();
+
+        Map<String, ClientEmployeeDto> clientEmployeeDtoMap = employees.stream()
+                .collect(Collectors.toMap(ClientEmployeeDto::getEmployeeId, Function.identity()));
+
+        return employeeIds.stream()
+                .map(clientEmployeeDtoMap::get)
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -147,10 +162,10 @@ public class ProjectTaskEmployeeService {
      * @param taskId      Task Id
      * @param employeeIds List of Strings
      */
-    @Cacheable(
-            value = "projectTaskEmployees",
-            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#projectId + ':' + #taskId)"
-    )
+//    @Cacheable(
+//            value = "projectTaskEmployees",
+//            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#projectId + ':' + #taskId)"
+//    )
     public void addEmployeesToProjectAndTask(UUID projectId, UUID taskId, List<String> employeeIds) {
         Project project = searchForProject(projectId);
         Task task = searchForTask(taskId);
