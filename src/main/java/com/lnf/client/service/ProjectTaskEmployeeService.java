@@ -162,10 +162,6 @@ public class ProjectTaskEmployeeService {
      * @param taskId      Task Id
      * @param employeeIds List of Strings
      */
-//    @Cacheable(
-//            value = "projectTaskEmployees",
-//            key = "T(com.lnf.tenant.core.util.CacheKeyUtils).tenantAwareKey(#projectId + ':' + #taskId)"
-//    )
     public void addEmployeesToProjectAndTask(UUID projectId, UUID taskId, List<String> employeeIds) {
         Project project = searchForProject(projectId);
         Task task = searchForTask(taskId);
