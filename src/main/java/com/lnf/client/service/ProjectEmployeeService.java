@@ -48,6 +48,8 @@ import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -89,10 +91,15 @@ public class ProjectEmployeeService {
     public Map<String, Object> findAllAssignedEmployees(final UUID projectId, int page, Integer size) {
         Project project = searchForProject(projectId);
         List<ProjectEmployee> employees = repository.findByProject(project);
+
+        List<ProjectEmployee> projectEmployees = employees.stream()
+                .sorted(Comparator.comparing(ProjectEmployee::getCreatedTime).reversed())
+                .toList();
+
         size = (size == null || size <= 0) ? employees.size() : size;
-        List<ClientEmployeeDto> employeeDtos = fetchEmployeeDetails(paginateEmployees(employees, page, size));
+        List<ClientEmployeeDto> employeeDtos = fetchEmployeeDetails(paginateEmployees(projectEmployees, page, size));
         ProjectEmployeeDto dto = createProjectEmployeeDto(project, employeeDtos);
-        return createPaginationContent(employees.size(), size, dto);
+        return createPaginationContent(projectEmployees.size(), size, dto);
     }
 
     private ProjectEmployeeDto createProjectEmployeeDto(Project project, List<ClientEmployeeDto> employeeDtos) {
@@ -114,8 +121,18 @@ public class ProjectEmployeeService {
         List<String> employeeIds = pagedEmployees.stream()
                 .map(ProjectEmployee::getEmployeeId)
                 .toList();
-        return employeeService.findByEmployeeIds(employeeIds).stream()
+
+        List<ClientEmployeeDto> employees = employeeService.findByEmployeeIds(employeeIds)
+                .stream()
                 .map(ProjectConverter::mapToClientEmployee)
+                .filter(Objects::nonNull)
+                .toList();
+
+        Map<String, ClientEmployeeDto> clientEmployeeDtoMap = employees.stream()
+                .collect(Collectors.toMap(ClientEmployeeDto::getEmployeeId, Function.identity()));
+
+        return employeeIds.stream()
+                .map(clientEmployeeDtoMap::get)
                 .filter(Objects::nonNull)
                 .toList();
     }
