@@ -384,7 +384,7 @@ public class DataExportService {
 
         return new Client(
                 code, name, pan, null, tan, status, workingFrom, agreementExpiryDate, serviceType, clientDetails, null,
-                null, null, null, addressSet, clientContactSet, escalationSet, gstSet, null,
+                null, null, null, null,addressSet, clientContactSet, escalationSet, gstSet, null,
                 null, null, null, null
         );
     }
