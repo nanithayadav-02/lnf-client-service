@@ -78,6 +78,9 @@ public class Client extends AuditableEntity {
     @Column(name = "type")
     private String type;
 
+    @Column(name = "ein")
+    private String ein;
+
     @ToString.Exclude
     @Builder.Default
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)

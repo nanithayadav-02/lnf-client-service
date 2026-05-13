@@ -50,6 +50,7 @@ public class ClientConverter {
         dto.setCategory(entity.getCategory());
         dto.setSubCategory(entity.getSubCategory());
         dto.setType(entity.getType());
+        dto.setEin(entity.getEin());
         Optional.ofNullable(entity.getClientContacts())
                 .ifPresent(clientContacts ->
                         dto.getContacts().addAll(
@@ -172,6 +173,7 @@ public class ClientConverter {
         entity.setCategory(transport.getCategory());
         entity.setSubCategory(transport.getSubCategory());
         entity.setType(transport.getType());
+        entity.setEin(transport.getEin());
 
         return entity;
     }
