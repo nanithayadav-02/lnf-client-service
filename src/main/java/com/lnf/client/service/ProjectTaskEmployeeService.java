@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisCallback;
@@ -173,11 +172,7 @@ public class ProjectTaskEmployeeService {
             } catch (LnFEntityNotFoundException ex) {
                 EmployeeDto employeeDto = employeeService.findOne(employeeId);
                 if (employeeDto != null) {
-                    ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
-                    taskEmployee.setProject(project);
-                    taskEmployee.setTask(task);
-                    taskEmployee.setEmployeeId(employeeId);
-                    save(taskEmployee);
+                    saveProjectTaskEmployee(employeeId, project, task);
                     log.debug("Successfully added the employee {} to the task {} of the project {}", employeeId, task.getName(), project.getCode());
 
                 } else {
@@ -185,6 +180,28 @@ public class ProjectTaskEmployeeService {
                 }
             }
         });
+    }
+
+    public void addAllActiveEmployeeToProjectAndTask(UUID projectId, UUID taskId, List<String> statuses) {
+        Project project = searchForProject(projectId);
+        Task task = searchForTask(taskId);
+        List<String> requiredIds = new ArrayList<>(employeeService.findByStatuses(statuses));
+        requiredIds.removeAll(repository.findByProjectAndTask(project, task)
+                .stream().map(ProjectTaskEmployee::getEmployeeId).toList());
+
+        requiredIds.parallelStream().forEach(employeeId -> {
+            saveProjectTaskEmployee(employeeId, project, task);
+            log.debug("Successfully added the employee {} to the task {} of the project {}",
+                    employeeId, task.getName(), project.getCode());
+        });
+    }
+
+    private void saveProjectTaskEmployee(String employeeId, Project project, Task task) {
+        ProjectTaskEmployee taskEmployee = new ProjectTaskEmployee();
+        taskEmployee.setProject(project);
+        taskEmployee.setTask(task);
+        taskEmployee.setEmployeeId(employeeId);
+        save(taskEmployee);
     }
 
     /**
