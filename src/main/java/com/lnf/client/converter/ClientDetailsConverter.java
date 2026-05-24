@@ -39,7 +39,6 @@ public class ClientDetailsConverter {
         ClientDetailsDto dto = new ClientDetailsDto();
         dto.setCode(entity.getCode());
         dto.setName(entity.getName());
-        dto.setPan(entity.getPan());
         dto.setAddresses(new ArrayList<>());
         dto.getContacts().addAll(entity.getClientContacts().stream().map(ContactConverter::toTransportModel).filter(Objects::nonNull).toList());
         dto.getGst().addAll(entity.getGst().stream().map(GstConverter::toTransportModel).filter(Objects::nonNull).toList());
