@@ -341,3 +341,10 @@ spring:
 printStackTrace: true
 
 ---
+
+lnf:
+  tenant:
+    enabled: ${LNF_TENANT_ENABLED:false}
+    databaseName: ${LNF_TENANT_DATABASENAME:client}
+    auth:
+      base-url: ${LNF_TENANT_AUTH_BASE_URL:https://auth.leverandfulcrum.com}

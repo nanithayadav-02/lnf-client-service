@@ -40,7 +40,7 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 @Profile({"prod", "dev"})
 public class SecurityConfig {
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:}")
     private String issuerUri;
 
     @Bean
@@ -80,6 +80,7 @@ public class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
+        if (issuerUri == null || issuerUri.isBlank()) { return token -> { throw new RuntimeException("No issuer-uri configured"); }; }
         return JwtDecoders.fromIssuerLocation(issuerUri);
     }
 
