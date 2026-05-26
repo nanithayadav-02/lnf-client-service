@@ -63,12 +63,23 @@ public class ProjectTaskEmployeeController {
      *
      * @param projectId   Project Id
      * @param taskId      Task Id
-     * @param employeeIds List of Strings
+     * @param identifiers List of Strings
      */
     @PostMapping(value = "/projects/{projectId}/tasks/{taskId}/employees")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addEmployeesToProjectAndTask(@PathVariable final UUID projectId, @PathVariable final UUID taskId, @RequestBody List<String> employeeIds) {
-        service.addEmployeesToProjectAndTask(projectId, taskId, employeeIds);
+    public ResponseEntity<?> addEmployeesToProjectAndTask(@PathVariable final UUID projectId,
+                                                          @PathVariable final UUID taskId,
+                                                          @RequestParam(required = false, defaultValue = "specific") String type,
+                                                          @RequestBody List<String> identifiers) {
+
+        if ("active".equals(type)) {
+            // If 'type' is 'active', treat identifiers as statuses and add all active employees based on these statuses
+            service.addAllActiveEmployeeToProjectAndTask(projectId, taskId, identifiers);
+        } else {
+            // Default behavior: treat identifiers as employeeIds and add them to the projectTask
+            service.addEmployeesToProjectAndTask(projectId, taskId, identifiers);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
