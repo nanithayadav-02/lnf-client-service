@@ -106,7 +106,15 @@ spring:
               drop-source: metadata
               create-database-schemas: true
     open-in-view: false
-
+  data:
+    redis:
+      host: localhost
+      port: 6379
+    cache:
+      redis:
+        time-to-live: 3600000
+        cache-null-values: false
+        use-key-prefix: true
   security:
     oauth2:
       resourceserver:
@@ -125,6 +133,10 @@ spring:
         provider:
           keycloak:
             issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+
+eureka:
+  client:
+    enabled: false
 
 printStackTrace: true
 
