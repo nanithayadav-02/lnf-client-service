@@ -8,7 +8,7 @@ spring:
 server:
   port: 8081
   servlet:
-    context-path: /api/v2
+    context-path: /api/v3
 
 aws:
   s3:
@@ -25,23 +25,23 @@ connection:
 
 employee:
   service:
-    url: "http://localhost:8081/api/v2"
+    url: "http://localhost:8081/api/v3"
 
 file:
   service:
-    url: "http://localhost:8081/api/v2"
+    url: "http://localhost:8081/api/v3"
 
 timesheet:
   service:
-    url: "http://localhost:8081/api/v2"
+    url: "http://localhost:8081/api/v3"
 
 email:
   service:
-    url: "http://localhost:8081/api/v2"
+    url: "http://localhost:8081/api/v3"
 
 audit:
   service:
-    url: "http://localhost:8081/api/v2"
+    url: "http://localhost:8081/api/v3"
 
 # Metrics Configuration
 management:
@@ -119,8 +119,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
-          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf/protocol/openid-connect/certs
+          issuer-uri: "${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:}"
 
       client:
         registration:
@@ -175,8 +174,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
-          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf/protocol/openid-connect/certs
+          issuer-uri: "${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:}"
       client:
         registration:
           client-service:
@@ -226,8 +224,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
-          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf/protocol/openid-connect/certs
+          issuer-uri: "${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:}"
       client:
         registration:
           client-service:
