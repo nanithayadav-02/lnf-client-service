@@ -282,6 +282,17 @@ printStackTrace: true
 
 ---
 
+spring:
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:${REDIS_HOST:localhost}}
+      port: ${SPRING_DATA_REDIS_PORT:${REDIS_PORT:6379}}
+    cache:
+      redis:
+        time-to-live: ${SPRING_DATA_CACHE_REDIS_TIME_TO_LIVE:3600000}
+        cache-null-values: ${SPRING_DATA_CACHE_REDIS_CACHE_NULL_VALUES:false}
+        use-key-prefix: ${SPRING_DATA_CACHE_REDIS_USE_KEY_PREFIX:true}
+
 lnf:
   entity-package: ${LNF_ENTITY_PACKAGE:com.lnf.client.model}
   tenant:
