@@ -2,6 +2,29 @@ spring:
   profiles:
     active: dev-ide
 
+  tenant:
+    datasource:
+      url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${TENANT_CORE_DB_NAME:tenant_core_db}
+      username: ${TENANT_CORE_DB_USERNAME:tenant_core_user}
+      password: ${TENANT_CORE_DB_PASSWORD:tenant_core@12345}
+      driverClassName: ${DATABASE_DRIVER:org.postgresql.Driver}
+
+  data:
+    redis:
+      host: ${REDIS_CACHE_HOST:localhost}
+      port: ${REDIS_CACHE_PORT:6379}
+    cache:
+      redis:
+        time-to-live: 3600000
+        cache-null-values: false
+        use-key-prefix: true
+      type: redis
+
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:false}
+    baseline-on-migrate: true
+    validate-on-migrate: true
+
   application:
     name: lnf-client-service
 
@@ -14,7 +37,7 @@ aws:
   s3:
     bucket:
       enabled: true
-      service: "/lnf/file"
+      service: "/lnf/files"
       folderName: "clients"
 
 application:
@@ -35,20 +58,44 @@ timesheet:
   service:
     url: "http://localhost:8081/api/v3"
 
-email:
-  service:
-    url: "http://localhost:8081/api/v3"
-
 audit:
   service:
     url: "http://localhost:8081/api/v3"
 
+email:
+  service:
+    url: "http://localhost:8081/api/v3"
+
+lnf:
+  audit:
+    enabled: ${AUDIT_ENABLED:false}
+
+  tenant:
+    enabled: ${TENANT_ENABLED:false}
+    default: ${TENANT_DEFAULT:LNF}
+    databaseName: ${TENANT_DATABASE_NAME:client}
+
+  entity-package: "com.lnf.client.model"
+
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    enabled: ${EUREKA_ENABLED:false}
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE:http://localhost:8081/eureka/}
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+
+tracing:
+  url: ${TRACING_URL:http://localhost:4318/v1/traces}
+
 # Metrics Configuration
 management:
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: ${TRACING_ENABLED:true}
   endpoint:
     prometheus:
       enabled: true
@@ -61,10 +108,14 @@ management:
       exposure:
         exclude:
         include: "*"
+  prometheus.metrics.export.enabled: true
 logging:
   level:
-    org:
-      springframework: INFO
+    org.springframework: INFO
+    org.springframework.data: WARN
+    root: ERROR
+    com.lnf.client.*: DEBUG
+    com.lnf.listener.audit.ChangeTrackerListener: DEBUG
 
 springdoc:
   api-docs:
@@ -106,20 +157,13 @@ spring:
               drop-source: metadata
               create-database-schemas: true
     open-in-view: false
-  data:
-    redis:
-      host: localhost
-      port: 6379
-    cache:
-      redis:
-        time-to-live: 3600000
-        cache-null-values: false
-        use-key-prefix: true
+
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: "${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:}"
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/realms/lnf
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/realms/lnf/protocol/openid-connect/certs
 
       client:
         registration:
@@ -131,11 +175,7 @@ spring:
             provider: keycloak
         provider:
           keycloak:
-            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
-
-eureka:
-  client:
-    enabled: false
+            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/realms/lnf
 
 printStackTrace: true
 
@@ -149,8 +189,13 @@ spring:
     url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
     username: ${database.username:client_user}
     password: ${database.password:client@12345}
-    data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
+    hikari:
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:5}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:60000}
+      max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:1800000}
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:30000}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -174,7 +219,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: "${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:}"
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/realms/lnf
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/realms/lnf/protocol/openid-connect/certs
       client:
         registration:
           client-service:
@@ -185,7 +231,9 @@ spring:
             provider: keycloak
         provider:
           keycloak:
-            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/realms/lnf
+
+  sql.init.data-locations: classpath*:db/data.sql
 
 printStackTrace: true
 
@@ -199,8 +247,13 @@ spring:
     url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
     username: ${database.username:client_user}
     password: ${database.password:client@12345}
-    data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
+    hikari:
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:5}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:60000}
+      max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:1800000}
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:30000}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -224,7 +277,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: "${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:}"
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/realms/lnf
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/realms/lnf/protocol/openid-connect/certs
       client:
         registration:
           client-service:
@@ -235,7 +289,9 @@ spring:
             provider: keycloak
         provider:
           keycloak:
-            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth/realms/lnf
+            issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/realms/lnf
+
+  sql.init.data-locations: classpath*:db/data.sql
 
 printStackTrace: true
 
@@ -249,8 +305,13 @@ spring:
     url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
     username: ${database.username:client_user}
     password: ${database.password:client@12345}
-    data: classpath*:db/data.sql
     driverClassName: ${database.drive:org.postgresql.Driver}
+    hikari:
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:5}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:60000}
+      max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:1800000}
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:30000}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -275,25 +336,15 @@ spring:
       - org.keycloak.adapters.springboot.KeycloakAutoConfiguration
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 
+  sql.init.data-locations: classpath*:db/data.sql
+
 printStackTrace: true
 
 ---
 
-spring:
-  data:
-    redis:
-      host: ${SPRING_DATA_REDIS_HOST:${REDIS_HOST:localhost}}
-      port: ${SPRING_DATA_REDIS_PORT:${REDIS_PORT:6379}}
-    cache:
-      redis:
-        time-to-live: ${SPRING_DATA_CACHE_REDIS_TIME_TO_LIVE:3600000}
-        cache-null-values: ${SPRING_DATA_CACHE_REDIS_CACHE_NULL_VALUES:false}
-        use-key-prefix: ${SPRING_DATA_CACHE_REDIS_USE_KEY_PREFIX:true}
-
 lnf:
-  entity-package: ${LNF_ENTITY_PACKAGE:com.lnf.client.model}
   tenant:
-    enabled: ${TENANT_ENABLED:false}
-    databaseName: ${TENANT_DATABASE_NAME:client}
+    enabled: ${LNF_TENANT_ENABLED:false}
+    databaseName: ${LNF_TENANT_DATABASENAME:client}
     auth:
       base-url: ${LNF_TENANT_AUTH_BASE_URL:https://auth.leverandfulcrum.com}
