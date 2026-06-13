@@ -145,7 +145,7 @@ public class WebClientConfiguration {
             String currentTenant = TenantContext.getCurrentTenant();
 
             String tenantPrefix = (currentTenant != null && currentTenant.contains("-"))
-                    ? currentTenant.split("-")[0]
+                    ? currentTenant.substring(0, currentTenant.lastIndexOf("-"))
                     : currentTenant;
 
             ClientRequest modifiedRequest = ClientRequest.from(clientRequest)
