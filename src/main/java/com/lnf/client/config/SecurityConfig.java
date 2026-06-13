@@ -17,6 +17,7 @@
 package com.lnf.client.config;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +31,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.server.resource.authentication.JwtIssuerAuthenticationManagerResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
@@ -42,6 +44,9 @@ public class SecurityConfig {
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:}")
     private String issuerUri;
+
+    @Autowired(required = false)
+    private JwtIssuerAuthenticationManagerResolver multiTenantJwtResolver;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -56,8 +61,13 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(Customizer.withDefaults()));
+                .oauth2ResourceServer(oauth2 -> {
+                    if (multiTenantJwtResolver != null) {
+                        oauth2.authenticationManagerResolver(multiTenantJwtResolver);
+                    } else {
+                        oauth2.jwt(Customizer.withDefaults());
+                    }
+                });
 
         http.addFilterBefore(
                 (servletRequest, servletResponse, chain) -> {
@@ -80,7 +90,9 @@ public class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
-        if (issuerUri == null || issuerUri.isBlank()) { return token -> { throw new RuntimeException("No issuer-uri configured"); }; }
+        if (issuerUri == null || issuerUri.isBlank()) {
+            return token -> { throw new IllegalStateException("Single-tenant mode: spring.security.oauth2.resourceserver.jwt.issuer-uri is required"); };
+        }
         return JwtDecoders.fromIssuerLocation(issuerUri);
     }
 
