@@ -31,6 +31,18 @@ file:
   service:
     url: "http://localhost:8081/api/v2"
 
+timesheet:
+  service:
+    url: "http://localhost:8081/api/v2"
+
+email:
+  service:
+    url: "http://localhost:8081/api/v2"
+
+audit:
+  service:
+    url: "http://localhost:8081/api/v2"
+
 # Metrics Configuration
 management:
   metrics:
