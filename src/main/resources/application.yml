@@ -283,6 +283,7 @@ printStackTrace: true
 ---
 
 lnf:
+  entity-package: ${LNF_ENTITY_PACKAGE:com.lnf.client.model}
   tenant:
     enabled: ${TENANT_ENABLED:false}
     databaseName: ${TENANT_DATABASE_NAME:client}
