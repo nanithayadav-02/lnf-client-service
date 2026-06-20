@@ -94,10 +94,11 @@ public class CacheConfig {
                 JsonTypeInfo.As.PROPERTY
         );
 
-        // Use runtime type for serialization so root-level List<T> gets an @class wrapper.
-        // Jackson's NON_FINAL typing excludes java.lang.Object, so writeValueAsBytes(Object)
-        // skips the outer ArrayList wrapper. writerFor(source.getClass()) forces the declared
-        // type to the actual runtime type (e.g. ArrayList), triggering the type wrapper.
+        // Force @class wrapper on root-level collections/maps.
+        // NON_FINAL excludes Object.class from typing, so Spring Redis's serialize(Object)
+        // never gets a wrapper for ArrayList at the root. writerFor(Collection.class) declares
+        // an interface as the root type (interface != runtime class) which forces Jackson to
+        // embed the concrete @class so the reader knows what to instantiate.
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper) {
             @Override
             public byte[] serialize(@Nullable Object source) throws SerializationException {
@@ -105,7 +106,13 @@ public class CacheConfig {
                     return new byte[0];
                 }
                 try {
-                    return objectMapper.writerFor(source.getClass()).writeValueAsBytes(source);
+                    if (source instanceof java.util.Collection) {
+                        return objectMapper.writerFor(java.util.Collection.class).writeValueAsBytes(source);
+                    }
+                    if (source instanceof java.util.Map) {
+                        return objectMapper.writerFor(java.util.Map.class).writeValueAsBytes(source);
+                    }
+                    return objectMapper.writeValueAsBytes(source);
                 } catch (JsonProcessingException e) {
                     throw new SerializationException("Could not write JSON: " + e.getMessage(), e);
                 }
