@@ -1,6 +1,7 @@
 package com.lnf.client.config;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
@@ -20,7 +21,9 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.lang.Nullable;
 import redis.clients.jedis.Jedis;
 
 import java.time.Duration;
@@ -91,7 +94,23 @@ public class CacheConfig {
                 JsonTypeInfo.As.PROPERTY
         );
 
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+        // Use runtime type for serialization so root-level List<T> gets an @class wrapper.
+        // Jackson's NON_FINAL typing excludes java.lang.Object, so writeValueAsBytes(Object)
+        // skips the outer ArrayList wrapper. writerFor(source.getClass()) forces the declared
+        // type to the actual runtime type (e.g. ArrayList), triggering the type wrapper.
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper) {
+            @Override
+            public byte[] serialize(@Nullable Object source) throws SerializationException {
+                if (source == null) {
+                    return new byte[0];
+                }
+                try {
+                    return objectMapper.writerFor(source.getClass()).writeValueAsBytes(source);
+                } catch (JsonProcessingException e) {
+                    throw new SerializationException("Could not write JSON: " + e.getMessage(), e);
+                }
+            }
+        };
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
