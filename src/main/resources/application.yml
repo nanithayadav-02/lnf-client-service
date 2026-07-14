@@ -342,7 +342,7 @@ spring:
       on-profile: dev-ide
 
   datasource:
-    url: jdbc:postgresql://${database.host:192.168.0.119}:${database.port:5432}/${database.name:client_db}
+    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
     username: ${database.username:client_user}
     password: ${database.password:client@12345}
     driverClassName: ${database.drive:org.postgresql.Driver}
