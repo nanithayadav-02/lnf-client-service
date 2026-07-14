@@ -46,6 +46,46 @@ application:
 connection:
   timeout: 10000
 
+webclient:
+  retry:
+    enabled: ${WEBCLIENT_RETRY_ENABLED:true}
+    max-attempts: ${WEBCLIENT_RETRY_MAX_ATTEMPTS:3}
+    initial-backoff-millis: ${WEBCLIENT_RETRY_INITIAL_BACKOFF_MILLIS:200}
+    max-backoff-millis: ${WEBCLIENT_RETRY_MAX_BACKOFF_MILLIS:2000}
+    jitter: ${WEBCLIENT_RETRY_JITTER:0.5}
+  circuitbreaker:
+    enabled: ${WEBCLIENT_CIRCUITBREAKER_ENABLED:false}
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: ${CB_SLIDING_WINDOW_SIZE:20}
+        minimum-number-of-calls: ${CB_MINIMUM_CALLS:8}
+        failure-rate-threshold: ${CB_FAILURE_RATE_THRESHOLD:50}
+        slow-call-duration-threshold: ${CB_SLOW_CALL_DURATION_MS:5000ms}
+        slow-call-rate-threshold: ${CB_SLOW_CALL_RATE_THRESHOLD:100}
+        wait-duration-in-open-state: ${CB_WAIT_DURATION_IN_OPEN_STATE:30s}
+        permitted-number-of-calls-in-half-open-state: ${CB_HALF_OPEN_CALLS:5}
+        automatic-transition-from-open-to-half-open-enabled: true
+        register-health-indicator: true
+    instances:
+      emp:
+        base-config: default
+
+      file:
+        base-config: default
+
+      timesheet:
+        base-config: default
+
+      email:
+        base-config: default
+
+      audit:
+        base-config: default
+
 employee:
   service:
     url: "http://localhost:8081/api/v3"
@@ -302,7 +342,7 @@ spring:
       on-profile: dev-ide
 
   datasource:
-    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.name:client_db}
+    url: jdbc:postgresql://${database.host:192.168.0.119}:${database.port:5432}/${database.name:client_db}
     username: ${database.username:client_user}
     password: ${database.password:client@12345}
     driverClassName: ${database.drive:org.postgresql.Driver}
