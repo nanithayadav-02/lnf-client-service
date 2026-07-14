@@ -202,7 +202,7 @@
         <dependency>
             <groupId>com.lnf.tenant.core</groupId>
             <artifactId>lnf-tenant-core</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
 
