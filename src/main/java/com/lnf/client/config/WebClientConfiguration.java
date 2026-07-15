@@ -249,8 +249,4 @@ public class WebClientConfiguration {
                 || throwable instanceof TimeoutException
                 || throwable instanceof IOException;
     }
-
-
-
-
 }
